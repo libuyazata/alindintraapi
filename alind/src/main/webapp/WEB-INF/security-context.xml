@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.2.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+
+	<http pattern="/login" security="none" />
+	<http pattern="/signup" security="none" />
+	
+	<http pattern="/masterTable/**" entry-point-ref="restAuthenticationEntryPoint"
+		create-session="stateless" >
+		<csrf disabled="true" />
+		<custom-filter after="CONCURRENT_SESSION_FILTER" ref="jwtAuthenticationFilter" />
+	</http>
+
+<!-- 
+	<http pattern="/masterTable/**" entry-point-ref="restAuthenticationEntryPoint"
+		create-session="stateless" >
+		<csrf disabled="true" />
+		<custom-filter before="FORM_LOGIN_FILTER" ref="jwtAuthenticationFilter" />
+	</http> -->
+
+	<!-- <http auto-config='true'> <intercept-url pattern="/**" access="ROLE_USER" 
+		/> </http> <http pattern="/login" security="none" /> <http pattern="/signup" 
+		security="none" /> -->
+
+	<beans:bean id="restAuthenticationEntryPoint"
+		class="com.yaz.security.CustomAuthenticationEntryPoint">
+	</beans:bean>
+
+	<beans:bean id="jwtAuthenticationFilter" class="com.yaz.security.JwtAuthenticationFilter">
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+	</beans:bean>
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="jwtAuthenticationProvider" />
+	</authentication-manager>
+
+	<beans:bean id="jwtAuthenticationProvider" class="com.yaz.security.JwtAuthenticationProvider">
+		<beans:property name="jwtTokenValidator" ref="jwtTokenValidator"></beans:property>
+	</beans:bean>
+	<beans:bean id="jwtTokenValidator" class="com.yaz.security.JwtTokenValidator"></beans:bean>
+
+</beans:beans>

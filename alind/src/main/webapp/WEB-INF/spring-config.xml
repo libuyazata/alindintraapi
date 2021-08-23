@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+ http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd ">
+
+	<context:component-scan base-package="com.yaz.alind" />
+	<mvc:annotation-driven />
+
+	<tx:annotation-driven transaction-manager="txManager" />
+
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<!-- -->
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+		<property name="url" value="${db.url}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+
+		<!-- For VPS <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" 
+			/> <property name="url" value="jdbc:mysql://localhost:3306/wintergr_aldintr" 
+			/> <property name="username" value="wintergr_test" /> <property name="password" 
+			value="hcKGdnX8" /> -->
+	</bean>
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>/WEB-INF/db.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="annotatedClasses">
+			<list>
+				<value>com.yaz.alind.entity.DepartmentEntity</value>
+				<value>com.yaz.alind.entity.EmployeeEntity</value>
+				<value>com.yaz.alind.entity.AccessLogsEntity</value>
+				<value>com.yaz.alind.entity.CategoryEntity</value>
+				<value>com.yaz.alind.entity.DepartmentUsersEntity</value>
+				<value>com.yaz.alind.entity.ProjectDocumentEntity</value>
+				<value>com.yaz.alind.entity.DocumentHistoryEntity</value>
+				<value>com.yaz.alind.entity.DocumentTypesEntity</value>
+				<value>com.yaz.alind.entity.DocumentUsersEntity</value>
+				<value>com.yaz.alind.entity.TokenEntity</value>
+				<value>com.yaz.alind.entity.EmployeeTypesEntity</value>
+				<value>com.yaz.alind.entity.UserRolesEntity</value>
+				<value>com.yaz.alind.entity.ProjectInfoEntity</value>
+				<value>com.yaz.alind.entity.ProjectStatusEntity</value>
+				<value>com.yaz.alind.entity.DocumentNumberSeriesEntity</value>
+				<value>com.yaz.alind.entity.WorkStatusEntity</value>
+				<value>com.yaz.alind.entity.WorkTypeEntity</value>
+				<value>com.yaz.alind.entity.WorkDetailsEntity</value>
+				<value>com.yaz.alind.entity.SubTaskEntity</value>
+				<value>com.yaz.alind.entity.SubTaskAssigneeEntity</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<!--<prop key="hibernate.hbm2ddl.auto">create</prop> -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.id.new_generator_mappings">false</prop>
+				<prop key="show_sql">true</prop>
+				<!--<prop key="hibernate.show_sql">true</prop> <prop key="hibernate.current_session_context_class">thread</prop> 
+					<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory 
+					</prop> -->
+				<!-- enable second level cache and query cache <prop key="hibernate.cache.use_second_level_cache">true</prop> 
+					<prop key="hibernate.cache.use_query_cache">true</prop> <prop key="hibernate.jdbc.fetch_size">10000</prop> 
+					<prop key="keyhibernate.jdbc.batch_size">10000</prop> <prop key="show_sql">true</prop> 
+					<prop key="format_sql">true</prop> -->
+
+				<prop key="use_sql_comments">true</prop>
+				<!-- <prop key="hibernate.order_inserts">true</prop> <prop key="hibernate.order_updates">true</prop> -->
+			</props>
+		</property>
+	</bean>
+
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+
+	<!-- File Uploading -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- setting maximum upload size <property name="maxUploadSize" value="100000" 
+			/> -->
+
+	</bean>
+
+	<bean id="userDAO" class="com.yaz.alind.dao.UserDAOImpl" />
+	<bean id="userService" class="com.yaz.alind.service.UserServiceImpl" />
+	<bean id="utilService" class="com.yaz.alind.service.UtilServiceImpl" />
+
+	<bean id="projectDAO" class="com.yaz.alind.dao.ProjectDAOImpl" />
+	<bean id="projectService" class="com.yaz.alind.service.ProjectServiceImpl" />
+
+	<bean id="masterTableDAO" class="com.yaz.alind.dao.MasterTableDAOImpl" />
+	<bean id="masterTableService" class="com.yaz.alind.service.MasterTableServiceImpl" />
+
+	<!-- Dash Board -->
+	<bean id="dashBoardService" class="com.yaz.alind.service.DashBoardServiceImpl" />
+
+	<!-- Factory for Dash Board -->
+	<bean id="adminDashBoardFactory" class="com.yaz.alind.entity.AdminDashBoardFactory" />
+	<bean id="adminDashBoardModel" class="com.yaz.alind.entity.AdminDashBoardModel"
+		factory-method="createAdminDashBoardModel" factory-bean="adminDashBoardFactory" />
+
+	<!-- Factory for Document History -->
+	<bean id="documentHistoryFactory" class="com.yaz.alind.entity.DocumentHistoryFactory" />
+
+	<bean id="documentHistory" class="com.yaz.alind.entity.DocumentHistoryEntity"
+		factory-method="createDocumentHistory" factory-bean="documentHistoryFactory" />
+
+	<!-- Factory for ProjectDocument -->
+	<bean id="projectDocumentFactory" class="com.yaz.alind.entity.ProjectDocumentFactory" />
+	<bean id="projectDocument" class="com.yaz.alind.entity.ProjectDocumentEntity"
+		factory-method="createProjectDocument" factory-bean="projectDocumentFactory" />
+
+	<!-- Factory for DocumentNumberSeries -->
+	<bean id="documentNumberSeriesFactory" class="com.yaz.alind.entity.DocumentNumberSeriesFactory" />
+	<bean id="documentNumberSeries" class="com.yaz.alind.entity.DocumentNumberSeriesEntity"
+		factory-method="createDocumentNumberSeries" factory-bean="documentNumberSeriesFactory" />
+
+	<!-- Factory for DocumentNumberSeries -->
+	<bean id="workTypeEntityFactory" class="com.yaz.alind.entity.factory.WorkTypeEntityFactory" />
+	<bean id="workTypeEntity" class="com.yaz.alind.entity.WorkTypeEntity"
+		factory-method="createWorkTypeEntity" factory-bean="workTypeEntityFactory" />
+
+	<!-- Spring Security Starts <bean id="springSecurityFilterChain" class="org.springframework.web.filter.DelegatingFilterProxy"/> -->
+	<!-- Spring Security Ends -->
+
+</beans>
