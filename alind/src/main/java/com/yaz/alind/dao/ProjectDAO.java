@@ -48,7 +48,7 @@ public interface ProjectDAO {
 	public WorkDetailsEntity saveWorkDetails(WorkDetailsEntity workDetailsEntity);
 	public WorkDetailsEntity updateWorkDetails(WorkDetailsEntity workDetailsEntity);
 	public WorkDetailsEntity getWorkDetailsEntityById(int workDetailsId);
-	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId);
+	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId,int status);
 	public List<WorkDetailsEntity> getWorkDetailsBySearch(String searchKeyWord, int workTypeId,Date startDate,Date endDate);
 	
 	

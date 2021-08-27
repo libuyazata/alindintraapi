@@ -766,7 +766,7 @@ public class ProjectController {
 	
 	@RequestMapping(value="/project/getWorkDetailsByDeptId", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsByDeptId(@RequestHeader("token") String token
-			,@RequestParam int departmentId) throws Exception{
+			,@RequestParam int departmentId, int status) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
@@ -774,7 +774,7 @@ public class ProjectController {
 			System.out.println("getWorkDetailsByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<WorkDetailsModel> models = projectService.getWorkDetailsByDeptId(departmentId);
+				List<WorkDetailsModel> models = projectService.getWorkDetailsByDeptId(departmentId,status);
 				if(models != null){
 					resultMap.put("models", models);
 				}else{

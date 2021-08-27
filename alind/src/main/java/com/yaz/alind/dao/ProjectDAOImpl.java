@@ -482,17 +482,12 @@ public class ProjectDAOImpl implements ProjectDAO {
 	public WorkDetailsEntity updateWorkDetails(
 			WorkDetailsEntity workDetailsEntity) {
 		WorkDetailsEntity entity = null;
-		Session session = this.sessionFactory.openSession();
-//		Transaction tx = session.beginTransaction();
 		try{
-			//			this.sessionFactory.getCurrentSession().update(workDetailsEntity);
-			
-			session.update(workDetailsEntity);
-//			session.setFlushMode(FlushMode.COMMIT );
-			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId());
+			this.sessionFactory.getCurrentSession().update(workDetailsEntity);
+//			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId());
 			//			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId()+
 			//					",Pjt Co-ordinate Emp name: "+workDetailsEntity.getProjectCoOrdinatorEmp().getFirstName());
-			entity = workDetailsEntity;
+//			entity = workDetailsEntity;
 //			tx.commit();
 
 		}catch(Exception e){
@@ -503,6 +498,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 		finally{
 //			session.setFlushMode(FlushMode.ALWAYS );
 			entity = workDetailsEntity;
+//			System.out.println("DAO,updateWorkDetails,getDescription: "+entity.getDescription());
 		}
 		return entity;
 	}
@@ -530,11 +526,13 @@ public class ProjectDAOImpl implements ProjectDAO {
 	@Override
 	@Transactional
 	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(
-			int departmentId) {
+			int departmentId,int status) {
 		List<WorkDetailsEntity> workDetailsEntities = null;
 		try{
 			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class);
+			cr.addOrder(Order.desc("createdOn"));
 			cr.add(Restrictions.eq("departmentId", departmentId));
+			cr.add(Restrictions.eq("status", status));
 			workDetailsEntities = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -542,7 +540,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return workDetailsEntities;
 	}
-
 
 	@Override
 	@Transactional
@@ -616,6 +613,8 @@ public class ProjectDAOImpl implements ProjectDAO {
 			int workTypeId, Date startDate, Date endDate) {
 		List<WorkDetailsEntity> workDetailsEntities = null;
 		try{
+//			System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord
+//					+", startDate: "+startDate+", endDate: "+endDate);
 			workDetailsEntities = new ArrayList<WorkDetailsEntity>();
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class,"workDetails");
 			cr.createAlias("departmentEntity", "departmentEntity"); 
@@ -629,14 +628,14 @@ public class ProjectDAOImpl implements ProjectDAO {
 				cr.add(Restrictions.eq("workTypeId", workTypeId));
 			}
 			if(startDate != null){
-				cr.add(Restrictions.eq("startDate", startDate));
+				cr.add(Restrictions.ge("startDate", startDate) );
 			}
 			if(endDate != null){
-				cr.add(Restrictions.eq("endDate", endDate));
+				cr.add(Restrictions.lt("endDate", endDate) );
 			}
 
 			if(!searchKeyWord.isEmpty()){
-				System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord);
+//				System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord);
 				Criterion description = Restrictions.ilike("workDetails.description", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion workName = Restrictions.ilike("workDetails.workName", searchKeyWord, MatchMode.ANYWHERE);
 

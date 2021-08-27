@@ -101,6 +101,7 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 		try{
 			this.sessionFactory.getCurrentSession().save(workTypeEntity);
 			entity = workTypeEntity;
+			System.out.println("MasterDAO, saveWorkTypeEntity,id: "+workTypeEntity.getWorkTypeId());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveWorkTypeEntity: "+e.getMessage());
@@ -113,6 +114,7 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 	public WorkTypeEntity updateWorkTypeEntity(WorkTypeEntity workTypeEntity) {
 		WorkTypeEntity entity = null;
 		try{
+			System.out.println("MasterDAO, updateWorkTypeEntity,id: "+workTypeEntity.getWorkTypeId());
 			this.sessionFactory.getCurrentSession().update(workTypeEntity);
 			entity = workTypeEntity;
 		}catch(Exception e){

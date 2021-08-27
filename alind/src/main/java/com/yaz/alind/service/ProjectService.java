@@ -48,7 +48,7 @@ public interface ProjectService {
 	public WorkDetailsModel saveWorkDetails(WorkDetailsModel workDetailsModel);
 	public WorkDetailsModel updateWorkDetails(WorkDetailsModel workDetailsModel);
 	public WorkDetailsModel getWorkDetailsById(int workDetailsId);
-	public List<WorkDetailsModel> getWorkDetailsByDeptId(int departmentId);
+	public List<WorkDetailsModel> getWorkDetailsByDeptId(int departmentId,int status);
 	public int deleteWorkDetailsById(int workDetailsId);
 	public List<WorkDetailsModel> getWorkDetailsBySearch(String searchKeyWord,
 			int workTypeId, String startDate, String endDate);

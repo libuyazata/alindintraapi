@@ -543,7 +543,7 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setUpdatedOn(utilService.getCurrentDate());
 			entity.setStatus(1);
 			entity = projectDAO.saveWorkDetails(entity);
-            entity = projectDAO.getWorkDetailsEntityById(entity.getWorkDetailsId());
+			entity = projectDAO.getWorkDetailsEntityById(entity.getWorkDetailsId());
 			model = createWorkDetailsModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -560,9 +560,10 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			entity = createWorkDetailsEntity(workDetailsModel);
 			entity.setUpdatedOn(utilService.getCurrentDate());
+			entity.setStatus(1);
 			entity = projectDAO.updateWorkDetails(entity);
 			entity = projectDAO.getWorkDetailsEntityById(entity.getWorkDetailsId());
-			//			System.out.println("Business,updateWorkDetails,Id: "+entity.getWorkDetailsId());
+//			System.out.println("Business,updateWorkDetails,getDescription: "+entity.getDescription());
 			model = createWorkDetailsModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -585,10 +586,10 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
-	public List<WorkDetailsModel> getWorkDetailsByDeptId(int departmentId) {
+	public List<WorkDetailsModel> getWorkDetailsByDeptId(int departmentId,int status) {
 		List<WorkDetailsModel> workDetailsModels = null;
 		try{
-			List<WorkDetailsEntity> entities = projectDAO.getWorkDetailsEntitiesByDeptId(departmentId);
+			List<WorkDetailsEntity> entities = projectDAO.getWorkDetailsEntitiesByDeptId(departmentId,status);
 			workDetailsModels = new ArrayList<WorkDetailsModel>();
 			if(entities.size() > 0){
 				for(WorkDetailsEntity e: entities){
@@ -629,7 +630,7 @@ public class ProjectServiceImpl implements ProjectService {
 		Date enDate = null;
 		try{
 			models = new ArrayList<WorkDetailsModel>();
-//			System.out.println("Bussiness, getWorkDetailsBySearch,startDate: "+startDate.trim().length());
+			//			System.out.println("Bussiness, getWorkDetailsBySearch,startDate: "+startDate.trim().length());
 			if( !startDate.trim().isEmpty() && startDate != null ){
 				stDate = utilService.stringToDate(startDate);
 			}
