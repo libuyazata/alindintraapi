@@ -74,6 +74,10 @@
 				<value>com.yaz.alind.entity.WorkDetailsEntity</value>
 				<value>com.yaz.alind.entity.SubTaskEntity</value>
 				<value>com.yaz.alind.entity.SubTaskAssigneeEntity</value>
+				<value>com.yaz.alind.entity.WorkDocumentEntity</value>
+				<value>com.yaz.alind.entity.DeputationEntity</value>
+				<value>com.yaz.alind.entity.DeputationHistoryEntity</value> 
+				<value>com.yaz.alind.entity.EmployeeTaskAllocationEntity</value> 
 			</list>
 		</property>
 		<property name="hibernateProperties">
@@ -82,14 +86,17 @@
 				<!--<prop key="hibernate.hbm2ddl.auto">create</prop> -->
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 				<prop key="hibernate.id.new_generator_mappings">false</prop>
-				<prop key="show_sql">true</prop>
-				<!--<prop key="hibernate.show_sql">true</prop> <prop key="hibernate.current_session_context_class">thread</prop> 
-					<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory 
-					</prop> -->
-				<!-- enable second level cache and query cache <prop key="hibernate.cache.use_second_level_cache">true</prop> 
-					<prop key="hibernate.cache.use_query_cache">true</prop> <prop key="hibernate.jdbc.fetch_size">10000</prop> 
-					<prop key="keyhibernate.jdbc.batch_size">10000</prop> <prop key="show_sql">true</prop> 
-					<prop key="format_sql">true</prop> -->
+				<!-- Display SQL quires,while initialization 
+				<prop key="hibernate.show_sql">true</prop> 
+				<prop key="hibernate.current_session_context_class">thread</prop>-->
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory
+				</prop>
+				<!-- enable second level cache and query cache -->
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+				<!--  
+				<prop key="hibernate.jdbc.fetch_size">10000</prop>
+				<prop key="keyhibernate.jdbc.batch_size">10000</prop>-->
 
 				<prop key="use_sql_comments">true</prop>
 				<!-- <prop key="hibernate.order_inserts">true</prop> <prop key="hibernate.order_updates">true</prop> -->
