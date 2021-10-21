@@ -135,14 +135,6 @@ public class SubTaskEntity {
 		this.workStatusEntity = workStatusEntity;
 	}
 
-	public int getCreatedEmpId() {
-		return createdEmpId;
-	}
-
-	public void setCreatedEmpId(int createdEmpId) {
-		this.createdEmpId = createdEmpId;
-	}
-
 	public EmployeeEntity getCreatedEmp() {
 		return createdEmp;
 	}
@@ -175,4 +167,13 @@ public class SubTaskEntity {
 		this.status = status;
 	}
 
+	public int getCreatedEmpId() {
+		return createdEmpId;
+	}
+
+	public void setCreatedEmpId(int createdEmpId) {
+		this.createdEmpId = createdEmpId;
+	}
+
+	
 }

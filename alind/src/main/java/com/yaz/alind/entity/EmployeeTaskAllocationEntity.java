@@ -3,14 +3,16 @@ package com.yaz.alind.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-//@Entity
-//@Table(name="alind_t_sub_employee_task__allocation")
+@Entity
+@Table(name="alind_t_employee_task_allocation")
 public class EmployeeTaskAllocationEntity {
 	
 	@Id
@@ -18,19 +20,19 @@ public class EmployeeTaskAllocationEntity {
 	@Column(name = "emp_task_allocation_id", unique = true, nullable = false)
 	private int empTaskAllocationId;
 	
-	@Column(name = "task_details_id")
-	private int taskDetailsId;
+	@Column(name = "work_details_id")
+	private int workDetailsId;
 	
 	@ManyToOne
-	@JoinColumn(name="task_details_id",insertable = false, updatable = false)
-	private WorkDetailsEntity taskDetailsEntity;
+	@JoinColumn(name="work_details_id",insertable = false, updatable = false)
+	private WorkDetailsEntity workDetailsEntity;
 	
-	@Column(name = "sbu_task_id")
+	@ManyToOne
+	@JoinColumn(name="sub_task_id",insertable = false, updatable = false)
+	private SubTaskEntity subTaskEntity;
+	
+	@Column(name = "sub_task_id")
 	private int subTaskId;
-	
-	@ManyToOne
-	@JoinColumn(name="sbu_task_id",insertable = false, updatable = false)
-	private TaskDetailsEntity subTaskDetailsEntity;
 	
 	@Column(name="employee_id")
 	private int employeeId;
@@ -41,13 +43,6 @@ public class EmployeeTaskAllocationEntity {
 	
 	@Column(name = "description")
 	private String description;
-	
-	@Column(name="employee_id")
-	private int assignedByEmpId;
-
-	@ManyToOne
-	@JoinColumn(name="employee_id",insertable = false, updatable = false)
-	private EmployeeEntity assignedByEmp;
 	
 	@Column(name = "status")
 	private int status;
@@ -66,21 +61,6 @@ public class EmployeeTaskAllocationEntity {
 		this.empTaskAllocationId = empTaskAllocationId;
 	}
 
-	public int getTaskDetailsId() {
-		return taskDetailsId;
-	}
-
-	public void setTaskDetailsId(int taskDetailsId) {
-		this.taskDetailsId = taskDetailsId;
-	}
-
-	public WorkDetailsEntity getTaskDetailsEntity() {
-		return taskDetailsEntity;
-	}
-
-	public void setTaskDetailsEntity(WorkDetailsEntity taskDetailsEntity) {
-		this.taskDetailsEntity = taskDetailsEntity;
-	}
 
 	public int getSubTaskId() {
 		return subTaskId;
@@ -90,13 +70,6 @@ public class EmployeeTaskAllocationEntity {
 		this.subTaskId = subTaskId;
 	}
 
-	public TaskDetailsEntity getSubTaskDetailsEntity() {
-		return subTaskDetailsEntity;
-	}
-
-	public void setSubTaskDetailsEntity(TaskDetailsEntity subTaskDetailsEntity) {
-		this.subTaskDetailsEntity = subTaskDetailsEntity;
-	}
 
 	public int getEmployeeId() {
 		return employeeId;
@@ -130,22 +103,6 @@ public class EmployeeTaskAllocationEntity {
 		this.status = status;
 	}
 
-	public int getAssignedByEmpId() {
-		return assignedByEmpId;
-	}
-
-	public void setAssignedByEmpId(int assignedByEmpId) {
-		this.assignedByEmpId = assignedByEmpId;
-	}
-
-	public EmployeeEntity getAssignedByEmp() {
-		return assignedByEmp;
-	}
-
-	public void setAssignedByEmp(EmployeeEntity assignedByEmp) {
-		this.assignedByEmp = assignedByEmp;
-	}
-
 	public Date getCreatedOn() {
 		return createdOn;
 	}
@@ -160,6 +117,30 @@ public class EmployeeTaskAllocationEntity {
 
 	public void setUpdatedOn(Date updatedOn) {
 		this.updatedOn = updatedOn;
+	}
+
+	public int getWorkDetailsId() {
+		return workDetailsId;
+	}
+
+	public void setWorkDetailsId(int workDetailsId) {
+		this.workDetailsId = workDetailsId;
+	}
+
+	public WorkDetailsEntity getWorkDetailsEntity() {
+		return workDetailsEntity;
+	}
+
+	public void setWorkDetailsEntity(WorkDetailsEntity workDetailsEntity) {
+		this.workDetailsEntity = workDetailsEntity;
+	}
+
+	public SubTaskEntity getSubTaskEntity() {
+		return subTaskEntity;
+	}
+
+	public void setSubTaskEntity(SubTaskEntity subTaskEntity) {
+		this.subTaskEntity = subTaskEntity;
 	}
 
 }

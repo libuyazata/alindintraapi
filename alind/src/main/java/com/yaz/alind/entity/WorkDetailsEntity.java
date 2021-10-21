@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,7 +28,8 @@ public class WorkDetailsEntity {
 	@Column(name = "work_type_id")
 	private int workTypeId;
 
-	@ManyToOne
+//	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne 
 	@JoinColumn(name="work_type_id",insertable = false, updatable = false)
 	private WorkTypeEntity workTypeEntity;
 
@@ -230,5 +232,6 @@ public class WorkDetailsEntity {
 	public void setStatus(int status) {
 		this.status = status;
 	}
+	
 
 }

@@ -25,6 +25,8 @@ public class ProjectDocumentEntity {
 	private int projectDocumentId;
 	@Column(name = "document_type_id")
 	private int documentTypeId;
+//	@Column(name = "work_details_id")
+//	private int workDetailsId;
 	
 	// Remarks
 	@Column(name = "description")

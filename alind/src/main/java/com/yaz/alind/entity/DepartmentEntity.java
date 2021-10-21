@@ -23,6 +23,8 @@ public class DepartmentEntity {
 	private Date createdOn;
 	@Column(name = "description")
 	private String description;
+	@Column(name="is_active")
+	private int isActive;
 	
 	public int getDepartmentId() {
 		return departmentId;
@@ -47,6 +49,12 @@ public class DepartmentEntity {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public int getIsActive() {
+		return isActive;
+	}
+	public void setIsActive(int isActive) {
+		this.isActive = isActive;
 	}
 
 }

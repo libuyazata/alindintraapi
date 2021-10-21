@@ -15,7 +15,8 @@ public class AdminDashBoardModel {
 	private int noOfEmpoyees;
 	private Map<String,Integer> empCountBasedOnDept ;
 	private Map<String,Integer> docAgaistDept;
-	private Map<String,Integer> projectDetails;
+//	private Map<String,Integer> projectDetails;
+	private Map<String,Integer> workDetails;
 	private List<DocumentUsersEntity> documentUsers;
 	
 	public int getNoOfDepartments() {
@@ -36,12 +37,12 @@ public class AdminDashBoardModel {
 	public void setEmpCountBasedOnDept(Map<String, Integer> empCountBasedOnDept) {
 		this.empCountBasedOnDept = empCountBasedOnDept;
 	}
-	public Map<String, Integer> getProjectDetails() {
-		return projectDetails;
-	}
-	public void setProjectDetails(Map<String, Integer> projectDetails) {
-		this.projectDetails = projectDetails;
-	}
+//	public Map<String, Integer> getProjectDetails() {
+//		return projectDetails;
+//	}
+//	public void setProjectDetails(Map<String, Integer> projectDetails) {
+//		this.projectDetails = projectDetails;
+//	}
 	public Map<String, Integer> getDocAgaistDept() {
 		return docAgaistDept;
 	}
@@ -54,5 +55,10 @@ public class AdminDashBoardModel {
 	public void setDocumentUsers(List<DocumentUsersEntity> documentUsers) {
 		this.documentUsers = documentUsers;
 	}
-	
+	public Map<String, Integer> getWorkDetails() {
+		return workDetails;
+	}
+	public void setWorkDetails(Map<String, Integer> workDetails) {
+		this.workDetails = workDetails;
+	}
 }
