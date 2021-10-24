@@ -1,10 +1,9 @@
 package com.yaz.alind.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yaz.alind.dao.MasterTableDAO;
+import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
 import com.yaz.alind.entity.WorkTypeEntity;
 import com.yaz.alind.entity.factory.WorkTypeEntityFactory;
+import com.yaz.alind.model.ui.DocumentTypesModel;
 import com.yaz.alind.model.ui.WorkStatusModel;
 import com.yaz.alind.model.ui.WorkTypeModel;
 
@@ -132,7 +133,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		}
 		return model;
 	}
-	
+
 	private WorkStatusModel lamdaTestcreateWorkStatusModel(WorkStatusEntity entity){
 		WorkStatusModel model = null;
 		try{
@@ -217,10 +218,10 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		try{
 			models = new ArrayList<WorkTypeModel>();
 			List<WorkTypeEntity> entities = masterTableDAO.getAllWorkTypeEntities(status);
-//			entities.forEach(e -> {
-//				WorkTypeModel m= new WorkTypeModel();
-//				m = createWorkTypeModel(e);
-//			});
+			//			entities.forEach(e -> {
+			//				WorkTypeModel m= new WorkTypeModel();
+			//				m = createWorkTypeModel(e);
+			//			});
 			for(WorkTypeEntity e: entities){
 				WorkTypeModel m= new WorkTypeModel();
 				m = createWorkTypeModel(e);
@@ -246,7 +247,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		}
 		return model;
 	}
-	
+
 	@Override
 	public int deleteWorkType(int workTypeId){
 		int value = 0;
@@ -319,5 +320,138 @@ public  class MasterTableServiceImpl implements MasterTableService {
 
 		return entity;		
 	}
+	
+
+	@Override
+	public List<DocumentTypesModel> getAllDocumentTypes(int status) {
+		List<DocumentTypesModel> models = null;
+		try{
+			models = new ArrayList<DocumentTypesModel>();
+			List<DocumentTypesEntity> entities = masterTableDAO.getAllDocumentTypes(status);
+			for(DocumentTypesEntity e: entities){
+				DocumentTypesModel m = createDocumentTypesModel(e);
+				models.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllDocumentTypes: "+e.getMessage());
+		}
+		return models;
+	}
+
+	@Override
+	public DocumentTypesModel saveDocumentTypes(DocumentTypesModel documentTypes) {
+		DocumentTypesModel docTypes = null;
+		try{
+			Date date = utilService.getCurrentDate();
+			documentTypes.setCreatedOn(utilService.dateToString(date));
+			documentTypes.setUpdatedOn(utilService.dateToString(date));
+			documentTypes.setStatus(1);
+			DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
+			entity = masterTableDAO.saveDocumentTypes(entity);
+			docTypes = createDocumentTypesModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDocumentTypes: "+e.getMessage());
+		}
+		return docTypes;
+	}
+
+	@Override
+	public DocumentTypesModel updateDocumentTypes(DocumentTypesModel documentTypes) {
+		DocumentTypesModel docTypes = null;
+		try{
+			Date date = utilService.getCurrentDate();
+			documentTypes.setCreatedOn(utilService.dateToString(date));
+			documentTypes.setUpdatedOn(utilService.dateToString(date));
+			documentTypes.setStatus(1);
+			DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
+			entity = masterTableDAO.updateDocumentTypes(entity);
+			docTypes = createDocumentTypesModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDocumentTypes: "+e.getMessage());
+		}
+		return docTypes;
+	}
+	
+	@Override
+	public DocumentTypesModel getDocumentTypeById(int documentTypeId) {
+		DocumentTypesModel docTypes = null;
+		try{
+			DocumentTypesEntity entity = masterTableDAO.getDocumentTypeById(documentTypeId);
+			entity = masterTableDAO.updateDocumentTypes(entity);
+			docTypes = createDocumentTypesModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById: "+e.getMessage());
+		}
+		return docTypes;
+	}
+
+	@Override
+	public int deleteDocumentTypesById(int documentTypeId){
+		int status = 0;
+		try{
+			DocumentTypesEntity docType = masterTableDAO.getDocumentTypeById(documentTypeId);
+			docType.setUpdatedOn(utilService.getTodaysDate());
+			docType.setStatus(-1);
+			docType = masterTableDAO.updateDocumentTypes(docType);
+			if(docType.getStatus() == -1){
+				status = 1;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteDocumentTypesById: "+e.getMessage());
+		}
+		return status;
+	}
+
+
+	private DocumentTypesModel createDocumentTypesModel(DocumentTypesEntity entity){
+		DocumentTypesModel model = null;
+		try{
+			model = new DocumentTypesModel();
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedAt()));
+			model.setDocumentTypeId(entity.getDocumentTypeId());
+			model.setStatus(entity.getStatus());
+			model.setType(entity.getType());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDocumentTypesModel: "+e.getMessage());
+		}
+		return model;
+	}
+	
+	private DocumentTypesEntity createDocumentTypesEntity(DocumentTypesModel model){
+		DocumentTypesEntity  entity = null;
+		try{
+			entity = new DocumentTypesEntity();
+			entity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedOn()));
+			entity.setDocumentTypeId(entity.getDocumentTypeId());
+			entity.setStatus(entity.getStatus());
+			entity.setType(entity.getType());
+			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDocumentTypesModel: "+e.getMessage());
+		}
+		return entity;
+		
+	}
+
+
+	@Override
+	public boolean isDrawingSeriesExists(String drawingSeries) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	
+
+
 
 }

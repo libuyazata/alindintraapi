@@ -3,13 +3,10 @@ package com.yaz.alind.dao;
 import java.util.List;
 
 import com.yaz.alind.entity.DepartmentEntity;
-import com.yaz.alind.entity.DocumentHistoryEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
-import com.yaz.alind.entity.DocumentUsersEntity;
+import com.yaz.alind.entity.DeputationEntity;
+import com.yaz.alind.entity.DeputationHistoryEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
-import com.yaz.alind.entity.ProjectDocumentEntity;
-import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
 
@@ -27,7 +24,15 @@ public interface UserDAO {
 	public List<DepartmentEntity> getAllDepartment();
 	public UserRolesEntity getUserRoleById(int userRoleId);
 	public DepartmentEntity saveOrUpdateDepartment(DepartmentEntity department);
+	public DepartmentEntity getDepartmentById(int departmentId );
 	public EmployeeEntity getLastEmployeeDetails();
 	public EmployeeEntity getEmployeeById(int employeeId);
+	
+	public DeputationEntity saveDeputation(DeputationEntity deputation);
+	public DeputationEntity updateDeputation(DeputationEntity deputation);
+	public List<DeputationEntity> getDeputationListByDeptId(int departmentId);
+	public DeputationEntity getDeputationById(int deputationId);
+	
+	public DeputationHistoryEntity saveDeputationHistory(DeputationHistoryEntity deputationHistory);
 	
 }

@@ -7,11 +7,13 @@ import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
+import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.ProjectStatusEntity;
 import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
+import com.yaz.alind.entity.WorkDocumentEntity;
 
 public interface ProjectDAO {
 
@@ -19,10 +21,11 @@ public interface ProjectDAO {
 	public List<ProjectInfoEntity> getAllProject(int departmentId);
 	public ProjectInfoEntity getProjectInfoById(int projectId);
 	
-	public List<DocumentTypesEntity> getAllDocumentTypes();
-	public DocumentTypesEntity saveOrUpdateDocumentTypes(DocumentTypesEntity documentTypes);
-	public DocumentTypesEntity getDocumentTypeById(int documentTypeId);
-	public boolean isDrawingSeriesExists(String drawingSeries);
+//	public List<DocumentTypesEntity> getAllDocumentTypes();
+//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes);
+//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes);
+//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId);
+//	public boolean isDrawingSeriesExists(String drawingSeries);
 	
 //	public List<ProjectDocument> getAllDocumentByProjectId(int projectId );
 	public ProjectDocumentEntity saveOrUpdateDocument(ProjectDocumentEntity document);
@@ -44,6 +47,8 @@ public interface ProjectDAO {
 	
 	public DocumentNumberSeriesEntity saveOrUpdateDocumentNumberSeries(DocumentNumberSeriesEntity documentNumberSeries);
 	public DocumentNumberSeriesEntity getDocumentNumberSeriesByDocumentTypeId(int documentTypeId);
+	public DocumentNumberSeriesEntity updateDocumentNumberSeries
+											(DocumentNumberSeriesEntity documentNumberSeries);
 	
 	public WorkDetailsEntity saveWorkDetails(WorkDetailsEntity workDetailsEntity);
 	public WorkDetailsEntity updateWorkDetails(WorkDetailsEntity workDetailsEntity);
@@ -51,10 +56,22 @@ public interface ProjectDAO {
 	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId,int status);
 	public List<WorkDetailsEntity> getWorkDetailsBySearch(String searchKeyWord, int workTypeId,Date startDate,Date endDate);
 	
-	
 	public SubTaskEntity saveSubTaskEntity(SubTaskEntity subTaskEntity);
 	public SubTaskEntity updateSubTaskEntity(SubTaskEntity subTaskEntity);
 	public SubTaskEntity getSubTaskEntityById(int subTaskId);
     public List<SubTaskEntity> getSubTaskEntitiesByWorkId(int workDetailsId,int status);
+    
+    public WorkDocumentEntity saveWorkDocument(WorkDocumentEntity workDocumentEntity);
+    public WorkDocumentEntity updateWorkDocument(WorkDocumentEntity workDocumentEntity);
+    public WorkDocumentEntity getWorkDocumentById(int workDocumentId);
+    public List<WorkDocumentEntity> getWorkDocumentByWorkDetailsId(int workDetailsId);
+    public List<WorkDocumentEntity> getWorkDocumentBySubTaskId(int subTaskId);
+    public List<WorkDocumentEntity> getAllWorkDocumentByDepartMentId(int departmentId);
+    
+    public EmployeeTaskAllocationEntity saveEmployeeTaskAllocation(EmployeeTaskAllocationEntity employeeTaskAllocation);
+    public EmployeeTaskAllocationEntity updateEmployeeTaskAllocation(EmployeeTaskAllocationEntity employeeTaskAllocation);
+    public EmployeeTaskAllocationEntity getEmployeeTaskAllocationById(int empTaskAllocationId);
+    public List<EmployeeTaskAllocationEntity> getAllEmployeeTaskAllocationBySubTaskId(int subTaskId);
+    public List<EmployeeTaskAllocationEntity> getAllEmployeeTaskAllocationByWorkDetailsId(int workDetailsId);
 	
 }

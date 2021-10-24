@@ -17,6 +17,7 @@ public interface UtilService {
 	public Date getPreviousYearDate(Date todaysDate);
 	public Date getDateFromString(String dateStr);
 	public Timestamp dateToTimestamp(Date date);
+	public Timestamp stringDateToTimestamp(String dateStr);
 	public int saveFile(MultipartFile mulFile,String contextPath,String fileLocation);
 	public String createFileName(String existingName);
 	public boolean isRightFileType(String fileType);
@@ -27,6 +28,8 @@ public interface UtilService {
 	public String dateToString(Date date);
 	public Date getCurrentDate();
 	public Date stringToDate(String date );
+	public String createDownLoadFileName();
+	
 	
 //	public Document getWaterMarkPDF(String fileName,Employee employee);
 }

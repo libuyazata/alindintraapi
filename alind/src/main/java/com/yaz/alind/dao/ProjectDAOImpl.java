@@ -7,10 +7,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.hibernate.Criteria;
-import org.hibernate.FlushMode;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
@@ -25,13 +22,16 @@ import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
+import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.ProjectStatusEntity;
 import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
+import com.yaz.alind.entity.WorkDocumentEntity;
 
 @Repository
+@Transactional
 public class ProjectDAOImpl implements ProjectDAO {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectDAOImpl.class);
@@ -39,7 +39,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 	private SessionFactory sessionFactory;
 
 	@Override
-	@Transactional
 	public ProjectInfoEntity saveOrUpdateProject(ProjectInfoEntity projectInfo) {
 		ProjectInfoEntity prInfo = null;
 		try{
@@ -54,7 +53,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 
 
 	@Override
-	@Transactional
 	public List<ProjectInfoEntity> getAllProject(int departmentId) {
 		List<ProjectInfoEntity> projectInfos = null;
 		try{
@@ -73,7 +71,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 
 
 	@Override
-	@Transactional
 	public ProjectInfoEntity getProjectInfoById(int projectId) {
 		ProjectInfoEntity projectInfo = null;
 		try{
@@ -87,87 +84,80 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return projectInfo;
 	}
 
-	@Override
-	@Transactional
-	public List<DocumentTypesEntity> getAllDocumentTypes() {
-		List<DocumentTypesEntity> documentTypes = null;
-		try{
-			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
-			documentTypes = cr.list();
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getAllDocumentTypes: "+e.getMessage());
-		}
-
-		return documentTypes;
-	}
-
-
-	@Override
-	@Transactional
-	public DocumentTypesEntity saveOrUpdateDocumentTypes(DocumentTypesEntity documentTypes) {
-		DocumentTypesEntity docTypes = null;
-		try{
-			this.sessionFactory.getCurrentSession().saveOrUpdate(documentTypes);
-			docTypes = documentTypes;
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("saveOrUpdateDocumentTypes: "+e.getMessage());
-		}
-		return docTypes;
-	}
-
-	@Override
-	@Transactional
-	public boolean isDrawingSeriesExists(String drawingSeries){
-		boolean status = false;
-		try{
-
-			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
-			cr.add(Restrictions.eq("drawingSeries", drawingSeries));
-			List list = cr.list();
-			if(list.size() > 0){
-				status = true;
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("isDrawingSeriesExists: "+e.getMessage());
-		}
-		return status;
-	}
+//	@Override
+//	public List<DocumentTypesEntity> getAllDocumentTypes() {
+//		List<DocumentTypesEntity> documentTypes = null;
+//		try{
+//			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+//			cr.add(Restrictions.eq("status", 1));
+//			documentTypes = cr.list();
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("getAllDocumentTypes: "+e.getMessage());
+//		}
+//
+//		return documentTypes;
+//	}
 
 
-	@Override
-	@Transactional
-	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
-		DocumentTypesEntity docTypes = null;
-		try{
-			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
-			cr.add(Restrictions.eq("documentTypeId", documentTypeId));
-			docTypes = (DocumentTypesEntity) cr.list().get(0);
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getDocumentTypeById: "+e.getMessage());
-		}
-		return docTypes;
-	}
+//	@Override
+//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
+//		DocumentTypesEntity docTypes = null;
+//		try{
+//			this.sessionFactory.getCurrentSession().save(documentTypes);
+//			docTypes = documentTypes;
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("saveDocumentTypes: "+e.getMessage());
+//		}
+//		return docTypes;
+//	}
+
+//	@Override
+//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
+//		DocumentTypesEntity docTypes = null;
+//		try{
+//			this.sessionFactory.getCurrentSession().update(documentTypes);
+//			docTypes = documentTypes;
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("updateDocumentTypes: "+e.getMessage());
+//		}
+//		return docTypes;
+//	}
+
+//	@Override
+//	public boolean isDrawingSeriesExists(String drawingSeries){
+//		boolean status = false;
+//		try{
+//
+//			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+//			cr.add(Restrictions.eq("drawingSeries", drawingSeries));
+//			List list = cr.list();
+//			if(list.size() > 0){
+//				status = true;
+//			}
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("isDrawingSeriesExists: "+e.getMessage());
+//		}
+//		return status;
+//	}
 
 
-	//	@Override
-	//	@Transactional
-	//	public List<ProjectDocument> getAllDocumentByProjectId(int projectId) {
-	//		List<ProjectDocument> documents = null;
-	//		try{
-	//			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(ProjectDocument.class);
-	//			cr.add(Restrictions.eq("projectId", projectId));
-	//			documents = cr.list();
-	//		}catch(Exception e){
-	//			e.printStackTrace();
-	//			logger.error("getDocumentTypeById: "+e.getMessage());
-	//		}
-	//		return documents;
-	//	}
-
+//	@Override
+//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
+//		DocumentTypesEntity docTypes = null;
+//		try{
+//			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+//			cr.add(Restrictions.eq("documentTypeId", documentTypeId));
+//			docTypes = (DocumentTypesEntity) cr.list().get(0);
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("getDocumentTypeById: "+e.getMessage());
+//		}
+//		return docTypes;
+//	}
 
 	@Override
 	@Transactional
@@ -184,24 +174,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 
-	//	@Override
-	//	@Transactional
-	//	public ProjectDocument getDocumentById(int documentId) {
-	//		ProjectDocument document = null;
-	//		try{
-	//			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(ProjectDocument.class);
-	//			cr.add(Restrictions.eq("documentId", documentId));
-	//			document = (ProjectDocument) cr.list().get(0);
-	//		}catch(Exception e){
-	//			e.printStackTrace();
-	//			logger.error("getDocumentById: "+e.getMessage());
-	//		}
-	//		return document;
-	//	}
-
-
 	@Override
-	@Transactional
 	public List<DocumentHistoryEntity> getAllDocumentHistories(int documentId,int departmentId ) {
 		List<DocumentHistoryEntity> documentHistories = null;
 		try{
@@ -432,6 +405,21 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return docuSeries;
 	}
+	
+	@Override
+	public DocumentNumberSeriesEntity updateDocumentNumberSeries
+				(DocumentNumberSeriesEntity documentNumberSeries){
+		DocumentNumberSeriesEntity docuSeries = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(documentNumberSeries);
+			docuSeries = documentNumberSeries;
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDocumentNumberSeries: "+e.getMessage());
+		}
+		return docuSeries;
+	}
 
 
 	@Override
@@ -458,47 +446,64 @@ public class ProjectDAOImpl implements ProjectDAO {
 	@Transactional
 	public WorkDetailsEntity saveWorkDetails(
 			WorkDetailsEntity workDetailsEntity) {
+		//		Transaction tx = null;
+		//		Session session = null;
 		WorkDetailsEntity work = null;
 		try{
-			//			this.sessionFactory.getCurrentSession().save(workDetailsEntity);
-			Session session = this.sessionFactory.openSession();
-			int id = (int) session.save(workDetailsEntity);
-			workDetailsEntity.setWorkDetailsId(id);
-			System.out.println("DAO,saveWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId()+", id: "+id);
-			work = workDetailsEntity;
+			this.sessionFactory.getCurrentSession().save(workDetailsEntity);
+			//			session = this.sessionFactory.openSession();
+			//			tx = session.beginTransaction();
+			//			tx.begin();
+			//			int id = (int) session.save(workDetailsEntity);
+			//			workDetailsEntity.setWorkDetailsId(id);
+			//			session.save(workDetailsEntity);
+			//			//			work = workDetailsEntity;
+			//			tx.commit();
+			//			System.out.println("DAO,saveWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId());
 		}catch(Exception e){
+			//			tx.rollback();
 			e.printStackTrace();
 			logger.error("saveOrUpdateWorkDetails: "+e.getMessage());
 		}
-		//		finally{
-		//			this.sessionFactory.getCurrentSession().flush();
-		//			work = workDetailsEntity;
-		//		}
+		finally{
+			//			session.flush();
+			work = workDetailsEntity;
+			System.out.println("DAO,saveWorkDetails,Id: "+work.getWorkDetailsId());
+		}
 		return workDetailsEntity;
 	}
 
 	@Override
-	@Transactional
+	//	@Transactional
 	public WorkDetailsEntity updateWorkDetails(
 			WorkDetailsEntity workDetailsEntity) {
+		//		Transaction tx = null;
+		//		Session session = null;
 		WorkDetailsEntity entity = null;
+
 		try{
 			this.sessionFactory.getCurrentSession().update(workDetailsEntity);
-//			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId());
+			//									this.sessionFactory.getCurrentSession().flush();
+			//			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId());
 			//			System.out.println("DAO,updateWorkDetails,Id: "+workDetailsEntity.getWorkDetailsId()+
 			//					",Pjt Co-ordinate Emp name: "+workDetailsEntity.getProjectCoOrdinatorEmp().getFirstName());
-//			entity = workDetailsEntity;
-//			tx.commit();
+			//			entity = workDetailsEntity;
+			//			tx.commit();
+
+			//			session = this.sessionFactory.getSessionFactory().getCurrentSession();
+			//			tx = session.beginTransaction();
+			//			session.update(workDetailsEntity);
+			//			tx.commit();
 
 		}catch(Exception e){
-//		    tx.rollback();
+			//		    tx.rollback();
 			e.printStackTrace();
 			logger.error("updateWorkDetails: "+e.getMessage());
 		}
 		finally{
-//			session.setFlushMode(FlushMode.ALWAYS );
+			//			session.flush();
 			entity = workDetailsEntity;
-//			System.out.println("DAO,updateWorkDetails,getDescription: "+entity.getDescription());
+			System.out.println("DAO,updateWorkDetails,getDescription: "+entity.getDescription());
 		}
 		return entity;
 	}
@@ -528,10 +533,17 @@ public class ProjectDAOImpl implements ProjectDAO {
 	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(
 			int departmentId,int status) {
 		List<WorkDetailsEntity> workDetailsEntities = null;
+		//		Transaction tx = null;
+		//		Session session = null;
 		try{
 			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class);
+			//			session = this.sessionFactory.getCurrentSession();
+			//			tx = session.beginTransaction();
+			//			Criteria cr= session.createCriteria(WorkDetailsEntity.class);
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
 			cr.addOrder(Order.desc("createdOn"));
-			cr.add(Restrictions.eq("departmentId", departmentId));
 			cr.add(Restrictions.eq("status", status));
 			workDetailsEntities = cr.list();
 		}catch(Exception e){
@@ -596,7 +608,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 		List<SubTaskEntity> entities = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(SubTaskEntity.class);
-			cr.add(Restrictions.eq("workDetailsId", workDetailsId));
+			if(workDetailsId > 0){
+				cr.add(Restrictions.eq("workDetailsId", workDetailsId));
+			}
 			cr.add(Restrictions.eq("status", status));
 			entities = cr.list();
 		}catch(Exception e){
@@ -613,8 +627,8 @@ public class ProjectDAOImpl implements ProjectDAO {
 			int workTypeId, Date startDate, Date endDate) {
 		List<WorkDetailsEntity> workDetailsEntities = null;
 		try{
-//			System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord
-//					+", startDate: "+startDate+", endDate: "+endDate);
+			//			System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord
+			//					+", startDate: "+startDate+", endDate: "+endDate);
 			workDetailsEntities = new ArrayList<WorkDetailsEntity>();
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class,"workDetails");
 			cr.createAlias("departmentEntity", "departmentEntity"); 
@@ -635,7 +649,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			}
 
 			if(!searchKeyWord.isEmpty()){
-//				System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord);
+				//				System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord);
 				Criterion description = Restrictions.ilike("workDetails.description", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion workName = Restrictions.ilike("workDetails.workName", searchKeyWord, MatchMode.ANYWHERE);
 
@@ -670,6 +684,185 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return workDetailsEntities;
 	}
 
+
+	@Override
+	public WorkDocumentEntity saveWorkDocument(
+			WorkDocumentEntity workDocumentEntity) {
+		WorkDocumentEntity workDocument = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(workDocumentEntity);
+			workDocument = workDocumentEntity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveWorkDocument: "+e.getMessage());
+		}
+		return workDocument;
+	}
+
+
+	@Override
+	public WorkDocumentEntity updateWorkDocument(
+			WorkDocumentEntity workDocumentEntity) {
+		WorkDocumentEntity workDocument = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(workDocumentEntity);
+			workDocument = workDocumentEntity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateWorkDocument: "+e.getMessage());
+		}
+		return workDocument;
+	}
+
+
+	@Override
+	public WorkDocumentEntity getWorkDocumentById(int workDocumentId) {
+		WorkDocumentEntity workDocument = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDocumentEntity.class);
+			cr.add(Restrictions.eq("workDocumentId", workDocumentId));
+			List<WorkDocumentEntity> list = cr.list();
+			if(list.size() > 0){
+				workDocument = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentById: "+e.getMessage());
+		}
+		return workDocument;
+	}
+
+
+	@Override
+	public List<WorkDocumentEntity> getWorkDocumentByWorkDetailsId(int workDetailsId) {
+		List<WorkDocumentEntity> workDocumentEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDocumentEntity.class);
+			cr.add(Restrictions.eq("workDetailsId", workDetailsId));
+			cr.add(Restrictions.eq("status", 1));
+			workDocumentEntities = cr.list();
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentByWorkDetailsId: "+e.getMessage());
+		}
+		return workDocumentEntities;
+	}
+
+
+	@Override
+	public List<WorkDocumentEntity> getWorkDocumentBySubTaskId(int subTaskId) {
+		List<WorkDocumentEntity> workDocumentEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDocumentEntity.class);
+			cr.add(Restrictions.eq("subTaskId", subTaskId));
+			cr.add(Restrictions.eq("status", 1));
+			workDocumentEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentBySubTaskId: "+e.getMessage());
+		}
+		return workDocumentEntities;
+	}
+
+
+	@Override
+	public List<WorkDocumentEntity> getAllWorkDocumentByDepartMentId(
+			int departmentId) {
+		List<WorkDocumentEntity> workDocumentEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDocumentEntity.class);
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}			
+			cr.add(Restrictions.eq("status", 1));
+			workDocumentEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllWorkDocumentByDepartMentId: "+e.getMessage());
+		}
+		return workDocumentEntities;
+	}
+
+
+	@Override
+	public EmployeeTaskAllocationEntity saveEmployeeTaskAllocation(
+			EmployeeTaskAllocationEntity employeeTaskAllocation) {
+		EmployeeTaskAllocationEntity employeeTask = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(employeeTaskAllocation);
+			employeeTask = employeeTaskAllocation;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveEmployeeTaskAllocation: "+e.getMessage());
+		}
+		return employeeTask;
+	}
+
+
+	@Override
+	public EmployeeTaskAllocationEntity updateEmployeeTaskAllocation(
+			EmployeeTaskAllocationEntity employeeTaskAllocation) {
+		EmployeeTaskAllocationEntity employeeTask = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(employeeTaskAllocation);
+			employeeTask = employeeTaskAllocation;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateEmployeeTaskAllocation: "+e.getMessage());
+		}
+		return employeeTask;
+	}
+
+
+	@Override
+	public EmployeeTaskAllocationEntity getEmployeeTaskAllocationById(
+			int empTaskAllocationId) {
+		EmployeeTaskAllocationEntity employeeTask = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeTaskAllocationEntity.class);
+			cr.add(Restrictions.eq("empTaskAllocationId", empTaskAllocationId));
+			employeeTask = (EmployeeTaskAllocationEntity) cr.list().get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateEmployeeTaskAllocation: "+e.getMessage());
+		}
+		return employeeTask;
+	}
+
+
+	@Override
+	public List<EmployeeTaskAllocationEntity> getAllEmployeeTaskAllocationBySubTaskId(
+			int subTaskId) {
+		List<EmployeeTaskAllocationEntity> emEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeTaskAllocationEntity.class);
+			cr.add(Restrictions.eq("subTaskId", subTaskId));
+			cr.add(Restrictions.eq("status", 1));
+			emEntities = cr.list();			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllEmployeeTaskAllocationBySubTaskId: "+e.getMessage());
+		}
+		return emEntities;
+	}
+
+
+	@Override
+	public List<EmployeeTaskAllocationEntity> getAllEmployeeTaskAllocationByWorkDetailsId(
+			int workDetailsId) {
+		List<EmployeeTaskAllocationEntity> emEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeTaskAllocationEntity.class);
+			cr.add(Restrictions.eq("workDetailsId", workDetailsId));
+			cr.add(Restrictions.eq("status", 1));
+			emEntities = cr.list();			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllEmployeeTaskAllocationByWorkDetailsId: "+e.getMessage());
+		}
+		return emEntities;
+	}
 
 
 }

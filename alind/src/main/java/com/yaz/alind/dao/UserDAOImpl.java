@@ -14,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.yaz.alind.entity.DepartmentEntity;
+import com.yaz.alind.entity.DeputationEntity;
+import com.yaz.alind.entity.DeputationHistoryEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
 
 @Repository
+@Transactional
 public class UserDAOImpl implements UserDAO {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserDAOImpl.class);
@@ -160,6 +163,7 @@ public class UserDAOImpl implements UserDAO {
 		List<EmployeeEntity> employees = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeEntity.class);
+			cr.add(Restrictions.eq("isActive",1));
 			employees = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -168,7 +172,7 @@ public class UserDAOImpl implements UserDAO {
 		return employees;
 	}
 
-	
+
 	@Override
 	@Transactional
 	public List<EmployeeEntity> getAllEmployeesByDept(int departmentId) {
@@ -208,6 +212,7 @@ public class UserDAOImpl implements UserDAO {
 		List<DepartmentEntity> departments = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentEntity.class);
+			cr.add(Restrictions.eq("isActive",1));
 			departments = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -265,8 +270,99 @@ public class UserDAOImpl implements UserDAO {
 	}
 
 
-	
+	@Override
+	@Transactional
+	public DepartmentEntity getDepartmentById(int departmentId) {
+		DepartmentEntity department = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentEntity.class);
+			cr.add(Restrictions.eq("departmentId",departmentId));
+			department = (DepartmentEntity) cr.list().get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentById: "+e.getMessage());
+		}
+		return department;
+	}
 
 
-	
+	@Override
+	public DeputationEntity saveDeputation(DeputationEntity deputation) {
+		DeputationEntity entity = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(deputation);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDeputation: "+e.getMessage());
+		}finally{
+			entity = deputation;
+		}
+		return entity;
+	}
+
+
+	@Override
+	public DeputationEntity updateDeputation(DeputationEntity deputation) {
+		DeputationEntity entity = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(deputation);
+			entity = deputation;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDeputation: "+e.getMessage());
+		}
+		return entity;
+	}
+
+
+	@Override
+	public List<DeputationEntity> getDeputationListByDeptId(int departmentId) {
+		List<DeputationEntity> deputationEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DeputationEntity.class);
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId",departmentId));
+			}
+			cr.add(Restrictions.eq("status", 1));
+			deputationEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDeputationListByDeptId: "+e.getMessage());
+		}
+		return deputationEntities;
+	}
+
+
+	@Override
+	public DeputationEntity getDeputationById(int deputationId) {
+		DeputationEntity entity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DeputationEntity.class);
+			cr.add(Restrictions.eq("deputationId",deputationId));
+			entity = (DeputationEntity) cr.list().get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDeputationById: "+e.getMessage());
+		}
+		
+		return entity;
+	}
+
+
+	@Override
+	public DeputationHistoryEntity saveDeputationHistory(
+			DeputationHistoryEntity deputationHistory) {
+		DeputationHistoryEntity depEntity = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(deputationHistory);
+			depEntity = deputationHistory;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDeputationHistory: "+e.getMessage());
+		}
+		return depEntity;
+	}
+
+
+
 }

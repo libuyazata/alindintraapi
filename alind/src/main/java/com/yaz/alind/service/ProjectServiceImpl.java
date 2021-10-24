@@ -6,9 +6,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,7 @@ import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfImportedPage;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.yaz.alind.dao.MasterTableDAO;
 import com.yaz.alind.dao.ProjectDAO;
 import com.yaz.alind.dao.UserDAO;
 import com.yaz.alind.entity.DocumentHistoryEntity;
@@ -36,13 +42,18 @@ import com.yaz.alind.entity.DocumentNumberSeriesFactory;
 import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
+import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectDocumentFactory;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
+import com.yaz.alind.entity.WorkDocumentEntity;
+import com.yaz.alind.model.ui.EmployeeModel;
+import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
+import com.yaz.alind.model.ui.WorkDocumentModel;
 import com.yaz.security.Iconstants;
 
 @Service
@@ -64,6 +75,8 @@ public class ProjectServiceImpl implements ProjectService {
 	UserService userService;
 	@Autowired
 	DocumentNumberSeriesFactory documentNumberSeriesFactory;
+	@Autowired
+	MasterTableDAO masterTableDAO;
 
 	@Override
 	public ProjectInfoEntity saveOrUpdateProject(ProjectInfoEntity projectInfo) {
@@ -144,37 +157,62 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectDAO.getProjectInfoById(projectId);
 	}
 
-	@Override
-	public List<DocumentTypesEntity> getAllDocumentTypes() {
-		return projectDAO.getAllDocumentTypes();
-	}
+//	@Override
+//	public List<DocumentTypesEntity> getAllDocumentTypes() {
+//		return projectDAO.getAllDocumentTypes();
+//	}
 
-	@Override
-	public DocumentTypesEntity saveOrUpdateDocumentTypes(DocumentTypesEntity documentTypes) {
-		DocumentTypesEntity docTypes = null;
-		try{
-			Date today = utilService.getTodaysDate();
-			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
-			//Updating the existing data
-			if(documentTypes.getDocumentTypeId() > 0){
-				docTypes = projectDAO.saveOrUpdateDocumentTypes(documentTypes);
-			}else{ // For new entry
-				boolean drawingSerExists = projectDAO.isDrawingSeriesExists(documentTypes.getDrawingSeries());
-				if(!drawingSerExists){
-					docTypes = projectDAO.saveOrUpdateDocumentTypes(documentTypes);
-				}
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("saveOrUpdateDocumentTypes: "+e.getMessage());
-		}
-		return docTypes;
-	}
+//	@Override
+//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
+//		DocumentTypesEntity docTypes = null;
+//		try{
+//			Date today = utilService.getTodaysDate();
+//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
+//			docTypes = projectDAO.saveDocumentTypes(documentTypes);
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("saveDocumentTypes: "+e.getMessage());
+//		}
+//		return docTypes;
+//	}
 
-	@Override
-	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
-		return projectDAO.getDocumentTypeById(documentTypeId);
-	}
+//	@Override
+//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
+//		DocumentTypesEntity docTypes = null;
+//		try{
+//			//			Date today = utilService.getTodaysDate();
+//			//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
+//			docTypes = projectDAO.updateDocumentTypes(documentTypes);
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("updateDocumentTypes: "+e.getMessage());
+//		}
+//		return docTypes;
+//	}
+
+//	@Override
+//	public int deleteDocumentTypesById(int documentTypeId){
+//		int status = 0;
+//		try{
+//			DocumentTypesEntity docType = projectDAO.getDocumentTypeById(documentTypeId);
+//			docType.setUpdatedOn(utilService.getTodaysDate());
+//			docType.setStatus(-1);
+//			docType = projectDAO.updateDocumentTypes(docType);
+//			if(docType.getStatus() == -1){
+//				status = 1;
+//			}
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("deleteDocumentTypesById: "+e.getMessage());
+//		}
+//		return status;
+//	}
+
+
+//	@Override
+//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
+//		return projectDAO.getDocumentTypeById(documentTypeId);
+//	}
 
 	@Override
 	public List<ProjectDocumentEntity> getAllDocumentByProjectId(int projectId,int documentTypeId,String realPath,String token) {
@@ -185,8 +223,8 @@ public class ProjectServiceImpl implements ProjectService {
 			String[] arrOfStr = realPath.split(Iconstants.BUILD_NAME, 2); 
 			String path = arrOfStr[0]+fileLocation;
 			EmployeeEntity employee = userService.getEmployeeByToken(token);
-			System.out.println("getAllDocumentByProjectId, projectId: "+projectId
-					+", documentTypeId: "+documentTypeId);
+			//			System.out.println("getAllDocumentByProjectId, projectId: "+projectId
+			//					+", documentTypeId: "+documentTypeId);
 			switch (employee.getUserRoleId()) {
 			//Admin
 			case 1:
@@ -216,8 +254,8 @@ public class ProjectServiceImpl implements ProjectService {
 				projectDocuments.get(i).setFilePath(path+"/"+projectDocuments.get(i).getFileName());
 				projectDocuments.get(i).setSlNo(i+1);
 			}
-			System.out.println("getAllDocumentByProjectId, size: "+projectDocuments.size()
-					+", emp role: "+employee.getUserRoleId()+" ,emp id: "+employee.getEmployeeId());
+			//			System.out.println("getAllDocumentByProjectId, size: "+projectDocuments.size()
+			//					+", emp role: "+employee.getUserRoleId()+" ,emp id: "+employee.getEmployeeId());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAllDocumentByProjectId: "+e.getMessage());
@@ -304,7 +342,7 @@ public class ProjectServiceImpl implements ProjectService {
 			,int projectDocumentId,String description) {
 		ProjectDocumentEntity projectDocument = null;
 		try{
-			System.out.println("Business,uploadProjectDocument,contextPath: "+contextPath);
+			//			System.out.println("Business,uploadProjectDocument,contextPath: "+contextPath);
 			//			projectDocument = new ProjectDocument();
 			projectDocument = projectDocumentFactory.createProjectDocument();
 			//			projectDocument = projectDAO.getProjectDocumentById(projectDocumentId);
@@ -333,7 +371,7 @@ public class ProjectServiceImpl implements ProjectService {
 				// Whether is a new / project updation
 				if(projectDocumentId == 0){
 					System.out.println("Business,uploadProjectDocument,documentNumberSeries, : "+documentNumberSeries);
-					DocumentTypesEntity documentTypes = projectDAO.getDocumentTypeById(documentTypeId);
+					DocumentTypesEntity documentTypes = masterTableDAO.getDocumentTypeById(documentTypeId);
 					//Check , the existing document series is existing in the DB
 					if(documentNumberSeries == null){
 						DocumentNumberSeriesEntity docSeries = documentNumberSeriesFactory.createDocumentNumberSeries();
@@ -392,6 +430,68 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
+	public WorkDocumentModel saveWorkDocument(MultipartFile file,String token,int documentTypeId,
+			int workDetailsId,int subTaskId,String description,int departmentId,
+			String documentName,String contextPath) {
+		WorkDocumentModel documentModel = null;
+		try{
+			WorkDocumentEntity entity = new WorkDocumentEntity();
+			EmployeeEntity employee = userService.getEmployeeByToken(token);
+			DocumentTypesEntity documentTypes = masterTableDAO.getDocumentTypeById(documentTypeId);
+			DocumentNumberSeriesEntity documentNumberSeries = projectDAO.getDocumentNumberSeriesByDocumentTypeId(documentTypeId);
+			String documentnumber = null;
+			// If the respective Number Series not in the DB
+			if(documentNumberSeries == null){
+				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
+						documentnumber);
+				documentNumberSeries = documentNumberSeriesFactory.createDocumentNumberSeries();
+				documentNumberSeries.setDocumentTypeId(documentTypeId);
+			}else{
+				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
+						documentNumberSeries.getLastDocumentNumber());
+			}
+			documentNumberSeries.setLastDocumentNumber(documentnumber);
+			//			System.out.println("Business,saveWorkDocument,documentNumberSeries, documentnumber: "+documentnumber);
+			documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
+
+			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + workDetailsId +"/"+ subTaskId;
+			System.out.println("Business,saveWorkDocument,fileLocation : "+fileLocation);
+			int status = utilService.saveFile(file, contextPath, fileLocation);
+			//			String originalFileName = file.getOriginalFilename();
+			String fileName = utilService.createFileName(file.getOriginalFilename());
+
+			entity.setApprovalStatus(0);
+			entity.setWorkDetailsId(workDetailsId);
+			entity.setDepartmentId(departmentId);
+			entity.setDescription(description);
+			entity.setDocumentName(documentName);
+			entity.setDocumentnumber(documentnumber);
+			entity.setDocumentTypeId(documentTypeId);
+			entity.setEmployeeId(employee.getEmployeeId());
+			entity.setFileSize(file.getSize());
+			entity.setFileType(file.getContentType());
+			entity.setOriginalFileName(file.getOriginalFilename());
+			entity.setStatus(1);
+			entity.setSubTaskId(subTaskId);
+			entity.setCreatedOn(utilService.getCurrentDate());
+			entity.setUpdatedOn(utilService.getCurrentDate());
+			entity.setVerificationStatus(0);
+
+			entity.setFileName(fileName);
+			entity = projectDAO.saveWorkDocument(entity);
+			entity = projectDAO.getWorkDocumentById(entity.getWorkDocumentId());
+			documentModel = createWorkDocumentModel(entity,contextPath);
+
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateWorkDocument: "+e.getMessage());
+		}
+		return documentModel;
+	}
+
+
+	@Override
 	public InputStream getProjectDocument(int projectDocumentId,
 			int employeeId) {
 		InputStream input = null;
@@ -447,6 +547,95 @@ public class ProjectServiceImpl implements ProjectService {
 			logger.error("getProjectDocument: "+e.getMessage());
 		}
 		return input;
+	}
+
+	/**
+	 *  Water Mark with download
+	 */
+	@Override
+	public ByteArrayInputStream getWorkDocument(int workDocumentId,String token,String contextPath){
+		ByteArrayInputStream byteArrayInputStream = null;
+		try{
+			EmployeeEntity employee = userService.getEmployeeByToken(token);
+			WorkDocumentEntity workDocument = projectDAO.getWorkDocumentById(workDocumentId);
+
+			ByteArrayOutputStream archivo = new ByteArrayOutputStream();
+			Font alindFont = new Font(Font.FontFamily.HELVETICA, 32, Font.BOLD, new GrayColor(0.85f));
+			Font nameFont = new Font(Font.FontFamily.HELVETICA, 22, Font.BOLD, new GrayColor(0.85f));
+			PdfReader.unethicalreading = true;
+			// Create output PDF
+			Document document = new Document(PageSize.A4);
+			//			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream("D:/alind_sample_database.pdf"));
+			PdfWriter writer = PdfWriter.getInstance(document, archivo);
+			document.open();
+			PdfContentByte cb = writer.getDirectContent();
+
+			// Load existing PDF
+			//			PdfReader reader = new PdfReader("C:/Users/dell/Desktop/model_for database.pdf");
+//			String filePath="D:/alind.pdf";
+			String[] arrOfStr = contextPath.split(Iconstants.BUILD_NAME, 2); 
+			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + 
+					workDocument.getWorkDetailsId() +"/"+ workDocument.getSubTaskId();
+			String path = arrOfStr[0]+fileLocation;
+			String filePath = path+"/"+workDocument.getFileName();
+
+			PdfReader reader = new PdfReader(filePath);
+			PdfImportedPage page = writer.getImportedPage(reader, 1); 
+
+			// Copy first page of existing PDF into output PDF
+			if(workDocument.getApprovalStatus() == 1){
+				for(int i=1; i<= reader.getNumberOfPages(); i++){
+					document.newPage();
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("CONTROLLED COPY", alindFont),
+							297.5f, 621, i % 2 == 1 ? 0 : 0);
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("Issued to - "+" GSS - "+" AS - "+employee.getFirstName()+", "+employee.getEmpCode(), nameFont),
+							297.5f, 591, i % 2 == 1 ? 0 : 0);
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("Issued by - "+" AKS - "+" DD - "+utilService.getCurrentDateTime(), nameFont),
+							297.5f, 561, i % 2 == 1 ? 0 : 0);
+					//				ColumnText.showTextAligned(writer.getDirectContentUnder(),
+					//						Element.ALIGN_CENTER, new Phrase("Issued to - "+" GSS - "+" AS - "+" 01.06.2019", nameFont),
+					//						297.5f, 591, i % 2 == 1 ? 0 : 0);
+					//				ColumnText.showTextAligned(writer.getDirectContentUnder(),
+					//						Element.ALIGN_CENTER, new Phrase("Issued by - "+" AKS - "+" DD - "+" 27.05.2019", nameFont),
+					//						297.5f, 561, i % 2 == 1 ? 0 : 0);
+					cb.addTemplate(page, 0, 0);
+				}
+			}else{
+				for(int i=1; i<= reader.getNumberOfPages(); i++){
+					document.newPage();
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("DRAFT", alindFont),
+							297.5f, 621, i % 2 == 1 ? 0 : 0);
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("Issued to - "+" GSS - "+" AS - "+employee.getFirstName()+", "+employee.getEmpCode(), nameFont),
+							297.5f, 591, i % 2 == 1 ? 0 : 0);
+					ColumnText.showTextAligned(writer.getDirectContentUnder(),
+							Element.ALIGN_CENTER, new Phrase("Issued by - "+" AKS - "+" DD - "+utilService.getCurrentDateTime(), nameFont),
+							297.5f, 561, i % 2 == 1 ? 0 : 0);
+					//				ColumnText.showTextAligned(writer.getDirectContentUnder(),
+					//						Element.ALIGN_CENTER, new Phrase("Issued to - "+" GSS - "+" AS - "+" 01.06.2019", nameFont),
+					//						297.5f, 591, i % 2 == 1 ? 0 : 0);
+					//				ColumnText.showTextAligned(writer.getDirectContentUnder(),
+					//						Element.ALIGN_CENTER, new Phrase("Issued by - "+" AKS - "+" DD - "+" 27.05.2019", nameFont),
+					//						297.5f, 561, i % 2 == 1 ? 0 : 0);
+					cb.addTemplate(page, 0, 0);
+				}
+			}
+
+			document.close();
+			writer.close();
+
+			byteArrayInputStream = new ByteArrayInputStream(archivo.toByteArray());
+
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocument: "+e.getMessage());
+		}
+		return byteArrayInputStream;
 	}
 
 	@Override
@@ -553,17 +742,19 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
+	@Transactional
 	public WorkDetailsModel updateWorkDetails(
 			WorkDetailsModel workDetailsModel) {
 		WorkDetailsModel model = null;
 		WorkDetailsEntity entity = null;
 		try{
+			System.out.println("Business,updateWorkDetails,CreatedOn: "+workDetailsModel.getCreatedOn());
 			entity = createWorkDetailsEntity(workDetailsModel);
 			entity.setUpdatedOn(utilService.getCurrentDate());
 			entity.setStatus(1);
 			entity = projectDAO.updateWorkDetails(entity);
-			entity = projectDAO.getWorkDetailsEntityById(entity.getWorkDetailsId());
-//			System.out.println("Business,updateWorkDetails,getDescription: "+entity.getDescription());
+			//			entity = projectDAO.getWorkDetailsEntityById(entity.getWorkDetailsId());
+			//			System.out.println("Business,updateWorkDetails,getDescription: "+entity.getDescription());
 			model = createWorkDetailsModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -798,6 +989,175 @@ public class ProjectServiceImpl implements ProjectService {
 		return value;
 	}
 
+
+	@Override
+	public WorkDocumentModel updateWorkDocument(
+			WorkDocumentModel model,String contextPath) {
+		WorkDocumentModel documentModel = null;
+		try{
+			WorkDocumentEntity entity = createWorkDocumentEntity(model);
+			entity.setUpdatedOn(utilService.getCurrentDate());
+			entity = projectDAO.updateWorkDocument(entity);
+			model = createWorkDocumentModel(entity,contextPath);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateWorkDocument: "+e.getMessage());
+		}
+		return documentModel;
+	}
+
+	@Override
+	public WorkDocumentModel getWorkDocumentById(int workDocumentId,String contextPath) {
+		WorkDocumentModel model = null;
+		try{
+			WorkDocumentEntity entity = projectDAO.getWorkDocumentById(workDocumentId);
+			model = createWorkDocumentModel(entity,contextPath);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentById: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public List<WorkDocumentModel> getWorkDocumentByWorkDetailsId(int workDetailsId,String contextPath){
+		List<WorkDocumentModel> models = null;
+		try{
+			models = new ArrayList<WorkDocumentModel>();
+			List<WorkDocumentEntity> entities = projectDAO.getWorkDocumentByWorkDetailsId(workDetailsId);
+			for(WorkDocumentEntity entity: entities){
+				WorkDocumentModel model = createWorkDocumentModel(entity,contextPath);
+				models.add(model);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentByWorkDetailsId: "+e.getMessage());
+		}
+		return models;
+	}
+
+	@Override
+	public List<WorkDocumentModel> getWorkDocumentBySubTaskId(int subTaskId,String contextPath) {
+		List<WorkDocumentModel> models = null;
+		try{
+			models = new ArrayList<WorkDocumentModel>();
+			List<WorkDocumentEntity> entities = projectDAO.getWorkDocumentBySubTaskId(subTaskId);
+			System.out.println("Business,getWorkDocumentBySubTaskId, size: "+entities.size()+", subTaskId: "+subTaskId);
+			for(WorkDocumentEntity entity: entities){
+				WorkDocumentModel model = createWorkDocumentModel(entity,contextPath);
+				models.add(model);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDocumentBySubTaskId: "+e.getMessage());
+		}
+		return models;
+	}
+
+	@Override
+	public int deleteWorkDocumentModelById(int workDocumentId){
+		int status = 0;
+		try{
+			WorkDocumentEntity entity = projectDAO.getWorkDocumentById(workDocumentId);
+			if(entity.getApprovalStatus() == 0){
+				entity.setStatus(0);
+				entity = projectDAO.updateWorkDocument(entity);
+				status = 1;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteWorkDocumentModelById: "+e.getMessage());
+		}
+		return status ;
+	}
+
+	private WorkDocumentEntity createWorkDocumentEntity(WorkDocumentModel model){
+		WorkDocumentEntity entity = null;
+		try{
+			entity = new WorkDocumentEntity();
+			entity.setApprovalStatus(model.getApprovalStatus());
+			if(model.getCreatedOn() != null){
+				entity.setCreatedOn(utilService.stringToDate(model.getCreatedOn()));
+			}
+			entity.setDepartmentId(model.getDepartmentId());
+			entity.setDescription(model.getDescription());
+			entity.setDocumentTypeId(model.getDocumentTypeId());
+			entity.setDocumentName(model.getDocumentName());
+			entity.setDocumentnumber(model.getDocumentnumber());
+			entity.setFileName(model.getFileName());
+			entity.setFilePath(model.getFilePath());
+			entity.setFileSize(model.getFileSize());
+			entity.setFileType(model.getFileType());
+			entity.setOriginalFileName(model.getOriginalFileName());
+			entity.setStatus(model.getStatus());
+			entity.setSubTaskId(model.getSubTaskId());
+			if(model.getUpdatedOn() != null){
+				entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
+			}
+			entity.setVerificationStatus(model.getVerificationStatus());
+			entity.setWorkDetailsId(model.getWorkDetailsId());
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createWorkDocumentEntity: "+e.getMessage());
+		}
+		return entity;
+	}
+
+	private WorkDocumentModel createWorkDocumentModel(WorkDocumentEntity entity,String contextPath){
+		WorkDocumentModel model = null;
+		try{
+			model = new WorkDocumentModel();
+			model.setApprovalStatus(entity.getApprovalStatus());
+			if(model.getApprovalStatus() == 0){
+				model.setApprovalType("No");
+			} else{
+				model.setApprovalType("Yes");
+			}
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setCreatedEmpCode(entity.getEmplpoyee().getEmpCode());
+			model.setCreatedEmpId(entity.getEmplpoyee().getEmployeeId());
+			model.setCreatedEmpName(entity.getEmplpoyee().getFirstName()+" "+entity.getEmplpoyee().getLastName());
+			model.setDepartmentId(entity.getDepartmentId());
+			model.setDepartmentName(entity.getDepartment().getDepartmentName());
+			model.setDescription(entity.getDescription());
+			model.setDocumentType(entity.getDocumentTypes().getType());
+			model.setDocumentTypeId(entity.getDocumentTypeId());
+			model.setDocumentName(entity.getDocumentName());
+			model.setDocumentnumber(entity.getDocumentnumber());
+			model.setFileName(entity.getFileName());
+			// Setting file path / location
+			String[] arrOfStr = contextPath.split(Iconstants.BUILD_NAME, 2); 
+			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + 
+					entity.getWorkDetailsId() +"/"+ entity.getSubTaskId();
+			String path = arrOfStr[0]+fileLocation;
+			model.setFilePath(path+"/"+entity.getFileName());
+
+			model.setFileSize(entity.getFileSize());
+			model.setFileType(entity.getFileType());
+			model.setOriginalFileName(entity.getOriginalFileName());
+			model.setStatus(entity.getStatus());
+			model.setSubTaskId(entity.getSubTaskId());
+			model.setSubTaskName(entity.getSubTask().getSubTaskName());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setVerificationStatus(entity.getVerificationStatus());
+			if(entity.getVerificationStatus() == 1){
+				model.setVerificationType("Yes");
+			}else{
+				model.setVerificationType("No");
+			}
+			model.setWorkDocumentId(entity.getWorkDocumentId());
+			model.setWorkDetailsId(entity.getWorkDetailsId());
+			model.setWorkName(entity.getWorkDetails().getWorkName());
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createSubTaskModel: "+e.getMessage());
+		}
+		return model;
+
+	}
+
 	private SubTaskModel createSubTaskModel(SubTaskEntity entity){
 		SubTaskModel model = null;
 		try{
@@ -847,6 +1207,251 @@ public class ProjectServiceImpl implements ProjectService {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createSubTaskEntity: "+e.getMessage());
+		}
+		return entity;
+	}
+
+	@Override
+	public WorkDocumentModel verifyDocument(int workDocumentId,String contextPath) {
+		WorkDocumentModel model = null;
+		try{
+			WorkDocumentEntity entity = projectDAO.getWorkDocumentById(workDocumentId);
+			entity.setVerificationStatus(1);
+			entity = projectDAO.updateWorkDocument(entity);
+			if(entity.getStatus() == 1){
+				model = createWorkDocumentModel(entity, contextPath);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("verifyDocument: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public WorkDocumentModel approveDocument(int workDocumentId,String contextPath) {
+		WorkDocumentModel model = null;
+		try{
+			WorkDocumentEntity entity = projectDAO.getWorkDocumentById(workDocumentId);
+			entity.setApprovalStatus(1);
+			entity = projectDAO.updateWorkDocument(entity);
+			if(entity.getStatus() == 1){
+				model = createWorkDocumentModel(entity, contextPath);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("approveDocument: "+e.getMessage());
+		}
+		return model;
+	}
+
+
+	@Override
+	public List<EmployeeTaskAllocationModel> saveEmployeeTaskAllocation(Object object) {
+		List<EmployeeTaskAllocationModel> allocationModels = null;
+		try{
+			allocationModels = new ArrayList<EmployeeTaskAllocationModel>();
+			LinkedHashMap<String, String> lhm = (LinkedHashMap<String, String>) object;
+			LinkedHashMap<String, String> objAllotT=null;
+			// Generating a Set of entries
+			Set set = lhm.entrySet();
+			// Displaying elements of LinkedHashMap
+			Iterator iterator = set.iterator();
+			while(iterator.hasNext()) {
+				Map.Entry me = (Map.Entry)iterator.next();
+				//				System.out.print("Key is: "+ me.getKey() + 
+				//						"& Value is: "+me.getValue()+"\n");
+				objAllotT = (LinkedHashMap<String, String>) me.getValue();
+			}
+			String workDetailsId = String.valueOf(objAllotT.get("workDetailsId"));
+			String subTaskId = String.valueOf(objAllotT.get("subTaskId"));
+			String employyArray = String.valueOf(objAllotT.get("employeeList"));
+
+			//			System.out.println("Business,saveEmployeeTaskAllocation,workDetailsId: "+workDetailsId+","
+			//					+ "employyArray: "+employyArray);
+
+			List<Integer> empList = new ArrayList<Integer>();
+			String[] words = employyArray.split("\\s+");
+			//			System.out.println("Business,saveEmployeeTaskAllocation,words, size: "+words.length);
+			for(int i=0;i<words.length;i++) {
+				if( words[i].contains("employeeId")){
+					//					System.out.println("contains,employeeId");
+					String strId =words[i].substring(words[i].indexOf("=")+1  , words[i].length()-1);
+					//					System.out.println("Id: "+strId);
+					empList.add(Integer.parseInt(strId));
+				}
+			}
+			Date today = utilService.getCurrentDate();
+			for(int j=0;j<empList.size();j++){
+				EmployeeTaskAllocationEntity employeeTask = new EmployeeTaskAllocationEntity();
+				employeeTask.setStatus(1);
+				employeeTask.setCreatedOn(today);
+				employeeTask.setUpdatedOn(today);
+				employeeTask.setEmployeeId(empList.get(j));
+				employeeTask.setSubTaskId(Integer.parseInt(subTaskId));
+				employeeTask.setWorkDetailsId(Integer.parseInt(workDetailsId));
+				//				EmployeeTaskAllocationEntity entity = createEmployeeTaskAllocationEntity(employeeTask);
+				employeeTask = projectDAO.saveEmployeeTaskAllocation(employeeTask);
+				employeeTask = projectDAO.getEmployeeTaskAllocationById(employeeTask.getEmpTaskAllocationId());
+				EmployeeTaskAllocationModel model = createEmployeeTaskAllocationModel(employeeTask);
+				allocationModels.add(model);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveEmployeeTaskAllocation: "+e.getMessage());
+		}
+		return allocationModels;
+	}
+
+	@Override
+	public EmployeeTaskAllocationModel updateEmployeeTaskAllocation
+	(EmployeeTaskAllocationModel employeeTask) {
+		EmployeeTaskAllocationModel model = null;
+		try{
+			Date date = utilService.getCurrentDate();
+			String strDate = utilService.dateToString(date);
+			employeeTask.setUpdatedOn(strDate);
+			EmployeeTaskAllocationEntity entity = createEmployeeTaskAllocationEntity(employeeTask);
+			entity = projectDAO.saveEmployeeTaskAllocation(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateEmployeeTaskAllocation: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public EmployeeTaskAllocationModel getEmployeeTaskAllocationById(
+			int empTaskAllocationId) {
+		EmployeeTaskAllocationModel model = null;
+		try{
+			EmployeeTaskAllocationEntity entity = projectDAO.getEmployeeTaskAllocationById
+					(empTaskAllocationId);
+			model = createEmployeeTaskAllocationModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getEmployeeTaskAllocationById: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public List<EmployeeTaskAllocationModel> getAllEmployeeTaskAllocationBySubTaskId(
+			int subTaskId) {
+		List<EmployeeTaskAllocationModel> models = null;
+		try{
+			models = new ArrayList<EmployeeTaskAllocationModel>();
+			List<EmployeeTaskAllocationEntity> entities = projectDAO.getAllEmployeeTaskAllocationBySubTaskId(subTaskId);
+			for(EmployeeTaskAllocationEntity e: entities){
+				EmployeeTaskAllocationModel m = createEmployeeTaskAllocationModel(e);
+				models.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllEmployeeTaskAllocationBySubTaskId: "+e.getMessage());
+		}
+		return models;
+	}
+
+	@Override
+	public List<EmployeeTaskAllocationModel> getAllEmployeeTaskAllocationByWorkDetailsId(
+			int workDetailsId) {
+		List<EmployeeTaskAllocationModel> models = null;
+		try{
+			models = new ArrayList<EmployeeTaskAllocationModel>();
+			List<EmployeeTaskAllocationEntity> entities = projectDAO.getAllEmployeeTaskAllocationByWorkDetailsId
+					(workDetailsId);
+			for(EmployeeTaskAllocationEntity e: entities){
+				EmployeeTaskAllocationModel m = createEmployeeTaskAllocationModel(e);
+				models.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllEmployeeTaskAllocationByWorkDetailsId: "+e.getMessage());
+		}
+		return models;
+	}
+
+	@Override
+	public int deleteEmployeeFromSubTask(int empTaskAllocationId){
+		int value = 0;
+		try{
+			EmployeeTaskAllocationEntity entity = projectDAO.getEmployeeTaskAllocationById
+					(empTaskAllocationId);
+			entity.setStatus(-1);
+			entity.setUpdatedOn(utilService.getCurrentDate());
+			entity = projectDAO.updateEmployeeTaskAllocation(entity);
+			if(entity.getStatus() == -1){
+				value = 1;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteEmployeeFromSubTask: "+e.getMessage());
+		}
+		return value;
+	}
+
+	/**
+	 *   Allocation of employees for various Sub tasks
+	 * @param departmentId
+	 * @return
+	 */
+	@Override
+	public List<EmployeeModel> getEmployeeListForTaskAllocationByDeptId(
+			int departmentId) {
+		List<EmployeeModel> empModels = null;
+		try{
+			empModels = userService.getAllEmployeesByDept(departmentId);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getEmployeeListForTaskAllocationByDeptId: "+e.getMessage());
+		}
+		return empModels;
+	}
+
+	private EmployeeTaskAllocationModel createEmployeeTaskAllocationModel(EmployeeTaskAllocationEntity entity){
+		EmployeeTaskAllocationModel model = null;
+		try{
+			model = new EmployeeTaskAllocationModel();
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			//			model.setDescription(entity.getDescription());
+			model.setEmpCode(entity.getEmployeeEntity().getEmpCode());
+			model.setEmployeeId(entity.getEmployeeId());
+			model.setEmpName(entity.getEmployeeEntity().getFirstName()+" "+entity.getEmployeeEntity().getLastName());
+			model.setEmpTaskAllocationId(entity.getEmpTaskAllocationId());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setWorkDetailsId(entity.getWorkDetailsId());
+			model.setWorkName(entity.getWorkDetailsEntity().getWorkName());
+			model.setStatus(entity.getStatus());
+			model.setSubTaskId(entity.getSubTaskId());
+			model.setSubTaskName(entity.getSubTaskEntity().getSubTaskName());
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createEmployeeTaskAllocationModel: "+e.getMessage());
+		}
+		return model;
+	}
+
+
+	private EmployeeTaskAllocationEntity createEmployeeTaskAllocationEntity
+	(EmployeeTaskAllocationModel model){
+		EmployeeTaskAllocationEntity entity = null;
+		try{
+			entity = new EmployeeTaskAllocationEntity();
+			entity.setCreatedOn(utilService.stringToDate(model.getCreatedOn()));
+			//			entity.setDescription(model.getDescription());
+			entity.setEmployeeId(model.getEmployeeId());
+			entity.setEmpTaskAllocationId(model.getEmpTaskAllocationId());
+			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
+			entity.setWorkDetailsId(model.getWorkDetailsId());
+			entity.setStatus(model.getStatus());
+			entity.setSubTaskId(model.getSubTaskId());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createEmployeeTaskAllocationEntity: "+e.getMessage());
 		}
 		return entity;
 	}

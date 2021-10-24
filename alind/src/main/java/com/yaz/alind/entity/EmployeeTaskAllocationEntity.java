@@ -41,8 +41,8 @@ public class EmployeeTaskAllocationEntity {
 	@JoinColumn(name="employee_id",insertable = false, updatable = false)
 	private EmployeeEntity employeeEntity;
 	
-	@Column(name = "description")
-	private String description;
+//	@Column(name = "description")
+//	private String description;
 	
 	@Column(name = "status")
 	private int status;
@@ -87,13 +87,13 @@ public class EmployeeTaskAllocationEntity {
 		this.employeeEntity = employeeEntity;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
+//	public String getDescription() {
+//		return description;
+//	}
+//
+//	public void setDescription(String description) {
+//		this.description = description;
+//	}
 
 	public int getStatus() {
 		return status;

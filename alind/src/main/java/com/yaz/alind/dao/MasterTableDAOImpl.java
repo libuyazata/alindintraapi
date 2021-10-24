@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.yaz.alind.entity.DocumentNumberSeriesEntity;
+import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
 import com.yaz.alind.entity.WorkTypeEntity;
 
@@ -157,5 +159,79 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 		return entity;
 	}
 
+	@Override
+	public List<DocumentTypesEntity> getAllDocumentTypes(int status) {
+		List<DocumentTypesEntity> documentTypes = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+			cr.add(Restrictions.eq("status", status));
+			documentTypes = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllDocumentTypes: "+e.getMessage());
+		}
+
+		return documentTypes;
+	}
+
+
+	@Override
+	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
+		DocumentTypesEntity docTypes = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(documentTypes);
+			docTypes = documentTypes;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDocumentTypes: "+e.getMessage());
+		}
+		return docTypes;
+	}
+
+	@Override
+	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
+		DocumentTypesEntity docTypes = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(documentTypes);
+			docTypes = documentTypes;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDocumentTypes: "+e.getMessage());
+		}
+		return docTypes;
+	}
+
+	@Override
+	public boolean isDrawingSeriesExists(String drawingSeries){
+		boolean status = false;
+		try{
+
+			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+			cr.add(Restrictions.eq("drawingSeries", drawingSeries));
+			List list = cr.list();
+			if(list.size() > 0){
+				status = true;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("isDrawingSeriesExists: "+e.getMessage());
+		}
+		return status;
+	}
+
+
+	@Override
+	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
+		DocumentTypesEntity docTypes = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+			cr.add(Restrictions.eq("documentTypeId", documentTypeId));
+			docTypes = (DocumentTypesEntity) cr.list().get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById: "+e.getMessage());
+		}
+		return docTypes;
+	}
 	
 }

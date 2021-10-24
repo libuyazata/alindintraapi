@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yaz.alind.dao.UserDAO;
+import com.yaz.alind.entity.TokenEntity;
 import com.yaz.security.Iconstants;
 
 @Service
@@ -69,25 +70,25 @@ public class UtilServiceImpl implements UtilService{
 
 	@Override
 	public boolean evaluateToken(String token) {
-		boolean status = true;
-//		boolean status = false;
-//		try{
-//			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
-//			if(tokenModel != null){
-//				if(token.equals(tokenModel.getToken())){
-//					boolean timeStatus = evaluateSessionTime(tokenModel.getDateTime(), getCurrentDateTime());
-//					if(timeStatus){
-//						status = true;
-//						// Updating session time
-//						tokenModel.setDateTime(getCurrentDateTime());
-//						userDAO.saveOrUpdateToken(tokenModel);
-//					}
-//				}
-//			}
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("evaluateToken: "+e.getMessage());
-//		}
+//		boolean status = true;
+		boolean status = false;
+		try{
+			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
+			if(tokenModel != null){
+				if(token.equals(tokenModel.getToken())){
+					boolean timeStatus = evaluateSessionTime(tokenModel.getDateTime(), getCurrentDateTime());
+					if(timeStatus){
+						status = true;
+						// Updating session time
+						tokenModel.setDateTime(getCurrentDateTime());
+						userDAO.saveOrUpdateToken(tokenModel);
+					}
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("evaluateToken: "+e.getMessage());
+		}
 		return status;
 	}
 
@@ -381,7 +382,8 @@ public class UtilServiceImpl implements UtilService{
 	public String dateToString(Date date) {
 		String strDate =  null;
 		try {
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
+//			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
 			strDate = dateFormat.format(date);
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -407,6 +409,47 @@ public class UtilServiceImpl implements UtilService{
 			System.out.println("Exception, Util: "+e.getMessage());
 		} 
 		return fromattedDate;
+	}
+	
+	/**
+	 *  the file name for Excel / PDF download
+	 */
+	@Override
+	public String createDownLoadFileName(){
+		String fileName = null;
+		try{
+			//			String fileExtension = FilenameUtils.getExtension(existingName);
+			ZoneId zoneId = ZoneId.of("Asia/Kolkata");
+			LocalTime localTime=LocalTime.now(zoneId);
+			DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+			// convert to date
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(new Date());
+			Date date = cal.getTime();
+			String dateStr = dateFormat.format(date);
+			DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmss");
+			String formattedTime=localTime.format(formatter);
+			fileName = dateStr+formattedTime;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDownLoadFileName: "+e.getMessage());
+		}
+		return fileName;
+	}
+
+	@Override
+	public Timestamp stringDateToTimestamp(String dateStr) {
+		Timestamp timestamp = null;
+		try{
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+			Date parsedDate = dateFormat.parse(dateStr);
+		    timestamp = new java.sql.Timestamp(parsedDate.getTime());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("stringDateToTimestamp: "+e.getMessage());
+		}
+		return timestamp;
 	}
 
 

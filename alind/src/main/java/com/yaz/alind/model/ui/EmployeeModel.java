@@ -25,6 +25,10 @@ public class EmployeeModel {
 	private int isActive;
 
 	private String lastName;
+	
+	private String empFullName;
+	
+	private String empFullNameWithEmpCode;
 
 	private String primaryMobileNo;
 
@@ -369,7 +373,21 @@ public class EmployeeModel {
 	public void setToken(String token) {
 		this.token = token;
 	}
-	
-	
+
+	public String getEmpFullName() {
+		return empFullName;
+	}
+
+	public void setEmpFullName(String empFullName) {
+		this.empFullName = empFullName;
+	}
+
+	public String getEmpFullNameWithEmpCode() {
+		return empFullNameWithEmpCode;
+	}
+
+	public void setEmpFullNameWithEmpCode(String empFullNameWithEmpCode) {
+		this.empFullNameWithEmpCode = empFullNameWithEmpCode;
+	}
 
 }
