@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,9 +18,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.model.ui.DocumentTypesModel;
 import com.yaz.alind.model.ui.WorkStatusModel;
 import com.yaz.alind.model.ui.WorkTypeModel;
 import com.yaz.alind.service.MasterTableService;
+import com.yaz.alind.service.ProjectService;
 import com.yaz.alind.service.UtilService;
 
 
@@ -33,6 +37,8 @@ public class MasterTableController {
 	MasterTableService masterTableService;
 	@Autowired
 	UtilService utilService;
+	@Autowired
+	ProjectService projectService;
 
 	@RequestMapping(value="/masterTable/saveWorkStatus", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>> saveWorkStatus(@RequestHeader("token") String token,
@@ -248,7 +254,7 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/masterTable/deleteWorkType", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  deleteWorkType(@RequestHeader("token") String token,
 			@RequestParam int workTypeId) throws Exception{
@@ -303,5 +309,128 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+
+	@RequestMapping(value="/masterTable/updateDocumentTypes", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>>  saveDocumentTypes(@RequestHeader("token") String token
+			,@RequestBody DocumentTypesModel documentTypes ) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("saveOrUpdateDocumentTypes,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypesModel model= masterTableService.updateDocumentTypes(documentTypes);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("updateDocumentTypes, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/masterTable/getAllDocumentTypes/{status}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getAllDocumentTypes(@RequestHeader("token") String token,
+			@PathVariable("status") int status) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("getAllDocumentTypes,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<DocumentTypesModel> models= masterTableService.getAllDocumentTypes(status);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllDocumentTypes, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/masterTable/deleteDocumentTypes/{documentTypeId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  deleteDocumentTypes(@RequestHeader("token") String token,
+			@PathVariable("documentTypeId") int documentTypeId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("getAllWorkStatus,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				int status = masterTableService.deleteDocumentTypesById(documentTypeId);
+				if(status == 1){
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteDocumentTypes, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+
+	@RequestMapping(value="/masterTable/getDocumentTypeById/{documentTypeId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getDocumentTypeById(@RequestHeader("token") String token,
+			@PathVariable("documentTypeId") int documentTypeId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("getAllWorkStatus,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypesModel model = masterTableService.getDocumentTypeById(documentTypeId);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	
 
 }

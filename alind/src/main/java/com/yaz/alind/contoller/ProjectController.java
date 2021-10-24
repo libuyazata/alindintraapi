@@ -5,20 +5,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,8 +50,11 @@ import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
+import com.yaz.alind.model.ui.EmployeeModel;
+import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
+import com.yaz.alind.model.ui.WorkDocumentModel;
 import com.yaz.alind.service.ProjectService;
 import com.yaz.alind.service.UserService;
 import com.yaz.alind.service.UtilService;
@@ -94,78 +102,8 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
-	@RequestMapping(value="/project/saveOrUpdateDocumentTypes", method = RequestMethod.POST)
-	public ResponseEntity<Map<String,Object>>  saveOrUpdateDocumentTypes(@RequestHeader("token") String token
-			,@RequestBody DocumentTypesEntity documentTypes ) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			//			System.out.println("saveOrUpdateDocumentTypes,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				DocumentTypesEntity docTypes= projectService.saveOrUpdateDocumentTypes(documentTypes);
-				resultMap.put("documentTypes", docTypes);
-				resultMap.put("status", "success");
-			}else{
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
 
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("saveOrUpdateDocumentTypes, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-
-	@RequestMapping(value="/project/getAllDocumentTypes", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  getAllDocumentTypes(@RequestHeader("token") String token) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			//			System.out.println("getAllDocumentTypes,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				List<DocumentTypesEntity> docTypes= projectService.getAllDocumentTypes();
-				resultMap.put("documentTypes", docTypes);
-			}else{
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getAllDocumentTypes, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-
-	@RequestMapping(value="/project/getDocumentTypeById", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  getDocumentTypeById(@RequestHeader("token") String token
-			,@RequestParam String documentTypeId ) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			//			System.out.println("getDocumentTypeById,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				DocumentTypesEntity docTypes= projectService.getDocumentTypeById(Integer.parseInt(documentTypeId));
-				resultMap.put("documentTypes", docTypes);
-			}else{
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getDocumentTypeById, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-
+	
 	@RequestMapping(value="/project/getAllProject", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getAllProject(@RequestHeader("token") String token
 			,@RequestParam String departmentId,@RequestParam String projectId ) throws Exception{
@@ -604,6 +542,42 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value="/project/getWorkDocument/{workDocumentId}", method = RequestMethod.GET)
+	public ResponseEntity<ByteArrayResource>  getProjectDocumentsById(@RequestHeader("token") String token
+			,@PathVariable("workDocumentId") int workDocumentId,HttpServletResponse response ) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		InputStreamResource input =  null;
+		byte[] content = null;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("getWorkDocument,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				String contextPath = context.getRealPath(""); 
+				ByteArrayInputStream bis = projectService.getWorkDocument(workDocumentId, token, contextPath);
+				WorkDocumentModel model = projectService.getWorkDocumentById(workDocumentId, contextPath);
+				String newFileName = utilService.createDownLoadFileName();
+				content = IOUtils.toByteArray(bis); 
+				response.setContentType("application/pdf");
+				String fileName = model.getSubTaskName()+"_"+newFileName+".pdf";
+				response.setHeader("Content-disposition","attachment; filename="+newFileName+".pdf");
+				System.out.println("getWorkDocument,fileName: "+fileName);
+//				response.setHeader("Content-disposition","attachment; filename="+model.getSubTaskName()
+//						+"_"+newFileName+".pdf");
+				input = new InputStreamResource(bis);
+				resultMap.put("status", "success");
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getWorkDocument, "+e.getMessage());
+			return  new ResponseEntity<ByteArrayResource>(new ByteArrayResource(content),HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<ByteArrayResource>(new ByteArrayResource(content),HttpStatus.OK);
+	}
 
 	@RequestMapping(value="/project/saveWorkDetails", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>>  saveWorkDetails(@RequestHeader("token") String token
@@ -612,7 +586,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-//			System.out.println("saveWorkDetails,token: "+token);
+			//			System.out.println("saveWorkDetails,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				WorkDetailsModel model= projectService.saveWorkDetails(workDetailsModel);
@@ -636,7 +610,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/updateWorkDetails", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>>  updateWorkDetails(@RequestHeader("token") String token
 			,@RequestBody WorkDetailsModel workDetailsModel ) throws Exception{
@@ -644,7 +618,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-//			System.out.println("updateWorkDetails,token: "+token);
+			//			System.out.println("updateWorkDetails,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				WorkDetailsModel model= projectService.updateWorkDetails(workDetailsModel);
@@ -700,7 +674,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/getWorkDetailsBySearch", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsBySearch(@RequestHeader("token") String token
 			,@RequestParam String searchKeyWord,
@@ -732,7 +706,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/deleteWorkDetailsById", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  deleteWorkDetailsById(@RequestHeader("token") String token
 			,@RequestParam int workDetailsId) throws Exception{
@@ -740,7 +714,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-//			System.out.println("deleteWorkDetailsById,token: "+token);
+			//			System.out.println("deleteWorkDetailsById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				int value = projectService.deleteWorkDetailsById(workDetailsId);
@@ -763,7 +737,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/getWorkDetailsByDeptId", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsByDeptId(@RequestHeader("token") String token
 			,@RequestParam int departmentId, int status) throws Exception{
@@ -790,7 +764,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/saveSubTask", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>> saveSubTask(@RequestHeader("token") String token,
 			@RequestBody SubTaskModel subTaskModel) throws Exception {
@@ -817,7 +791,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/updateSubTask", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>> updateSubTask(@RequestHeader("token") String token,
 			@RequestBody SubTaskModel subTaskModel) throws Exception {
@@ -844,7 +818,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/getSubTaskById", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getSubTaskById(@RequestHeader("token") String token
 			,@RequestParam int subTaskId) throws Exception{
@@ -875,7 +849,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/getSubTaskByWorkId", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getSubTaskById(@RequestHeader("token") String token
 			,@RequestParam int workDetailsId, @RequestParam int status) throws Exception{
@@ -906,7 +880,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/project/deleteSubTask", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  deleteSubTask(@RequestHeader("token") String token
 			,@RequestParam int subTaskId) throws Exception{
@@ -932,6 +906,400 @@ public class ProjectController {
 			e.printStackTrace();
 			resultMap.put("status", "failed");
 			logger.error("deleteSubTask, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/project/saveWorkDocument",
+			method = RequestMethod.POST, consumes = { "multipart/form-data" })
+	public ResponseEntity<Map<String,Object>>  saveWorkDocument(@RequestHeader("token") String token,
+			@RequestParam(value = "file", required = false)MultipartFile file,
+			@RequestParam(value = "documentTypeId", required = false)int documentTypeId,
+			@RequestParam(value = "workDetailsId", required = false)int workDetailsId,
+			@RequestParam(value = "subTaskId", required = false) int subTaskId,
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "departmentId", required = false) int departmentId,
+			@RequestParam(value = "documentName", required = false) String documentName
+			)throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("uploadEmployeeDocuments,token: "+token+", projectDocumentId: "+projectDocumentId);
+			System.out.println("saveWorkDocument,token: "+token+", file size: "+file.getSize());
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				String contextPath = context.getRealPath(""); 
+				WorkDocumentModel workDocumentModel = projectService.saveWorkDocument(file,token,
+						documentTypeId,workDetailsId,subTaskId,description,departmentId,documentName, contextPath);
+				if(workDocumentModel != null){
+					resultMap.put("workDocumentModel", workDocumentModel);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveWorkDocument, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/getWorkDocumentBySubTaskId/{subTaskId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getWorkDocumentBySubTaskId(@RequestHeader("token") String token
+			,@PathVariable("subTaskId") int subTaskId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("getWorkDocumentBySubTaskId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				String contextPath = context.getRealPath("");
+				List<WorkDocumentModel> models= projectService.getWorkDocumentBySubTaskId(subTaskId,contextPath);
+				if(models != null){
+					resultMap.put("status", "success");
+					resultMap.put("models", models);
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getWorkDocumentBySubTaskId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/deleteWorkDocumentById/{workDocumentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  deleteWorkDocumentById(@RequestHeader("token") String token
+			,@PathVariable("workDocumentId") int workDocumentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("deleteWorkDocumentById,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				int value = projectService.deleteWorkDocumentModelById(workDocumentId);
+				if(value == 1){
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getWorkDocumentBySubTaskId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/verifyDocument/{workDocumentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  verifyDocument(@RequestHeader("token") String token
+			,@PathVariable("workDocumentId") int workDocumentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("verifyDocument,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				String contextPath = context.getRealPath(""); 
+				WorkDocumentModel model = projectService.verifyDocument(workDocumentId,contextPath);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("verifyDocument, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+
+	@RequestMapping(value="/project/approveDocument/{workDocumentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  approveDocument(@RequestHeader("token") String token
+			,@PathVariable("workDocumentId") int workDocumentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("approveDocument,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				String contextPath = context.getRealPath(""); 
+				WorkDocumentModel model = projectService.approveDocument(workDocumentId,contextPath);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("approveDocument, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/saveEmployeeTaskAllocation", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> saveEmployeeTaskAllocation(@RequestHeader("token") String token,
+			@RequestBody Object object) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("saveEmployeeTaskAllocation,token: "+token+",object: "+object);
+			LinkedHashMap<String, String> lhm = (LinkedHashMap<String, String>) object;
+
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<EmployeeTaskAllocationModel> models= projectService.saveEmployeeTaskAllocation(object);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("saveEmployeeTaskAllocation, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/updateEmployeeTaskAllocation", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> updateEmployeeTaskAllocation(@RequestHeader("token") String token,
+			@RequestBody EmployeeTaskAllocationModel empAllocationModel) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("saveEmployeeTaskAllocation,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				EmployeeTaskAllocationModel model= projectService.updateEmployeeTaskAllocation(empAllocationModel);
+				resultMap.put("model", model);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("updateEmployeeTaskAllocation, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/getEmployeeTaskAllocationById/{empTaskAllocationId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getEmployeeTaskAllocationById(@RequestHeader("token") String token
+			,@PathVariable("empTaskAllocationId") int empTaskAllocationId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("approveDocument,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				EmployeeTaskAllocationModel model = projectService.getEmployeeTaskAllocationById(empTaskAllocationId);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getEmployeeTaskAllocationById, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+
+	@RequestMapping(value="/project/getAllEmployeeTaskAllocationBySubTaskId/{subTaskId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getAllEmployeeTaskAllocationBySubTaskId(@RequestHeader("token") String token
+			,@PathVariable("subTaskId") int subTaskId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("approveDocument,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				List<EmployeeTaskAllocationModel> models = projectService.getAllEmployeeTaskAllocationBySubTaskId
+						(subTaskId);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getAllEmployeeTaskAllocationBySubTaskId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/getAllEmployeeTaskAllocationByWorkDetailsId/{workDetailsId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getAllEmployeeTaskAllocationByWorkDetailsId(@RequestHeader("token") String token
+			,@PathVariable("workDetailsId") int workDetailsId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("getAllEmployeeTaskAllocationByWorkDetailsId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				List<EmployeeTaskAllocationModel> models = projectService.getAllEmployeeTaskAllocationByWorkDetailsId
+						(workDetailsId);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getAllEmployeeTaskAllocationByWorkDetailsId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/getEmployeeListForTaskAllocationByDeptId/{departmentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getEmployeeListForTaskAllocationByDeptId(@RequestHeader("token") String token
+			,@PathVariable("departmentId") int departmentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("getAllEmployeeTaskAllocationByWorkDetailsId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+
+			if(tokenStatus){
+				List<EmployeeModel> models = projectService.getEmployeeListForTaskAllocationByDeptId
+						(departmentId);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getEmployeeListForTaskAllocationByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/deleteEmployeeFromSubTask/{empTaskAllocationId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  deleteEmployeeFromSubTask(@RequestHeader("token") String token
+			,@PathVariable("empTaskAllocationId") int empTaskAllocationId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("deleteEmployeeFromSubTask,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				int value = projectService.deleteEmployeeFromSubTask(empTaskAllocationId);
+				if(value == 1){
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("deleteEmployeeFromSubTask, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
