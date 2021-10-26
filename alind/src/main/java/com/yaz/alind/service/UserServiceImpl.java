@@ -365,7 +365,7 @@ public class UserServiceImpl implements UserService {
 			entity = new DeputationEntity();
 			System.out.println("UserService,CreatedOn: "+model.getCreatedOn());
 			entity.setCreatedOn(utilService.stringToDate(model.getCreatedOn()));
-			entity.setDepartmentId(model.getDepartmentId());
+			entity.setDeputedDepartmentId(model.getDeputedDepartmentId());
 			entity.setDeputationId(model.getDeputationId());
 			entity.setDescription(model.getDescription());
 			entity.setEmployeeId(model.getEmployeeId());
@@ -444,8 +444,8 @@ public class UserServiceImpl implements UserService {
 			//					+" "+entity.getAssignedByemployee().getLastName());
 			//			model.setAssignedEmployeeId(entity.getAssignedBy());
 			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
-			model.setDepartmentId(entity.getDepartmentId());
-			model.setDepartmentName(entity.getDeputedDepartment().getDepartmentName());
+			model.setDeputedDepartmentId(entity.getDeputedDepartmentId());
+			model.setDeputedDepartmentName(entity.getDeputedDepartment().getDepartmentName());
 			model.setDeputationId(entity.getDeputationId());
 			model.setDescription(entity.getDescription());
 			model.setEmpCode(entity.getEmployee().getEmpCode());

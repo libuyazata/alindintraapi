@@ -325,6 +325,7 @@ public class MasterTableController {
 					resultMap.put("model", model);
 					resultMap.put("status", "success");
 				}else{
+					resultMap.put("message", "Drawing series exists");
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 				}

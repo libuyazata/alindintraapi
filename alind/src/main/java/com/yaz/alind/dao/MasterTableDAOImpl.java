@@ -25,6 +25,7 @@ import com.yaz.alind.entity.WorkTypeEntity;
  */
 
 @Repository
+@Transactional
 public class MasterTableDAOImpl implements MasterTableDAO {
 
 	private static final Logger logger = LoggerFactory.getLogger(MasterTableDAOImpl.class);
@@ -46,14 +47,14 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 		}
 		return entity;
 	}
-	
+
 	@Override
 	@Transactional
 	public WorkStatusEntity updateWorkStatusEntity(
 			WorkStatusEntity workStatusEntity) {
 		WorkStatusEntity entity = null;
 		try{
-//			System.out.println("MasterTableDAOImpl,updateWorkStatusEntity,id: "+workStatusEntity.getTaskStatusId());
+			//			System.out.println("MasterTableDAOImpl,updateWorkStatusEntity,id: "+workStatusEntity.getTaskStatusId());
 			this.sessionFactory.getCurrentSession().update(workStatusEntity);
 			entity = workStatusEntity;
 		}catch(Exception e){
@@ -164,7 +165,9 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 		List<DocumentTypesEntity> documentTypes = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
-			cr.add(Restrictions.eq("status", status));
+			if(status == 1){
+				cr.add(Restrictions.eq("status", status));
+			}
 			documentTypes = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -233,5 +236,5 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 		}
 		return docTypes;
 	}
-	
+
 }

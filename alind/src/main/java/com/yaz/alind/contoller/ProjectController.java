@@ -45,7 +45,6 @@ import com.itextpdf.text.pdf.PdfGState;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.yaz.alind.entity.DocumentHistoryEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
@@ -1305,56 +1304,6 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
-
-	/**
-	@RequestMapping(value="/project/getAllAssingnedPjtByEmpId", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  getAllAssingnedPjtByEmpId(@RequestHeader("token") String token
-			,@RequestParam String employeeId ) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			System.out.println("getAllAssingnedPjtByEmpId,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				List<ProjectInfo> projectInfos= projectService.getAllProjctByEmpId(Integer.parseInt(employeeId));
-				resultMap.put("projectInfos", projectInfos);
-			}else{
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getAllAssingnedPjtByEmpId, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-
-	@RequestMapping(value="/project/getAllAssingnedDocumentsByEmpId", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  getAllAssingnedDocumentsByEmpId(@RequestHeader("token") String token
-			,@RequestParam String employeeId ) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			System.out.println("getAllAssingnedDocumentsByEmpId,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				List<DocumentUsers> documentUsers= projectService.getAllDocumentUserById(Integer.parseInt(employeeId));
-				resultMap.put("documentUsers", documentUsers);
-			}else{
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getAllAssingnedDocumentsByEmpId, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-	 **/
 
 
 }

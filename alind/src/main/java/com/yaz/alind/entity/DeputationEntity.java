@@ -28,7 +28,7 @@ public class DeputationEntity {
 	private EmployeeEntity employee;
 	
 	@Column(name = "department_id")
-	private int departmentId;
+	private int deputedDepartmentId;
 
 	@ManyToOne
 	@JoinColumn(name="department_id",insertable = false, updatable = false)
@@ -83,12 +83,12 @@ public class DeputationEntity {
 		this.employee = employee;
 	}
 
-	public int getDepartmentId() {
-		return departmentId;
+	public int getDeputedDepartmentId() {
+		return deputedDepartmentId;
 	}
 
-	public void setDepartmentId(int departmentId) {
-		this.departmentId = departmentId;
+	public void setDeputedDepartmentId(int deputedDepartmentId) {
+		this.deputedDepartmentId = deputedDepartmentId;
 	}
 
 	public DepartmentEntity getDeputedDepartment() {

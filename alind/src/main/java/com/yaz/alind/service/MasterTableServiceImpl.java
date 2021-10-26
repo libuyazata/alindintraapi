@@ -320,7 +320,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 
 		return entity;		
 	}
-	
+
 
 	@Override
 	public List<DocumentTypesModel> getAllDocumentTypes(int status) {
@@ -344,12 +344,15 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		DocumentTypesModel docTypes = null;
 		try{
 			Date date = utilService.getCurrentDate();
-			documentTypes.setCreatedOn(utilService.dateToString(date));
-			documentTypes.setUpdatedOn(utilService.dateToString(date));
-			documentTypes.setStatus(1);
-			DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
-			entity = masterTableDAO.saveDocumentTypes(entity);
-			docTypes = createDocumentTypesModel(entity);
+			boolean status = masterTableDAO.isDrawingSeriesExists(documentTypes.getDrawingSeries());
+			if(status){
+				documentTypes.setCreatedOn(utilService.dateToString(date));
+				documentTypes.setUpdatedOn(utilService.dateToString(date));
+				documentTypes.setStatus(1);
+				DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
+				entity = masterTableDAO.saveDocumentTypes(entity);
+				docTypes = createDocumentTypesModel(entity);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveDocumentTypes: "+e.getMessage());
@@ -374,7 +377,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		}
 		return docTypes;
 	}
-	
+
 	@Override
 	public DocumentTypesModel getDocumentTypeById(int documentTypeId) {
 		DocumentTypesModel docTypes = null;
@@ -414,6 +417,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 			model = new DocumentTypesModel();
 			model.setCreatedOn(utilService.dateToString(entity.getCreatedAt()));
 			model.setDocumentTypeId(entity.getDocumentTypeId());
+			model.setDrawingSeries(entity.getDrawingSeries());
 			model.setStatus(entity.getStatus());
 			model.setType(entity.getType());
 			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
@@ -423,23 +427,24 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		}
 		return model;
 	}
-	
+
 	private DocumentTypesEntity createDocumentTypesEntity(DocumentTypesModel model){
 		DocumentTypesEntity  entity = null;
 		try{
 			entity = new DocumentTypesEntity();
 			entity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedOn()));
-			entity.setDocumentTypeId(entity.getDocumentTypeId());
-			entity.setStatus(entity.getStatus());
-			entity.setType(entity.getType());
+			entity.setDocumentTypeId(model.getDocumentTypeId());
+			entity.setDrawingSeries(model.getDrawingSeries());
+			entity.setStatus(model.getStatus());
+			entity.setType(model.getType());
 			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
-			
+
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDocumentTypesModel: "+e.getMessage());
 		}
 		return entity;
-		
+
 	}
 
 
@@ -450,7 +455,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 
-	
+
 
 
 

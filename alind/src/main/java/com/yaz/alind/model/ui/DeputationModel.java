@@ -11,9 +11,9 @@ public class DeputationModel {
 	
 	private String empCode;
 
-	private int departmentId;
+	private int deputedDepartmentId;
 
-	private String departmentName;
+	private String deputedDepartmentName;
 
 	private String description;
 
@@ -59,20 +59,20 @@ public class DeputationModel {
 		this.empCode = empCode;
 	}
 
-	public int getDepartmentId() {
-		return departmentId;
+	public int getDeputedDepartmentId() {
+		return deputedDepartmentId;
 	}
 
-	public void setDepartmentId(int departmentId) {
-		this.departmentId = departmentId;
+	public void setDeputedDepartmentId(int deputedDepartmentId) {
+		this.deputedDepartmentId = deputedDepartmentId;
 	}
 
-	public String getDepartmentName() {
-		return departmentName;
+	public String getDeputedDepartmentName() {
+		return deputedDepartmentName;
 	}
 
-	public void setDepartmentName(String departmentName) {
-		this.departmentName = departmentName;
+	public void setDeputedDepartmentName(String deputedDepartmentName) {
+		this.deputedDepartmentName = deputedDepartmentName;
 	}
 
 	public String getDescription() {
