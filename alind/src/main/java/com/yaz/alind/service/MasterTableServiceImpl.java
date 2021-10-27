@@ -345,7 +345,8 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		try{
 			Date date = utilService.getCurrentDate();
 			boolean status = masterTableDAO.isDrawingSeriesExists(documentTypes.getDrawingSeries());
-			if(status){
+//			System.out.println("Master bussiness, saveDocumentTypes,status: "+status);
+			if(!status){
 				documentTypes.setCreatedOn(utilService.dateToString(date));
 				documentTypes.setUpdatedOn(utilService.dateToString(date));
 				documentTypes.setStatus(1);
@@ -432,13 +433,12 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		DocumentTypesEntity  entity = null;
 		try{
 			entity = new DocumentTypesEntity();
-			entity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedOn()));
+			entity.setCreatedAt(utilService.stringToDate(model.getCreatedOn()));
 			entity.setDocumentTypeId(model.getDocumentTypeId());
 			entity.setDrawingSeries(model.getDrawingSeries());
 			entity.setStatus(model.getStatus());
 			entity.setType(model.getType());
 			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
-
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDocumentTypesModel: "+e.getMessage());

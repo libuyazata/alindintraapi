@@ -321,7 +321,7 @@ public class UserDAOImpl implements UserDAO {
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DeputationEntity.class);
 			if(departmentId > 0){
-				cr.add(Restrictions.eq("departmentId",departmentId));
+				cr.add(Restrictions.eq("deputedDepartmentId",departmentId));
 			}
 			cr.add(Restrictions.eq("status", 1));
 			deputationEntities = cr.list();

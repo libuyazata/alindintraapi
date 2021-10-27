@@ -284,6 +284,9 @@ public class UserController {
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 
 		}catch(Exception e){
@@ -311,6 +314,9 @@ public class UserController {
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 
 		}catch(Exception e){
@@ -336,8 +342,10 @@ public class UserController {
 					resultMap.put("status", "success");
 				}else{
 					resultMap.put("status", "failed");
-
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
+			}else{
+				resultMap.put("status", "failed");
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 			}
 		}catch(Exception e){
@@ -365,9 +373,13 @@ public class UserController {
 					resultMap.put("status", "success");
 				}else{
 					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			resultMap.put("status", "failed");
@@ -395,6 +407,9 @@ public class UserController {
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -421,6 +436,9 @@ public class UserController {
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
 				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 		}catch(Exception e){
 			e.printStackTrace();

@@ -35,6 +35,7 @@ public interface UserService {
 	public DeputationModel saveDeputation(DeputationModel deputationModel);
 	public DeputationModel updateDeputation(DeputationModel deputationModel);
 	public List<DeputationModel> getDeputationListByDeptId(int departmentId);
+	public List<EmployeeModel> getDeputedEmployeeListByDeptId(int departmentId);
 	public int deleteDeputation(int deputationId);
 	public DeputationModel getDeputationById(int deputationId);
 }

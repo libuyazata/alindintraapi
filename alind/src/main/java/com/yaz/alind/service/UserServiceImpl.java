@@ -358,6 +358,24 @@ public class UserServiceImpl implements UserService {
 		}
 		return empModels;
 	}
+	
+	@Override
+	public List<EmployeeModel> getDeputedEmployeeListByDeptId(int departmentId) {
+		List<EmployeeModel> employeeModels = null;
+		try{
+			employeeModels = new ArrayList<EmployeeModel>();
+			List<DeputationEntity> deputationEntities = userDAO.getDeputationListByDeptId(departmentId);
+			for(int i=0;i<deputationEntities.size();i++){
+				EmployeeEntity emp = deputationEntities.get(i).getEmployee();
+				EmployeeModel empModel = createEmployeeModel(emp);
+				employeeModels.add(empModel);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDeputedEmployeeListByDeptId: "+e.getMessage());
+		}
+		return employeeModels;
+	}
 
 	private DeputationEntity createDeputationEntity(DeputationModel model){
 		DeputationEntity entity = null;
@@ -464,8 +482,6 @@ public class UserServiceImpl implements UserService {
 		return model;
 	}
 
-
-
-
+	
 
 }

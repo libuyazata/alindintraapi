@@ -311,7 +311,7 @@ public class MasterTableController {
 	}
 
 	@RequestMapping(value="/masterTable/updateDocumentTypes", method = RequestMethod.POST)
-	public ResponseEntity<Map<String,Object>>  saveDocumentTypes(@RequestHeader("token") String token
+	public ResponseEntity<Map<String,Object>>  updateDocumentTypes(@RequestHeader("token") String token
 			,@RequestBody DocumentTypesModel documentTypes ) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
@@ -325,11 +325,44 @@ public class MasterTableController {
 					resultMap.put("model", model);
 					resultMap.put("status", "success");
 				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("updateDocumentTypes, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/masterTable/saveDocumentTypes", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>>  saveDocumentTypes(@RequestHeader("token") String token
+			,@RequestBody DocumentTypesModel documentTypes ) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("MasterTableController,saveDocumentTypes,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypesModel model= masterTableService.saveDocumentTypes(documentTypes);
+				if(model != null){
+					resultMap.put("model", model);
+					resultMap.put("status", "success");
+				}else{
 					resultMap.put("message", "Drawing series exists");
 					resultMap.put("status", "failed");
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 				}
 			}else{
+				resultMap.put("status", "failed");
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 
@@ -361,6 +394,7 @@ public class MasterTableController {
 					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 				}
 			}else{
+				resultMap.put("status", "failed");
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
 
@@ -431,7 +465,5 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-
-	
 
 }

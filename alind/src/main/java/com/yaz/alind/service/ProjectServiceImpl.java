@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +36,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.yaz.alind.dao.MasterTableDAO;
 import com.yaz.alind.dao.ProjectDAO;
 import com.yaz.alind.dao.UserDAO;
+import com.yaz.alind.entity.DeputationEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentHistoryFactory;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
@@ -1403,7 +1405,18 @@ public class ProjectServiceImpl implements ProjectService {
 			int departmentId) {
 		List<EmployeeModel> empModels = null;
 		try{
-			empModels = userService.getAllEmployeesByDept(departmentId);
+			HashMap<Integer, EmployeeModel> empMap = new HashMap<Integer, EmployeeModel>();
+			List<EmployeeModel> employeeModelsTemp = new ArrayList<EmployeeModel>();
+			employeeModelsTemp = userService.getAllEmployeesByDept(departmentId);
+			//Getting details from Deputation table
+			List<EmployeeModel> deputedEmpList = userService.getDeputedEmployeeListByDeptId(departmentId);
+			for(EmployeeModel m: deputedEmpList){
+				employeeModelsTemp.add(m);
+			}
+			for(int i=0;i<employeeModelsTemp.size();i++){
+				empMap.put(employeeModelsTemp.get(i).getEmployeeId(), employeeModelsTemp.get(i));
+			}
+			empModels = new ArrayList<EmployeeModel>(empMap.values());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeListForTaskAllocationByDeptId: "+e.getMessage());

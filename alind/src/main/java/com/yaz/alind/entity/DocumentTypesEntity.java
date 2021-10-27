@@ -30,7 +30,7 @@ public class DocumentTypesEntity {
 	@Column(name = "drawing_series", nullable = false)
 	private String drawingSeries;
 	@Column(name="created_at")
-	private Timestamp createdAt;
+	private Date createdAt;
 	@Column(name="updated_on")
 	private Date updatedOn;
 	// active - 1 or inactive = -1
@@ -49,10 +49,10 @@ public class DocumentTypesEntity {
 	public void setType(String type) {
 		this.type = type;
 	}
-	public Timestamp getCreatedAt() {
+	public Date getCreatedAt() {
 		return createdAt;
 	}
-	public void setCreatedAt(Timestamp createdAt) {
+	public void setCreatedAt(Date createdAt) {
 		this.createdAt = createdAt;
 	}
 	public String getDrawingSeries() {
