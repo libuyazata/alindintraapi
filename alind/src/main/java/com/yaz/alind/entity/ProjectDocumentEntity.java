@@ -84,7 +84,7 @@ public class ProjectDocumentEntity {
 	
 	@ManyToOne
 	@JoinColumn(name="document_type_id",insertable = false, updatable = false)
-	private DocumentTypesEntity documentTypes;
+	private DocumentCategoryEntity documentTypes;
 	
 	
 	@Column(name = "document_name")
@@ -175,10 +175,10 @@ public class ProjectDocumentEntity {
 	public void setDepartmentId(int departmentId) {
 		this.departmentId = departmentId;
 	}
-	public DocumentTypesEntity getDocumentTypes() {
+	public DocumentCategoryEntity getDocumentTypes() {
 		return documentTypes;
 	}
-	public void setDocumentTypes(DocumentTypesEntity documentTypes) {
+	public void setDocumentTypes(DocumentCategoryEntity documentTypes) {
 		this.documentTypes = documentTypes;
 	}
 	public int getEmployeeId() {

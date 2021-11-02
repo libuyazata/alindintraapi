@@ -2,8 +2,11 @@ package com.yaz.alind.dao;
 
 import java.util.List;
 
+import springfox.documentation.spi.DocumentationType;
+
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
+import com.yaz.alind.entity.DocumentTypeEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
 import com.yaz.alind.entity.WorkTypeEntity;
 
@@ -19,9 +22,11 @@ public interface MasterTableDAO {
 	public List<WorkTypeEntity> getAllWorkTypeEntities(int status);
 	public WorkTypeEntity getWorkTypeEntityById(int workTypeId);
 	
-	public List<DocumentTypesEntity> getAllDocumentTypes(int status);
-	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes);
-	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes);
-	public DocumentTypesEntity getDocumentTypeById(int documentTypeId);
+	public List<DocumentCategoryEntity> getAllDocumentCategory(int status);
+	public DocumentCategoryEntity saveDocumentCategory(DocumentCategoryEntity documentCategory);
+	public DocumentCategoryEntity updateDocumentCategory(DocumentCategoryEntity documentCategory);
+	public DocumentCategoryEntity getDocumentCategoryById(int documentCategoryId);
 	public boolean isDrawingSeriesExists(String drawingSeries);
+	
+	public List<DocumentTypeEntity> getAllDocumentType(int status);
 }

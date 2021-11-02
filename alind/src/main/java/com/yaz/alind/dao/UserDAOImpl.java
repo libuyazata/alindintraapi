@@ -324,6 +324,7 @@ public class UserDAOImpl implements UserDAO {
 				cr.add(Restrictions.eq("deputedDepartmentId",departmentId));
 			}
 			cr.add(Restrictions.eq("status", 1));
+			cr.addOrder(Order.desc("createdOn"));
 			deputationEntities = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -362,7 +363,5 @@ public class UserDAOImpl implements UserDAO {
 		}
 		return depEntity;
 	}
-
-
 
 }

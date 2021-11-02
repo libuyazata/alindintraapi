@@ -9,7 +9,7 @@ import javax.servlet.ServletContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yaz.alind.entity.DocumentHistoryEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
@@ -76,6 +76,7 @@ public interface ProjectService {
     public WorkDocumentModel verifyDocument(int workDocumentId,String contextPath);
     public WorkDocumentModel approveDocument(int workDocumentId,String contextPath);
     public ByteArrayInputStream getWorkDocument(int workDocumentId,String token,String contextPath);
+    public int getWorkVerificationStatusById(int workDocumentId);
     
     public List<EmployeeTaskAllocationModel> saveEmployeeTaskAllocation(Object object);
     public EmployeeTaskAllocationModel updateEmployeeTaskAllocation(EmployeeTaskAllocationModel employeeTask);

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;

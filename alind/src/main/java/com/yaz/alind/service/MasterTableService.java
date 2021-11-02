@@ -2,7 +2,8 @@ package com.yaz.alind.service;
 
 import java.util.List;
 
-import com.yaz.alind.model.ui.DocumentTypesModel;
+import com.yaz.alind.model.ui.DocumentCategoryModel;
+import com.yaz.alind.model.ui.DocumentTypeModel;
 import com.yaz.alind.model.ui.WorkStatusModel;
 import com.yaz.alind.model.ui.WorkTypeModel;
 
@@ -20,11 +21,13 @@ public interface MasterTableService {
 	public WorkTypeModel getWorkTypeById(int workTypeId);
 	public int deleteWorkType(int workTypeId);
 	
-	public List<DocumentTypesModel> getAllDocumentTypes(int status);
-	public DocumentTypesModel saveDocumentTypes(DocumentTypesModel documentTypes);
-	public DocumentTypesModel updateDocumentTypes(DocumentTypesModel documentTypes);
-	public int deleteDocumentTypesById(int documentTypeId); 
-	public DocumentTypesModel getDocumentTypeById(int documentTypeId);
+	public List<DocumentCategoryModel> getAllDocumentCategory(int status);
+	public DocumentCategoryModel saveDocumentCategory(DocumentCategoryModel documentCategory);
+	public DocumentCategoryModel updateDocumentCategory(DocumentCategoryModel documentCategory);
+	public int deleteDocumentCategoryById(int documentTypeId); 
+	public DocumentCategoryModel getDocumentCategoryById(int documentTypeId);
 	public boolean isDrawingSeriesExists(String drawingSeries);
+	
+	public List<DocumentTypeModel> getAllDocumentType(int status);
 
 }

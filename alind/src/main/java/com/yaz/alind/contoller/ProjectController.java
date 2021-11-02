@@ -1081,6 +1081,36 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	
+	@RequestMapping(value="/project/getWorkVerificationStatus/{workDocumentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getWorkVerificationStatus(@RequestHeader("token") String token
+			,@PathVariable("workDocumentId") int workDocumentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				int verficationStatus  = projectService.getWorkVerificationStatusById(workDocumentId);
+				if(verficationStatus != -1){
+					resultMap.put("verficationStatus", verficationStatus);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getWorkVerificationStatus, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
 
 	@RequestMapping(value="/project/saveEmployeeTaskAllocation", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>> saveEmployeeTaskAllocation(@RequestHeader("token") String token,

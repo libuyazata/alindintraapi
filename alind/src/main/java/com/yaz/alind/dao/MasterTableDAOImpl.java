@@ -12,8 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import springfox.documentation.spi.DocumentationType;
+
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
-import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
+import com.yaz.alind.entity.DocumentTypeEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
 import com.yaz.alind.entity.WorkTypeEntity;
 
@@ -161,10 +164,10 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 	}
 
 	@Override
-	public List<DocumentTypesEntity> getAllDocumentTypes(int status) {
-		List<DocumentTypesEntity> documentTypes = null;
+	public List<DocumentCategoryEntity> getAllDocumentCategory(int status) {
+		List<DocumentCategoryEntity> documentTypes = null;
 		try{
-			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentCategoryEntity.class);
 			if(status == 1){
 				cr.add(Restrictions.eq("status", status));
 			}
@@ -179,37 +182,36 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 
 
 	@Override
-	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
-		DocumentTypesEntity docTypes = null;
+	public DocumentCategoryEntity saveDocumentCategory(DocumentCategoryEntity documentCategory) {
+		DocumentCategoryEntity docCategory = null;
 		try{
-			this.sessionFactory.getCurrentSession().save(documentTypes);
-			docTypes = documentTypes;
+			this.sessionFactory.getCurrentSession().save(documentCategory);
+			docCategory = documentCategory;
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("saveDocumentTypes: "+e.getMessage());
+			logger.error("saveDocumentCategory: "+e.getMessage());
 		}
-		return docTypes;
+		return docCategory;
 	}
 
 	@Override
-	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
-		DocumentTypesEntity docTypes = null;
+	public DocumentCategoryEntity updateDocumentCategory(DocumentCategoryEntity documentCategory) {
+		DocumentCategoryEntity docCategory = null;
 		try{
-			this.sessionFactory.getCurrentSession().update(documentTypes);
-			docTypes = documentTypes;
+			this.sessionFactory.getCurrentSession().update(documentCategory);
+			docCategory = documentCategory;
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("updateDocumentTypes: "+e.getMessage());
+			logger.error("updateDocumentCategory: "+e.getMessage());
 		}
-		return docTypes;
+		return docCategory;
 	}
 
 	@Override
 	public boolean isDrawingSeriesExists(String drawingSeries){
 		boolean status = false;
 		try{
-
-			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
+			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(DocumentCategoryEntity.class);
 			cr.add(Restrictions.eq("drawingSeries", drawingSeries));
 			List list = cr.list();
 			if(list.size() > 0){
@@ -224,17 +226,33 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 
 
 	@Override
-	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
-		DocumentTypesEntity docTypes = null;
+	public DocumentCategoryEntity getDocumentCategoryById(int documentCategoryId) {
+		DocumentCategoryEntity docTypes = null;
 		try{
-			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypesEntity.class);
-			cr.add(Restrictions.eq("documentTypeId", documentTypeId));
-			docTypes = (DocumentTypesEntity) cr.list().get(0);
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentCategoryEntity.class);
+			cr.add(Restrictions.eq("documentCategoryId", documentCategoryId));
+			docTypes = (DocumentCategoryEntity) cr.list().get(0);
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("getDocumentTypeById: "+e.getMessage());
+			logger.error("getDocumentCategoryById: "+e.getMessage());
 		}
 		return docTypes;
+	}
+
+	@Override
+	public List<DocumentTypeEntity> getAllDocumentType(int status) {
+		List<DocumentTypeEntity> documentationTypes = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypeEntity.class);
+			if(status >= 0){
+				cr.add(Restrictions.eq("status", status));
+			}
+			documentationTypes = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllDocumentType: "+e.getMessage());
+		}
+		return documentationTypes;
 	}
 
 }

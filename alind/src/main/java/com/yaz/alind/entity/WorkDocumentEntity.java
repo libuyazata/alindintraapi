@@ -4,7 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,12 +20,19 @@ public class WorkDocumentEntity {
 	private int workDocumentId;
 	
 	
+	@Column(name = "document_category_id")
+	private int documentCategoryId;
+	
+	@ManyToOne
+	@JoinColumn(name="document_category_id",insertable = false, updatable = false)
+	private DocumentCategoryEntity documentCategory;
+	
 	@Column(name = "document_type_id")
 	private int documentTypeId;
 	
 	@ManyToOne
 	@JoinColumn(name="document_type_id",insertable = false, updatable = false)
-	private DocumentTypesEntity documentTypes;
+	private DocumentTypeEntity documentTypeEntity;
 	
 	@Column(name = "work_details_id")
 	private int workDetailsId;
@@ -196,11 +202,11 @@ public class WorkDocumentEntity {
 	public void setApprovalStatus(int approvalStatus) {
 		this.approvalStatus = approvalStatus;
 	}
-	public DocumentTypesEntity getDocumentTypes() {
-		return documentTypes;
+	public DocumentCategoryEntity getdocumentCategory() {
+		return documentCategory;
 	}
-	public void setDocumentTypes(DocumentTypesEntity documentTypes) {
-		this.documentTypes = documentTypes;
+	public void setdocumentCategory(DocumentCategoryEntity documentCategory) {
+		this.documentCategory = documentCategory;
 	}
 	public WorkDetailsEntity getWorkDetails() {
 		return workDetails;
@@ -243,6 +249,18 @@ public class WorkDocumentEntity {
 	}
 	public void setEmplpoyee(EmployeeEntity emplpoyee) {
 		this.emplpoyee = emplpoyee;
+	}
+	public int getDocumentCategoryId() {
+		return documentCategoryId;
+	}
+	public void setDocumentCategoryId(int documentCategoryId) {
+		this.documentCategoryId = documentCategoryId;
+	}
+	public DocumentTypeEntity getDocumentTypeEntity() {
+		return documentTypeEntity;
+	}
+	public void setDocumentTypeEntity(DocumentTypeEntity documentTypeEntity) {
+		this.documentTypeEntity = documentTypeEntity;
 	}
 	
 }

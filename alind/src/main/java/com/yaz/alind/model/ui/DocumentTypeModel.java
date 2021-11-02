@@ -1,18 +1,16 @@
 package com.yaz.alind.model.ui;
 
 
-public class DocumentTypesModel {
-	
+public class DocumentTypeModel {
+
 	private int documentTypeId;
-	// description
+
 	private String type;
-	
-	private String drawingSeries;
-	
+
 	private String createdOn;
 
 	private String updatedOn;
-	
+
 	private int status;
 
 	public int getDocumentTypeId() {
@@ -29,14 +27,6 @@ public class DocumentTypesModel {
 
 	public void setType(String type) {
 		this.type = type;
-	}
-
-	public String getDrawingSeries() {
-		return drawingSeries;
-	}
-
-	public void setDrawingSeries(String drawingSeries) {
-		this.drawingSeries = drawingSeries;
 	}
 
 	public String getCreatedOn() {
@@ -63,6 +53,4 @@ public class DocumentTypesModel {
 		this.status = status;
 	}
 	
-	
-
 }

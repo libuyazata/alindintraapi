@@ -36,12 +36,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.yaz.alind.dao.MasterTableDAO;
 import com.yaz.alind.dao.ProjectDAO;
 import com.yaz.alind.dao.UserDAO;
-import com.yaz.alind.entity.DeputationEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentHistoryFactory;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesFactory;
-import com.yaz.alind.entity.DocumentTypesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
@@ -159,62 +158,62 @@ public class ProjectServiceImpl implements ProjectService {
 		return projectDAO.getProjectInfoById(projectId);
 	}
 
-//	@Override
-//	public List<DocumentTypesEntity> getAllDocumentTypes() {
-//		return projectDAO.getAllDocumentTypes();
-//	}
+	//	@Override
+	//	public List<DocumentTypesEntity> getAllDocumentTypes() {
+	//		return projectDAO.getAllDocumentTypes();
+	//	}
 
-//	@Override
-//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
-//		DocumentTypesEntity docTypes = null;
-//		try{
-//			Date today = utilService.getTodaysDate();
-//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
-//			docTypes = projectDAO.saveDocumentTypes(documentTypes);
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("saveDocumentTypes: "+e.getMessage());
-//		}
-//		return docTypes;
-//	}
+	//	@Override
+	//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes) {
+	//		DocumentTypesEntity docTypes = null;
+	//		try{
+	//			Date today = utilService.getTodaysDate();
+	//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
+	//			docTypes = projectDAO.saveDocumentTypes(documentTypes);
+	//		}catch(Exception e){
+	//			e.printStackTrace();
+	//			logger.error("saveDocumentTypes: "+e.getMessage());
+	//		}
+	//		return docTypes;
+	//	}
 
-//	@Override
-//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
-//		DocumentTypesEntity docTypes = null;
-//		try{
-//			//			Date today = utilService.getTodaysDate();
-//			//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
-//			docTypes = projectDAO.updateDocumentTypes(documentTypes);
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("updateDocumentTypes: "+e.getMessage());
-//		}
-//		return docTypes;
-//	}
+	//	@Override
+	//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes) {
+	//		DocumentTypesEntity docTypes = null;
+	//		try{
+	//			//			Date today = utilService.getTodaysDate();
+	//			//			documentTypes.setCreatedAt(utilService.dateToTimestamp(today));
+	//			docTypes = projectDAO.updateDocumentTypes(documentTypes);
+	//		}catch(Exception e){
+	//			e.printStackTrace();
+	//			logger.error("updateDocumentTypes: "+e.getMessage());
+	//		}
+	//		return docTypes;
+	//	}
 
-//	@Override
-//	public int deleteDocumentTypesById(int documentTypeId){
-//		int status = 0;
-//		try{
-//			DocumentTypesEntity docType = projectDAO.getDocumentTypeById(documentTypeId);
-//			docType.setUpdatedOn(utilService.getTodaysDate());
-//			docType.setStatus(-1);
-//			docType = projectDAO.updateDocumentTypes(docType);
-//			if(docType.getStatus() == -1){
-//				status = 1;
-//			}
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("deleteDocumentTypesById: "+e.getMessage());
-//		}
-//		return status;
-//	}
+	//	@Override
+	//	public int deleteDocumentTypesById(int documentTypeId){
+	//		int status = 0;
+	//		try{
+	//			DocumentTypesEntity docType = projectDAO.getDocumentTypeById(documentTypeId);
+	//			docType.setUpdatedOn(utilService.getTodaysDate());
+	//			docType.setStatus(-1);
+	//			docType = projectDAO.updateDocumentTypes(docType);
+	//			if(docType.getStatus() == -1){
+	//				status = 1;
+	//			}
+	//		}catch(Exception e){
+	//			e.printStackTrace();
+	//			logger.error("deleteDocumentTypesById: "+e.getMessage());
+	//		}
+	//		return status;
+	//	}
 
 
-//	@Override
-//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
-//		return projectDAO.getDocumentTypeById(documentTypeId);
-//	}
+	//	@Override
+	//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId) {
+	//		return projectDAO.getDocumentTypeById(documentTypeId);
+	//	}
 
 	@Override
 	public List<ProjectDocumentEntity> getAllDocumentByProjectId(int projectId,int documentTypeId,String realPath,String token) {
@@ -373,7 +372,7 @@ public class ProjectServiceImpl implements ProjectService {
 				// Whether is a new / project updation
 				if(projectDocumentId == 0){
 					System.out.println("Business,uploadProjectDocument,documentNumberSeries, : "+documentNumberSeries);
-					DocumentTypesEntity documentTypes = masterTableDAO.getDocumentTypeById(documentTypeId);
+					DocumentCategoryEntity documentTypes = masterTableDAO.getDocumentCategoryById(documentTypeId);
 					//Check , the existing document series is existing in the DB
 					if(documentNumberSeries == null){
 						DocumentNumberSeriesEntity docSeries = documentNumberSeriesFactory.createDocumentNumberSeries();
@@ -439,7 +438,7 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			WorkDocumentEntity entity = new WorkDocumentEntity();
 			EmployeeEntity employee = userService.getEmployeeByToken(token);
-			DocumentTypesEntity documentTypes = masterTableDAO.getDocumentTypeById(documentTypeId);
+			DocumentCategoryEntity documentTypes = masterTableDAO.getDocumentCategoryById(documentTypeId);
 			DocumentNumberSeriesEntity documentNumberSeries = projectDAO.getDocumentNumberSeriesByDocumentTypeId(documentTypeId);
 			String documentnumber = null;
 			// If the respective Number Series not in the DB
@@ -574,7 +573,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 			// Load existing PDF
 			//			PdfReader reader = new PdfReader("C:/Users/dell/Desktop/model_for database.pdf");
-//			String filePath="D:/alind.pdf";
+			//			String filePath="D:/alind.pdf";
 			String[] arrOfStr = contextPath.split(Iconstants.BUILD_NAME, 2); 
 			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + 
 					workDocument.getWorkDetailsId() +"/"+ workDocument.getSubTaskId();
@@ -1093,6 +1092,7 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setOriginalFileName(model.getOriginalFileName());
 			entity.setStatus(model.getStatus());
 			entity.setSubTaskId(model.getSubTaskId());
+			entity.setDocumentCategoryId(model.getDocumentCategoryId());
 			if(model.getUpdatedOn() != null){
 				entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
 			}
@@ -1123,11 +1123,13 @@ public class ProjectServiceImpl implements ProjectService {
 			model.setDepartmentId(entity.getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
 			model.setDescription(entity.getDescription());
-			model.setDocumentType(entity.getDocumentTypes().getType());
+			model.setDocumentType(entity.getDocumentTypeEntity().getType());
 			model.setDocumentTypeId(entity.getDocumentTypeId());
 			model.setDocumentName(entity.getDocumentName());
 			model.setDocumentnumber(entity.getDocumentnumber());
 			model.setFileName(entity.getFileName());
+			model.setDocumentCategoryType(entity.getdocumentCategory().getType());
+			model.setDocumentCategoryId(entity.getDocumentCategoryId());
 			// Setting file path / location
 			String[] arrOfStr = contextPath.split(Iconstants.BUILD_NAME, 2); 
 			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + 
@@ -1424,6 +1426,20 @@ public class ProjectServiceImpl implements ProjectService {
 		return empModels;
 	}
 
+	@Override
+	public int getWorkVerificationStatusById(int workDocumentId) {
+		int verificationStatus = -1; 
+		try{
+             WorkDocumentEntity docEntity = projectDAO.getWorkDocumentById(workDocumentId);
+             verificationStatus = docEntity.getVerificationStatus();
+		}catch(Exception e){
+			verificationStatus = -1;
+			e.printStackTrace();
+			logger.error("getWorkVerificationStatusById: "+e.getMessage());
+		}
+		return verificationStatus;
+	}
+
 	private EmployeeTaskAllocationModel createEmployeeTaskAllocationModel(EmployeeTaskAllocationEntity entity){
 		EmployeeTaskAllocationModel model = null;
 		try{
@@ -1468,6 +1484,8 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 		return entity;
 	}
+
+
 
 
 

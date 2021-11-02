@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yaz.alind.dao.MasterTableDAO;
-import com.yaz.alind.entity.DocumentTypesEntity;
+import com.yaz.alind.entity.DocumentCategoryEntity;
+import com.yaz.alind.entity.DocumentTypeEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
 import com.yaz.alind.entity.WorkTypeEntity;
 import com.yaz.alind.entity.factory.WorkTypeEntityFactory;
-import com.yaz.alind.model.ui.DocumentTypesModel;
+import com.yaz.alind.model.ui.DocumentCategoryModel;
+import com.yaz.alind.model.ui.DocumentTypeModel;
 import com.yaz.alind.model.ui.WorkStatusModel;
 import com.yaz.alind.model.ui.WorkTypeModel;
 
@@ -323,13 +325,13 @@ public  class MasterTableServiceImpl implements MasterTableService {
 
 
 	@Override
-	public List<DocumentTypesModel> getAllDocumentTypes(int status) {
-		List<DocumentTypesModel> models = null;
+	public List<DocumentCategoryModel> getAllDocumentCategory(int status) {
+		List<DocumentCategoryModel> models = null;
 		try{
-			models = new ArrayList<DocumentTypesModel>();
-			List<DocumentTypesEntity> entities = masterTableDAO.getAllDocumentTypes(status);
-			for(DocumentTypesEntity e: entities){
-				DocumentTypesModel m = createDocumentTypesModel(e);
+			models = new ArrayList<DocumentCategoryModel>();
+			List<DocumentCategoryEntity> entities = masterTableDAO.getAllDocumentCategory(status);
+			for(DocumentCategoryEntity e: entities){
+				DocumentCategoryModel m = createDocumentCategoryModel(e);
 				models.add(m);
 			}
 		}catch(Exception e){
@@ -340,8 +342,8 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 	@Override
-	public DocumentTypesModel saveDocumentTypes(DocumentTypesModel documentTypes) {
-		DocumentTypesModel docTypes = null;
+	public DocumentCategoryModel saveDocumentCategory(DocumentCategoryModel documentTypes) {
+		DocumentCategoryModel docTypes = null;
 		try{
 			Date date = utilService.getCurrentDate();
 			boolean status = masterTableDAO.isDrawingSeriesExists(documentTypes.getDrawingSeries());
@@ -350,9 +352,9 @@ public  class MasterTableServiceImpl implements MasterTableService {
 				documentTypes.setCreatedOn(utilService.dateToString(date));
 				documentTypes.setUpdatedOn(utilService.dateToString(date));
 				documentTypes.setStatus(1);
-				DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
-				entity = masterTableDAO.saveDocumentTypes(entity);
-				docTypes = createDocumentTypesModel(entity);
+				DocumentCategoryEntity entity = createDocumentCategoryEntity(documentTypes);
+				entity = masterTableDAO.saveDocumentCategory(entity);
+				docTypes = createDocumentCategoryModel(entity);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -362,16 +364,16 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 	@Override
-	public DocumentTypesModel updateDocumentTypes(DocumentTypesModel documentTypes) {
-		DocumentTypesModel docTypes = null;
+	public DocumentCategoryModel updateDocumentCategory(DocumentCategoryModel documentTypes) {
+		DocumentCategoryModel docTypes = null;
 		try{
 			Date date = utilService.getCurrentDate();
 			documentTypes.setCreatedOn(utilService.dateToString(date));
 			documentTypes.setUpdatedOn(utilService.dateToString(date));
 			documentTypes.setStatus(1);
-			DocumentTypesEntity entity = createDocumentTypesEntity(documentTypes);
-			entity = masterTableDAO.updateDocumentTypes(entity);
-			docTypes = createDocumentTypesModel(entity);
+			DocumentCategoryEntity entity = createDocumentCategoryEntity(documentTypes);
+			entity = masterTableDAO.updateDocumentCategory(entity);
+			docTypes = createDocumentCategoryModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("updateDocumentTypes: "+e.getMessage());
@@ -380,12 +382,12 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 	@Override
-	public DocumentTypesModel getDocumentTypeById(int documentTypeId) {
-		DocumentTypesModel docTypes = null;
+	public DocumentCategoryModel getDocumentCategoryById(int documentTypeId) {
+		DocumentCategoryModel docTypes = null;
 		try{
-			DocumentTypesEntity entity = masterTableDAO.getDocumentTypeById(documentTypeId);
-			entity = masterTableDAO.updateDocumentTypes(entity);
-			docTypes = createDocumentTypesModel(entity);
+			DocumentCategoryEntity entity = masterTableDAO.getDocumentCategoryById(documentTypeId);
+			entity = masterTableDAO.updateDocumentCategory(entity);
+			docTypes = createDocumentCategoryModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getDocumentTypeById: "+e.getMessage());
@@ -394,13 +396,13 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 	@Override
-	public int deleteDocumentTypesById(int documentTypeId){
+	public int deleteDocumentCategoryById(int documentTypeId){
 		int status = 0;
 		try{
-			DocumentTypesEntity docType = masterTableDAO.getDocumentTypeById(documentTypeId);
+			DocumentCategoryEntity docType = masterTableDAO.getDocumentCategoryById(documentTypeId);
 			docType.setUpdatedOn(utilService.getTodaysDate());
 			docType.setStatus(-1);
-			docType = masterTableDAO.updateDocumentTypes(docType);
+			docType = masterTableDAO.updateDocumentCategory(docType);
 			if(docType.getStatus() == -1){
 				status = 1;
 			}
@@ -412,27 +414,27 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 
-	private DocumentTypesModel createDocumentTypesModel(DocumentTypesEntity entity){
-		DocumentTypesModel model = null;
+	private DocumentCategoryModel createDocumentCategoryModel(DocumentCategoryEntity entity){
+		DocumentCategoryModel model = null;
 		try{
-			model = new DocumentTypesModel();
+			model = new DocumentCategoryModel();
 			model.setCreatedOn(utilService.dateToString(entity.getCreatedAt()));
-			model.setDocumentTypeId(entity.getDocumentTypeId());
+			model.setDocumentTypeId(entity.getDocumentCategoryId());
 			model.setDrawingSeries(entity.getDrawingSeries());
 			model.setStatus(entity.getStatus());
 			model.setType(entity.getType());
 			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("createDocumentTypesModel: "+e.getMessage());
+			logger.error("createDocumentCategoryModel: "+e.getMessage());
 		}
 		return model;
 	}
 
-	private DocumentTypesEntity createDocumentTypesEntity(DocumentTypesModel model){
-		DocumentTypesEntity  entity = null;
+	private DocumentCategoryEntity createDocumentCategoryEntity(DocumentCategoryModel model){
+		DocumentCategoryEntity  entity = null;
 		try{
-			entity = new DocumentTypesEntity();
+			entity = new DocumentCategoryEntity();
 			entity.setCreatedAt(utilService.stringToDate(model.getCreatedOn()));
 			entity.setDocumentTypeId(model.getDocumentTypeId());
 			entity.setDrawingSeries(model.getDrawingSeries());
@@ -441,7 +443,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("createDocumentTypesModel: "+e.getMessage());
+			logger.error("createDocumentCategoryEntity: "+e.getMessage());
 		}
 		return entity;
 
@@ -455,7 +457,56 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	}
 
 
+	@Override
+	public List<DocumentTypeModel> getAllDocumentType(int status) {
+		List<DocumentTypeModel> documentTypeModels = null;
+		try{
+			List<DocumentTypeEntity> entities = masterTableDAO.getAllDocumentType(status);
+			documentTypeModels = new ArrayList<DocumentTypeModel>();
+			for(DocumentTypeEntity e: entities){
+				DocumentTypeModel model = createDocumentTypeModel(e);
+				documentTypeModels.add(model);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDocumentTypeModel: "+e.getMessage());
+		}
+		return documentTypeModels;
+	}
 
+  
+	private DocumentTypeModel createDocumentTypeModel(DocumentTypeEntity entity){
+		DocumentTypeModel model = null;
+		try{
+			model = new DocumentTypeModel();
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setDocumentTypeId(entity.getDocumentTypeId());
+			model.setStatus(entity.getStatus());
+			model.setType(entity.getType());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDocumentTypeModel: "+e.getMessage());
+		}
+		return model;
+	}
+
+	private DocumentTypeEntity createDocumentTypeEntity(DocumentTypeModel model){
+		DocumentTypeEntity entity = null;
+		try{
+			entity = new DocumentTypeEntity();
+			entity.setCreatedOn(utilService.stringToDate(model.getCreatedOn()));
+			entity.setDocumentTypeId(model.getDocumentTypeId());
+			entity.setStatus(model.getStatus());
+			entity.setType(model.getType());
+			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDocumentTypeEntity: "+e.getMessage());
+		}
+		return entity;
+	}
 
 
 

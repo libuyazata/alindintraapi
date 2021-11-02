@@ -61,7 +61,7 @@
 				<value>com.yaz.alind.entity.DepartmentUsersEntity</value>
 				<value>com.yaz.alind.entity.ProjectDocumentEntity</value>
 				<value>com.yaz.alind.entity.DocumentHistoryEntity</value>
-				<value>com.yaz.alind.entity.DocumentTypesEntity</value>
+				<value>com.yaz.alind.entity.DocumentCategoryEntity</value>
 				<value>com.yaz.alind.entity.DocumentUsersEntity</value>
 				<value>com.yaz.alind.entity.TokenEntity</value>
 				<value>com.yaz.alind.entity.EmployeeTypesEntity</value>
@@ -78,6 +78,7 @@
 				<value>com.yaz.alind.entity.DeputationEntity</value>
 				<value>com.yaz.alind.entity.DeputationHistoryEntity</value> 
 				<value>com.yaz.alind.entity.EmployeeTaskAllocationEntity</value> 
+				<value>com.yaz.alind.entity.DocumentTypeEntity</value> 
 			</list>
 		</property>
 		<property name="hibernateProperties">

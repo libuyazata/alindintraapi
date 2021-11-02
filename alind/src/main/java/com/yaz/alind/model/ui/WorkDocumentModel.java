@@ -17,6 +17,10 @@ public class WorkDocumentModel {
 	private int subTaskId;
 	
 	private String subTaskName;
+	
+	private int documentCategoryId;
+	
+	private String documentCategoryType;
 
 	// Remarks
 	private String description;
@@ -279,5 +283,20 @@ public class WorkDocumentModel {
 	public void setCreatedEmpName(String createdEmpName) {
 		this.createdEmpName = createdEmpName;
 	}
-	
+
+	public int getDocumentCategoryId() {
+		return documentCategoryId;
+	}
+
+	public void setDocumentCategoryId(int documentCategoryId) {
+		this.documentCategoryId = documentCategoryId;
+	}
+
+	public String getDocumentCategoryType() {
+		return documentCategoryType;
+	}
+
+	public void setDocumentCategoryType(String documentCategoryType) {
+		this.documentCategoryType = documentCategoryType;
+	}
 }

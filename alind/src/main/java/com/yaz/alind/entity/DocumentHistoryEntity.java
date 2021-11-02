@@ -48,7 +48,7 @@ public class DocumentHistoryEntity {
 	}
 	@ManyToOne
 	@JoinColumn(name="document_type_id",insertable = false, updatable = false)
-	private DocumentTypesEntity documentType;
+	private DocumentCategoryEntity documentType;
 	
 	
 	@Column(name = "description")
@@ -105,10 +105,10 @@ public class DocumentHistoryEntity {
 	public void setFileSize(float fileSize) {
 		this.fileSize = fileSize;
 	}
-	public DocumentTypesEntity getDocumentType() {
+	public DocumentCategoryEntity getDocumentType() {
 		return documentType;
 	}
-	public void setDocumentType(DocumentTypesEntity documentType) {
+	public void setDocumentType(DocumentCategoryEntity documentType) {
 		this.documentType = documentType;
 	}
 	public DepartmentEntity getDepartment() {
