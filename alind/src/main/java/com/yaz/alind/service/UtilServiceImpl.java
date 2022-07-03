@@ -54,7 +54,7 @@ public class UtilServiceImpl implements UtilService{
 			if(dateDifference == 0){
 				long timeDifference = endDate.getTime() - startDate.getTime();
 				long diffMinutes = timeDifference / (60 * 1000);   
-				System.out.println("UtilserviceImpl, evaluateSessionTime, timeDifference: "+timeDifference+",diffMinutes: "+diffMinutes+", session time: "+Iconstants.SESSION_TIME);
+				//				System.out.println("UtilserviceImpl, evaluateSessionTime, timeDifference: "+timeDifference+",diffMinutes: "+diffMinutes+", session time: "+Iconstants.SESSION_TIME);
 				if(diffMinutes <= Iconstants.SESSION_TIME){
 					status = true;
 				}
@@ -70,7 +70,7 @@ public class UtilServiceImpl implements UtilService{
 
 	@Override
 	public boolean evaluateToken(String token) {
-//		boolean status = true;
+		//		boolean status = true;
 		boolean status = false;
 		try{
 			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
@@ -252,11 +252,11 @@ public class UtilServiceImpl implements UtilService{
 			String year = null;
 			String actualNo = null;
 			if(lastDocumentNo != null){
-//				year = lastDocumentNo.substring(0,3);
-//				actualNo = lastDocumentNo.substring(3,lastDocumentNo.length()).;
+				//				year = lastDocumentNo.substring(0,3);
+				//				actualNo = lastDocumentNo.substring(3,lastDocumentNo.length()).;
 				String[] strColl = lastDocumentNo.split(" ");
 				year = strColl[0];
-//				actualNo = strColl[1];
+				//				actualNo = strColl[1];
 				actualNo = strColl[1].substring(2,strColl[1].length());
 			}else{
 				year = currentYear.substring(0,2);
@@ -372,7 +372,7 @@ public class UtilServiceImpl implements UtilService{
 		}
 		return updateSeries;
 	}
-	
+
 	/**
 	 * 
 	 * @param date
@@ -382,7 +382,7 @@ public class UtilServiceImpl implements UtilService{
 	public String dateToString(Date date) {
 		String strDate =  null;
 		try {
-//			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
+			//			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");  
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
 			strDate = dateFormat.format(date);
 		}catch (Exception e) {
@@ -392,13 +392,13 @@ public class UtilServiceImpl implements UtilService{
 
 		return strDate;
 	}
-	
+
 	@Override
 	public Date getCurrentDate() {
 		Date currentDate = new Date();
 		return currentDate;
 	}
-	
+
 	@Override
 	public Date stringToDate(String date ) {
 		Date fromattedDate = null;
@@ -410,7 +410,7 @@ public class UtilServiceImpl implements UtilService{
 		} 
 		return fromattedDate;
 	}
-	
+
 	/**
 	 *  the file name for Excel / PDF download
 	 */
@@ -444,12 +444,52 @@ public class UtilServiceImpl implements UtilService{
 		try{
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 			Date parsedDate = dateFormat.parse(dateStr);
-		    timestamp = new java.sql.Timestamp(parsedDate.getTime());
+			timestamp = new java.sql.Timestamp(parsedDate.getTime());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("stringDateToTimestamp: "+e.getMessage());
 		}
 		return timestamp;
+	}
+
+	@Override
+	public Date getFirstDayOfYear(Date date) {
+		Date start = null;
+		try{
+//			int year=date.getYear(); 
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			int year = cal.get(Calendar.YEAR);
+//			Calendar calendar = Calendar.getInstance();
+//			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+			System.out.println("Utill, getFirstDayOfYear,year: "+year+", date: "+date);
+			cal.set(Calendar.YEAR, year);
+			cal.set(Calendar.DAY_OF_YEAR, 1);    
+			start = cal.getTime();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getFirstDayOfYear: "+e.getMessage());
+		}
+		return start;
+	}
+
+	@Override
+	public Date getLastDayOfYear(Date date) {
+		Date end = null;
+		try{
+//			int year=date.getYear(); 
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			int year = cal.get(Calendar.YEAR);
+			cal.set(Calendar.YEAR, year);
+			cal.set(Calendar.MONTH, 11); // 11 = december
+			cal.set(Calendar.DAY_OF_MONTH, 31); // new years eve 
+			end = cal.getTime();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getLastDayOfYear: "+e.getMessage());
+		}
+		return end;
 	}
 
 

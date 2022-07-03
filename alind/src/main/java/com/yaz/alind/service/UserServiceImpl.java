@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yaz.alind.dao.UserDAO;
+import com.yaz.alind.entity.AuthorizationEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DeputationEntity;
 import com.yaz.alind.entity.DeputationHistoryEntity;
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
 		try{
 			employee = userDAO.getAuthentication(userName, password);
 			tokenModel = userDAO.getTokenModelByUserId(employee.getEmployeeId());
-			//			System.out.println("UserServiceImpl,getAuthentication,getEmployeeId: "+employee.getEmployeeId()+", token: "+tokenModel.getToken());
+//			System.out.println("UserServiceImpl,getAuthentication,getEmployeeId: "+employee.getEmployeeId()+", token: "+tokenModel.getToken());
 			if(employee != null ){
 				if(tokenModel != null){
 					employee.setPassword(null);
@@ -178,6 +179,7 @@ public class UserServiceImpl implements UserService {
 		try{
 			department.setCreatedOn(utilService.getTodaysDate());
 			System.out.println("Business,getAllEmployees, created on: "+department.getCreatedOn());
+			department.setIsActive(1);
 			dept = userDAO.saveOrUpdateDepartment(department);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -358,7 +360,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return empModels;
 	}
-	
+
 	@Override
 	public List<EmployeeModel> getDeputedEmployeeListByDeptId(int departmentId) {
 		List<EmployeeModel> employeeModels = null;
@@ -416,7 +418,7 @@ public class UserServiceImpl implements UserService {
 			model.setFirstName(entity.getFirstName());
 			model.setEmpFullName(entity.getFirstName()+" "+entity.getLastName());
 			model.setEmpFullNameWithEmpCode(entity.getFirstName()+" "+entity.getLastName()+" - "+
-													entity.getEmpCode());
+					entity.getEmpCode());
 			model.setGender(entity.getGender());
 			model.setHealthCardNo(entity.getHealthCardNo());
 			if(entity.getHealthCardValidity() != null){
@@ -443,9 +445,9 @@ public class UserServiceImpl implements UserService {
 			if(entity.getUpdatedAt() != null){
 				model.setUpdatedAt(utilService.dateToString(entity.getUpdatedAt()));
 			}
-            model.setUploadId(entity.getUploadId());
-            model.setUserName(entity.getUserName());
-            model.setUserRoleId(entity.getUserRoleId());
+			model.setUploadId(entity.getUploadId());
+			model.setUserName(entity.getUserName());
+			model.setUserRoleId(entity.getUserRoleId());
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -482,6 +484,31 @@ public class UserServiceImpl implements UserService {
 		return model;
 	}
 
-	
+
+	@Override
+	public AuthorizationEntity getAuthorizationByUserRole(int userRoleId) {
+		AuthorizationEntity entity = null;
+		try{
+			entity = userDAO.getAuthorizationByUserRole(userRoleId);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAuthorizationByUserRole: "+e.getMessage());
+		}
+		return entity;
+	}
+
+	@Override
+	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity) {
+		AuthorizationEntity authorizationEntity = null;
+		try{
+			authorizationEntity = userDAO.updateAuthorization(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateAuthorization: "+e.getMessage());
+		}
+		return authorizationEntity;
+	}
+
+
 
 }

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -36,6 +37,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.yaz.alind.dao.MasterTableDAO;
 import com.yaz.alind.dao.ProjectDAO;
 import com.yaz.alind.dao.UserDAO;
+import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
+import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentHistoryFactory;
@@ -44,17 +47,22 @@ import com.yaz.alind.entity.DocumentNumberSeriesFactory;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
+import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectDocumentFactory;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
+import com.yaz.alind.entity.WorkIssuedDetailsEntity;
+import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
 import com.yaz.alind.model.ui.WorkDocumentModel;
+import com.yaz.alind.model.ui.WorkIssuedModel;
 import com.yaz.security.Iconstants;
 
 @Service
@@ -433,27 +441,34 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	public WorkDocumentModel saveWorkDocument(MultipartFile file,String token,int documentTypeId,
 			int workDetailsId,int subTaskId,String description,int departmentId,
-			String documentName,String contextPath) {
+			String documentName,int documentCategoryId,String contextPath) {
 		WorkDocumentModel documentModel = null;
 		try{
 			WorkDocumentEntity entity = new WorkDocumentEntity();
 			EmployeeEntity employee = userService.getEmployeeByToken(token);
 			DocumentCategoryEntity documentTypes = masterTableDAO.getDocumentCategoryById(documentTypeId);
+			// Getting the latest Work Document for taking the drawing series number.
+			WorkDocumentModel latestWorkDocumentModel = getLatestWorkDocument(subTaskId, documentCategoryId, contextPath);
 			DocumentNumberSeriesEntity documentNumberSeries = projectDAO.getDocumentNumberSeriesByDocumentTypeId(documentTypeId);
 			String documentnumber = null;
 			// If the respective Number Series not in the DB
-			if(documentNumberSeries == null){
+			//			if(documentNumberSeries == null){
+			if(latestWorkDocumentModel == null){
 				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
 						documentnumber);
 				documentNumberSeries = documentNumberSeriesFactory.createDocumentNumberSeries();
 				documentNumberSeries.setDocumentTypeId(documentTypeId);
+				documentNumberSeries.setLastDocumentNumber(documentnumber);
+				documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
 			}else{
-				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
-						documentNumberSeries.getLastDocumentNumber());
+				//				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
+				//						documentNumberSeries.getLastDocumentNumber());
+				String latestDocumentnumber = latestWorkDocumentModel.getDocumentnumber();
+				documentnumber = utilService.updatedDocumentNumber(latestDocumentnumber);
+
 			}
-			documentNumberSeries.setLastDocumentNumber(documentnumber);
-			//			System.out.println("Business,saveWorkDocument,documentNumberSeries, documentnumber: "+documentnumber);
-			documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
+			//			documentNumberSeries.setLastDocumentNumber(documentnumber);
+			//			documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
 
 			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + workDetailsId +"/"+ subTaskId;
 			System.out.println("Business,saveWorkDocument,fileLocation : "+fileLocation);
@@ -468,6 +483,7 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setDocumentName(documentName);
 			entity.setDocumentnumber(documentnumber);
 			entity.setDocumentTypeId(documentTypeId);
+			entity.setDocumentCategoryId(documentCategoryId);
 			entity.setEmployeeId(employee.getEmployeeId());
 			entity.setFileSize(file.getSize());
 			entity.setFileType(file.getContentType());
@@ -489,6 +505,24 @@ public class ProjectServiceImpl implements ProjectService {
 			logger.error("updateWorkDocument: "+e.getMessage());
 		}
 		return documentModel;
+	}
+
+	/**
+	 *  Getting the Latest Work Document, based on CategoryId & subTaskId
+	 */
+	@Override
+	public WorkDocumentModel getLatestWorkDocument(int subTaskId,int documentCategoryId,String contextPath){
+		WorkDocumentModel model = null;
+		try{
+			WorkDocumentEntity entity = projectDAO.getLatestWorkDocument(subTaskId, documentCategoryId);
+			if(entity != null){
+				model = createWorkDocumentModel(entity, contextPath);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getLatestWorkDocument: "+e.getMessage());
+		}
+		return model;
 	}
 
 
@@ -777,11 +811,37 @@ public class ProjectServiceImpl implements ProjectService {
 		return model;
 	}
 
+	/**
+	 *  This is only for UI purpose
+	 * @param workDetailsId
+	 * @return
+	 */
 	@Override
-	public List<WorkDetailsModel> getWorkDetailsByDeptId(int departmentId,int status) {
-		List<WorkDetailsModel> workDetailsModels = null;
+	public List<WorkDetailsModel> getWorkDetailsListById(int workDetailsId) {
+		List<WorkDetailsModel> list = null;
 		try{
-			List<WorkDetailsEntity> entities = projectDAO.getWorkDetailsEntitiesByDeptId(departmentId,status);
+			list = new ArrayList<WorkDetailsModel>();
+			WorkDetailsEntity entity = projectDAO.getWorkDetailsEntityById(workDetailsId);
+			WorkDetailsModel model = createWorkDetailsModel(entity);
+			list.add(model);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDetailsListById: "+e.getMessage());
+		}
+		return list;
+	}
+
+	@Override
+	public List<WorkDetailsModel> getWorkDetailsByDeptId(String token,int departmentId,int status) {
+		List<WorkDetailsModel> workDetailsModels = null;
+		List<WorkDetailsEntity> entities = null;
+		try{
+			EmployeeEntity employeeEntity = userService.getEmployeeByToken(token);
+			if(employeeEntity.getUserRoleId() == 1){
+				entities = projectDAO.getWorkDetailsEntitiesByDeptId(0,status);
+			}else{
+				entities = projectDAO.getWorkDetailsEntitiesByDeptId(employeeEntity.getDepartmentId(),status);
+			}
 			workDetailsModels = new ArrayList<WorkDetailsModel>();
 			if(entities.size() > 0){
 				for(WorkDetailsEntity e: entities){
@@ -815,13 +875,16 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	@Override
-	public List<WorkDetailsModel> getWorkDetailsBySearch(String searchKeyWord,
+	public List<WorkDetailsModel> getWorkDetailsBySearch(String token,String searchKeyWord,
 			int workTypeId, String startDate, String endDate) {
 		List<WorkDetailsModel> models = null;
 		Date stDate = null;
 		Date enDate = null;
+		List<WorkDetailsEntity> entities = null;
 		try{
 			models = new ArrayList<WorkDetailsModel>();
+			EmployeeEntity employeeEntity = userService.getEmployeeByToken(token);
+			String departmentName = employeeEntity.getDepartment().getDepartmentName();
 			//			System.out.println("Bussiness, getWorkDetailsBySearch,startDate: "+startDate.trim().length());
 			if( !startDate.trim().isEmpty() && startDate != null ){
 				stDate = utilService.stringToDate(startDate);
@@ -829,7 +892,14 @@ public class ProjectServiceImpl implements ProjectService {
 			if( !endDate.trim().isEmpty() && endDate != null ){
 				enDate = utilService.stringToDate(endDate);
 			}
-			List<WorkDetailsEntity> entities = projectDAO.getWorkDetailsBySearch(searchKeyWord, workTypeId, stDate, enDate);
+
+			if(employeeEntity.getUserRoleId() == 1){
+				entities = projectDAO.getWorkDetailsBySearch(searchKeyWord, workTypeId,null,
+						stDate, enDate);
+			}else{
+				entities = projectDAO.getWorkDetailsBySearch(searchKeyWord, workTypeId,departmentName,
+						stDate, enDate);
+			}
 			for(WorkDetailsEntity e: entities){
 				WorkDetailsModel m = createWorkDetailsModel(e);
 				models.add(m);
@@ -837,6 +907,28 @@ public class ProjectServiceImpl implements ProjectService {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getWorkDetailsBySearch: "+e.getMessage());
+		}
+		return models;
+	}
+
+	public List<WorkDetailsModel> getWorkDetailsByDate(String token,
+			String startDate, String endDate,int departmentId){
+		List<WorkDetailsModel> models = null;
+		List<WorkDetailsEntity> entities = null;
+		try{
+			models = new ArrayList<WorkDetailsModel>();
+			Date stDate = utilService.getFirstDayOfYear(utilService.getDateFromString(startDate));
+			Date enDate = utilService.getLastDayOfYear(utilService.getDateFromString(startDate));
+			//			System.out.println("Project business, getWorkDetailsByDate, stDate: "+utilService.dateToString(stDate)
+			//					+", enDate: "+utilService.dateToString(enDate));
+			entities = projectDAO.getWorkDetailsByDate(stDate, enDate, departmentId);
+			for(WorkDetailsEntity e: entities){
+				WorkDetailsModel m = createWorkDetailsModel(e);
+				models.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDetailsByDate: "+e.getMessage());
 		}
 		return models;
 	}
@@ -1430,8 +1522,8 @@ public class ProjectServiceImpl implements ProjectService {
 	public int getWorkVerificationStatusById(int workDocumentId) {
 		int verificationStatus = -1; 
 		try{
-             WorkDocumentEntity docEntity = projectDAO.getWorkDocumentById(workDocumentId);
-             verificationStatus = docEntity.getVerificationStatus();
+			WorkDocumentEntity docEntity = projectDAO.getWorkDocumentById(workDocumentId);
+			verificationStatus = docEntity.getVerificationStatus();
 		}catch(Exception e){
 			verificationStatus = -1;
 			e.printStackTrace();
@@ -1485,6 +1577,483 @@ public class ProjectServiceImpl implements ProjectService {
 		return entity;
 	}
 
+	/**
+	 * For sharing the work with another departments
+	 */
+	@Override
+	public WorkIssuedModel saveWorkIssuedDetails(
+			WorkIssuedModel workIssuedDetails,String token) {
+		WorkIssuedModel model = null;
+		try{
+			EmployeeEntity employee = userService.getEmployeeByToken(token);
+			String dateStr = utilService.dateToString(utilService.getCurrentDate());
+			workIssuedDetails.setCreatedEmpId(employee.getEmployeeId());
+			workIssuedDetails.setStatus(1);
+			workIssuedDetails.setCreatedOn(dateStr);
+			workIssuedDetails.setUpdatedOn(dateStr);
+			//			System.out.println("ProjectBusiness,saveWorkIssuedDetails,dateStr: "+dateStr);
+			WorkIssuedDetailsEntity entity = createWorkIssuedDetailsEntity(workIssuedDetails);
+			entity = projectDAO.saveWorkIssuedDetails(entity);
+			System.out.println("ProjectBusiness,saveWorkIssuedDetails,WorkIssuedId: "+entity.getWorkIssuedId());
+			model = createWorkIssuedModel(entity);
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveWorkIssuedDetails: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public WorkIssuedModel updateWorkIssuedDetails(
+			WorkIssuedModel workIssuedDetails) {
+		WorkIssuedModel model = null;
+		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDate());
+			workIssuedDetails.setStatus(1);
+			workIssuedDetails.setUpdatedOn(dateStr);
+			WorkIssuedDetailsEntity entity = createWorkIssuedDetailsEntity(workIssuedDetails);
+			entity = projectDAO.updateWorkIssuedDetails(entity);
+			model = createWorkIssuedModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveWorkIssuedDetails: "+e.getMessage());
+		}
+		return model;
+	}
+
+	@Override
+	public int  deleteWorkIssuedDetails(
+			int workIssuedId) {
+		int status = -1;
+		WorkIssuedModel model = null;
+		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDate());
+			WorkIssuedDetailsEntity entity = projectDAO.getWorkIssuedDetailsEntity(workIssuedId);
+			entity.setStatus(0);
+			entity.setUpdatedOn(utilService.getDateFromString(dateStr));
+			entity = projectDAO.updateWorkIssuedDetails(entity);
+			model = createWorkIssuedModel(entity);
+			status = model.getStatus();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteWorkIssuedDetails: "+e.getMessage());
+		}
+		return status;
+	}
+
+	@Override
+	public List<WorkIssuedModel> getWorkIssuedDetailsByDeptId(int departmentId) {
+		List<WorkIssuedModel> workIssuedModels = null;
+		try{
+			List<WorkIssuedDetailsEntity> entities = projectDAO.getWorkIssuedDetailsByDeptId(departmentId);
+			workIssuedModels = new ArrayList<WorkIssuedModel>();
+			for(WorkIssuedDetailsEntity e: entities){
+				WorkIssuedModel m = createWorkIssuedModel(e);
+				workIssuedModels.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkIssuedDetailsByDeptId: "+e.getMessage());
+		}
+		return workIssuedModels;
+	}
+
+
+	private WorkIssuedModel createWorkIssuedModel(WorkIssuedDetailsEntity entity){
+		WorkIssuedModel model = null;
+		try{
+			model = new WorkIssuedModel();
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setCreatedEmpCode(entity.getEmployeeEntity().getEmpCode());
+			model.setCreatedEmpId(entity.getEmployeeEntity().getEmployeeId());
+			model.setCreatedEmpName(entity.getEmployeeEntity().getFirstName()
+					+" "+entity.getEmployeeEntity().getLastName() );
+			model.setDepartmentId(entity.getDepartmentEntity().getDepartmentId());
+			model.setDepartmentName(entity.getDepartmentEntity().getDepartmentName());
+			model.setStatus(entity.getStatus());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setWorkDetailsId(entity.getWorkDetailsId());
+			model.setWorkIssuedId(entity.getWorkIssuedId());
+			model.setWorkName(entity.getWorkDetailsEntity().getWorkName());
+			model.setWorkStatusId(entity.getWorkDetailsEntity().getWorkStatusId());
+			model.setWorkStatusName(entity.getWorkDetailsEntity().getWorkStatusEntity().getTaskStatusName());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createWorkIssuedModel: "+e.getMessage());
+		}
+		return model;
+	}
+
+	private WorkIssuedDetailsEntity createWorkIssuedDetailsEntity(WorkIssuedModel model){
+		WorkIssuedDetailsEntity entity = null;
+		try{
+			entity =new WorkIssuedDetailsEntity();
+			entity.setCreatedEmpId(model.getCreatedEmpId());
+			entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+			entity.setIssuedDeptId(model.getDepartmentId());
+			entity.setStatus(model.getStatus());
+			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			entity.setWorkDetailsId(model.getWorkDetailsId());
+			entity.setWorkIssuedId(model.getWorkIssuedId());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createWorkIssuedDetailsEntity: "+e.getMessage());
+		}
+		return entity;
+	}
+
+
+	@Override
+	public InterOfficeCommunicationModel saveInterOfficeCommunication(
+			InterOfficeCommunicationModel model,String token) {
+		InterOfficeCommunicationModel commModel = null;
+		try{
+			EmployeeEntity employee = userService.getEmployeeByToken(token);
+			model.setEmployeeId(employee.getEmployeeId());
+			//			System.out.println("Business, saveWorkIssuedDetails,Dept Id: "
+			//			+model.getDepartmentId()+",Description: "+model.getDescription());
+			Date today = utilService.getTodaysDate();
+			model.setCreatedOn(utilService.dateToString(today));
+			model.setUpdatedOn(utilService.dateToString(today));
+			model.setIsActive(1);
+			List<DepartmentCommunicationMessagesModel> deptMesgList = new ArrayList<DepartmentCommunicationMessagesModel>();
+			//			System.out.println("Business, saveWorkIssuedDetails,deptMessageList size: "+deptMessageList.size());
+			//			for(DepartmentCommunicationMessagesModel dept: deptMessageList){
+			//				System.out.println("Business, saveWorkIssuedDetails,deptId: "+dept.getDepartmentId());
+			//			}
+			InterOfficeCommunicationEntity entity = createInterOfficeCommunicationEntity(model);
+			entity = projectDAO.saveInterOfficeCommunicationEntity(entity);
+			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
+
+			List<DepartmentCommunicationMessagesEntity> departCommEntities = 
+					saveDepartmentCommunicationMessagesEntity(model.getDeptCommList(),entity.getOfficeCommunicationId());
+
+			for(DepartmentCommunicationMessagesEntity dc: departCommEntities){
+				DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
+				deptMesgList.add(m);
+			}
+			commModel = createInterOfficeCommunicationModel(entity);
+			commModel.setDeptCommList(deptMesgList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveInterOfficeCommunication: "+e.getMessage());
+		}
+		return commModel;
+	}
+
+
+	private List<DepartmentCommunicationMessagesEntity> saveDepartmentCommunicationMessagesEntity
+	(List<DepartmentCommunicationMessagesModel> deptMessageList,int officeCommunicationId){
+		List<DepartmentCommunicationMessagesEntity> departCommEntities = null;
+		try{
+			departCommEntities = new ArrayList<DepartmentCommunicationMessagesEntity>();
+			if(officeCommunicationId > 0){
+				Date today = utilService.getTodaysDate();
+				//				model.setCreatedOn(utilService.dateToString(today));
+				//				model.setUpdatedOn(utilService.dateToString(today));
+				for(DepartmentCommunicationMessagesModel dc: deptMessageList){
+					dc.setOfficeCommunicationId(officeCommunicationId);
+					dc.setCreatedOn(utilService.dateToString(today));
+					dc.setUpdatedOn(utilService.dateToString(today));
+					DepartmentCommunicationMessagesEntity e = createDepartmentCommunicationMessagesEntity(dc);
+					departCommEntities.add(e);
+				}
+				departCommEntities = projectDAO.saveDepartmentCommunicationMessages(departCommEntities);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDepartmentCommunicationMessagesEntity: "+e.getMessage());
+		}
+		return departCommEntities;
+	}
+
+	@Override
+	public InterOfficeCommunicationModel updateInterOfficeCommunication(
+			InterOfficeCommunicationModel model,String token) {
+		InterOfficeCommunicationModel commModel = null;
+		try{
+			Date today = utilService.getTodaysDate();
+			//			System.out.println("updateInterOfficeCommunication, date :"+today);
+			model.setUpdatedOn(utilService.dateToString(today));
+			model.setIsActive(1);
+			InterOfficeCommunicationEntity entity = createInterOfficeCommunicationEntity(model);
+			entity = projectDAO.updateInterOfficeCommunicationEntity(entity);
+			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
+			commModel = createInterOfficeCommunicationModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateInterOfficeCommunication: "+e.getMessage());
+		}
+		return commModel;
+	}
+
+	@Override
+	public InterOfficeCommunicationModel getCommunicationById(
+			int officeCommunicationId) {
+		InterOfficeCommunicationModel commModel = null;
+		try{
+			InterOfficeCommunicationEntity entity = projectDAO.getCommunicationEntityById(officeCommunicationId);
+			List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+					(entity.getOfficeCommunicationId());
+			System.out.println("Bussiness, getCommunicationById, CommunicationId: "+entity.getOfficeCommunicationId());
+			commModel = createInterOfficeCommunicationModel(entity);
+			if(depMesgList != null){
+				List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
+				for(DepartmentCommunicationMessagesEntity e: depMesgList){
+					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(e);
+					mList.add(m);
+				}
+				commModel.setDeptCommList(mList);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationById: "+e.getMessage());
+		}
+		return commModel;
+	}
+
+	@Override
+	public InterOfficeCommunicationModel deleteCommunicationById(
+			int officeCommunicationId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(
+			int subTaskId) {
+		List<InterOfficeCommunicationModel> commList = null;
+		try{
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityBySubTaskId(subTaskId);
+			//        	System.out.println("Service,getCommunicationListBySubTaskId,entityList: "+entityList.size());
+			for(InterOfficeCommunicationEntity e: entityList){
+				InterOfficeCommunicationModel m = createInterOfficeCommunicationModel(e);
+				// Dept Message
+				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+						(e.getOfficeCommunicationId());
+				
+				if(depMesgList != null){
+					List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
+					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+						DepartmentCommunicationMessagesModel mod = createDepartmentCommunicationMessagesModel(deptMsg);
+						mList.add(mod);
+					}
+					m.setDeptCommList(mList);
+				}
+				commList.add(m);
+			}
+			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationListBySubTaskId: "+e.getMessage());
+		}
+		return commList;
+	}
+
+	@Override
+	public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(
+			int workDetailsId) {
+		List<InterOfficeCommunicationModel> commList = null;
+		try{
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityByWorkId(workDetailsId);
+			for(InterOfficeCommunicationEntity e: entityList){
+				InterOfficeCommunicationModel m = createInterOfficeCommunicationModel(e);
+				//commList.add(m);
+				// Dept Message
+				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+						(e.getOfficeCommunicationId());
+				
+				if(depMesgList != null){
+					List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
+					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+						DepartmentCommunicationMessagesModel mod = createDepartmentCommunicationMessagesModel(deptMsg);
+						mList.add(mod);
+					}
+					m.setDeptCommList(mList);
+				}
+				commList.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationListByWorkId: "+e.getMessage());
+		}
+		return commList;
+	}
+
+	@Override
+	public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId ){
+		List<InterOfficeCommunicationModel> commList = null;
+		try{
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			int status = 1;
+					List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityByDeptId(departmentId);
+			for(InterOfficeCommunicationEntity e: entityList){
+				InterOfficeCommunicationModel m = createInterOfficeCommunicationModel(e);
+				//commList.add(m);
+				// Dept Message
+				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+						(e.getOfficeCommunicationId());
+				
+				if(depMesgList != null){
+					List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
+					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+						DepartmentCommunicationMessagesModel mod = createDepartmentCommunicationMessagesModel(deptMsg);
+						mList.add(mod);
+					}
+					m.setDeptCommList(mList);
+				}
+				commList.add(m);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationListByDeptId: "+e.getMessage());
+		}
+		return commList;
+	}
+
+	private DepartmentCommunicationMessagesModel createDepartmentCommunicationMessagesModel
+	(DepartmentCommunicationMessagesEntity entity){
+		DepartmentCommunicationMessagesModel model = null;
+		try{
+			model = new DepartmentCommunicationMessagesModel();
+			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setDepartmentId(entity.getDepartmentId());
+			model.setDepartmentName(entity.getDepartment().getDepartmentName());
+			model.setDeptCommId(entity.getDeptCommId());
+			model.setOfficeCommunicationId(entity.getOfficeCommunicationId());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setViewStatus(entity.getViewStatus());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDepartmentCommunicationMessagesModel: "+e.getMessage());
+		}
+		return model;
+	}
+
+	private DepartmentCommunicationMessagesEntity createDepartmentCommunicationMessagesEntity
+	(DepartmentCommunicationMessagesModel model){
+		DepartmentCommunicationMessagesEntity entity = null;
+		try{
+			entity = new DepartmentCommunicationMessagesEntity();
+			entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+			entity.setDepartmentId(model.getDepartmentId());
+			entity.setOfficeCommunicationId(model.getOfficeCommunicationId());
+			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			entity.setViewStatus(model.getViewStatus());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createDepartmentCommunicationMessagesEntity: "+e.getMessage());
+		}
+		return entity;
+	}
+
+	private InterOfficeCommunicationModel createInterOfficeCommunicationModel
+	(InterOfficeCommunicationEntity entity){
+		InterOfficeCommunicationModel model = null;
+		try{
+			EmployeeEntity emp = userService.getEmployeeById(entity.getEmployeeId());
+			model = new InterOfficeCommunicationModel();
+			model.setAnnexureFormat(Iconstants.ANNEXURE_FORMAT);
+			if(entity.getCreatedOn() != null){
+				model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			}
+			//			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setDepartmentId(emp.getDepartmentId());
+			model.setDepartmentName(entity.getDepartment().getDepartmentName());
+			model.setDescription(entity.getDescription());
+			model.setEmpCode(emp.getEmpCode());
+			model.setEmployeeId(entity.getEmployeeId());
+			model.setEmployeeName(emp.getFirstName()+" "+emp.getLastName());
+			model.setOfficeCommunicationId(entity.getOfficeCommunicationId());
+			model.setReferenceNo(entity.getReferenceNo());
+			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setSubTaskId(entity.getSubTaskId());
+			model.setSubTaskName(entity.getSubTaskEntity().getSubTaskName());
+			model.setWorkDetailsId(entity.getWorkDetailsId());
+			model.setWorkName(entity.getWorkDetailsEntity().getWorkName());
+			model.setSubject(entity.getSubject());
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createInterOfficeCommunicationModel: "+e.getMessage());
+		}
+		return model;
+	}
+
+	private InterOfficeCommunicationEntity createInterOfficeCommunicationEntity
+	(InterOfficeCommunicationModel model){
+		InterOfficeCommunicationEntity entity = null;
+		try{
+			entity = new InterOfficeCommunicationEntity();
+			if(model.getCreatedOn() != null){
+				entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+			}
+			entity.setDepartmentId(model.getDepartmentId());
+			entity.setDescription(model.getDescription());
+			entity.setEmployeeId(model.getEmployeeId());
+			entity.setOfficeCommunicationId(model.getOfficeCommunicationId());
+			entity.setReferenceNo(model.getReferenceNo());
+			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			entity.setSubTaskId(model.getSubTaskId());
+			entity.setWorkDetailsId(model.getWorkDetailsId());
+			entity.setSubject(model.getSubject());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createInterOfficeCommunicationModel: "+e.getMessage());
+		}
+		return entity;
+	}
+
+	@Override
+	public List<DepartmentEntity> getDepartmentListByWorkId(int workDetailsId) {
+		List<DepartmentEntity> departmentList = null;
+		try{
+
+			List<WorkIssuedDetailsEntity> workEnity = projectDAO.getWorkIssuedDetailsByWorkId(workDetailsId);
+			Map<Integer ,DepartmentEntity > map = new HashMap<Integer ,DepartmentEntity >();
+			for(WorkIssuedDetailsEntity work: workEnity){
+				map.put(work.getIssuedDeptId(), work.getDepartmentEntity());
+			}
+			if(map.size() > 0){
+				departmentList = new ArrayList<>(map.values());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentListByWorkId: "+e.getMessage());
+		}
+
+		return departmentList;
+	}
+
+	/**
+	 *  Once the message is open by the Dept head, then view status change to 1
+	 */
+	@Override
+	public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(
+			int deptCommId, String token) {
+		DepartmentCommunicationMessagesModel model = null;
+		try{
+			DepartmentCommunicationMessagesEntity entity = projectDAO.getDepartmentCommunicationMessagesById(deptCommId);
+			EmployeeEntity emp = userService.getEmployeeByToken(token);
+			int roleId = emp.getEmpolyeeTypeId();
+//			System.out.println("");
+			// Admin, HOD or Co-ordinator 
+			if(roleId == 1 || roleId == 2 || roleId == 4){
+				entity.setViewStatus(1); //
+				entity.setUpdatedOn(utilService.getCurrentDateTime());
+				entity = projectDAO.updateDepartmentCommunicationMessage(entity);
+			}
+			model = createDepartmentCommunicationMessagesModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("viewUpdateDepartmentCommunicationMessage: "+e.getMessage());
+		}
+		return model;
+	}
 
 
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.yaz.alind.entity.AuthorizationEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DeputationEntity;
 import com.yaz.alind.entity.EmployeeEntity;
@@ -38,4 +39,7 @@ public interface UserService {
 	public List<EmployeeModel> getDeputedEmployeeListByDeptId(int departmentId);
 	public int deleteDeputation(int deputationId);
 	public DeputationModel getDeputationById(int deputationId);
+	
+	public AuthorizationEntity getAuthorizationByUserRole(int userRoleId);
+	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity);
 }

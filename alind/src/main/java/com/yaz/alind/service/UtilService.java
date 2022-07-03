@@ -14,6 +14,8 @@ public interface UtilService {
 	public boolean evaluateSessionTime(Date loggedDate,Date systemDate);
 	public boolean evaluateToken(String token);
 	public Date getTodaysDate();
+	public Date getFirstDayOfYear(Date date);
+	public Date getLastDayOfYear(Date date);
 	public Date getPreviousYearDate(Date todaysDate);
 	public Date getDateFromString(String dateStr);
 	public Timestamp dateToTimestamp(Date date);

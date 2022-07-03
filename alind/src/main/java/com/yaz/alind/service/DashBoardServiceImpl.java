@@ -14,6 +14,7 @@ import com.yaz.alind.dao.ProjectDAO;
 import com.yaz.alind.dao.UserDAO;
 import com.yaz.alind.entity.AdminDashBoardFactory;
 import com.yaz.alind.entity.AdminDashBoardModel;
+import com.yaz.alind.entity.AuthorizationEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
@@ -94,51 +95,32 @@ public class DashBoardServiceImpl implements DashBoardService {
 				projectMap.put("pjtStarted",pjtStarted);
 				projectMap.put("pjtStarted",pjtStarted);
 
-				List<ProjectDocumentEntity> projectDocuments = projectDAO.getAllDocumentByProjectId(-1,-1);
-				projectMap.put("totalPjtDoc",projectDocuments.size());
-				
+				//				List<ProjectDocumentEntity> projectDocuments = projectDAO.getAllDocumentByProjectId(-1,-1);
+				//				projectMap.put("totalPjtDoc",projectDocuments.size());
+
 				Map<String,Integer> workDetails = getWorkDetails(token);
 				adminDashBoardModel.setWorkDetails(workDetails);
 
-//				adminDashBoardModel.setProjectDetails(projectMap);
+				//				adminDashBoardModel.setProjectDetails(projectMap);
 				adminDashBoardModel.setDocAgaistDept(docAgainstDeptMap);
+				//Authorization 
+				AuthorizationEntity authEntity = userDAO.getAuthorizationByUserRole(1);
+				adminDashBoardModel.setAuthorizationEntity(authEntity);
 			}
-			// HOD
-			if(employee.getUserRoleId() == 2){
+			// HOD or Department coordinator
+			if(employee.getUserRoleId() == 2 || employee.getUserRoleId() == 4){
+//				System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
 				employees = userDAO.getAllEmployeesByDept(employee.getDepartmentId());
 				adminDashBoardModel.setNoOfEmpoyees(employees.size());
-				projectInfos = projectDAO.getAllProject(employee.getDepartmentId());
-				docAgainstDeptMap.put(employee.getDepartment().getDepartmentName(),
-						projectDAO.getAllPjtDocByDeptId(employee.getDepartmentId()).size());
 
-				//				for(int j=0;j<projectInfos.size();j++){
-				//					docAgainstDeptMap.put(projectInfos.get(j).getDepartment().getDepartmentName(),
-				//							projectDAO.getAllPjtDocByDeptId(projectInfos.get(j).getDepartmentId()).size());
-				//				}
+				Map<String,Integer> workDetails = getWorkDetails(token);
+				adminDashBoardModel.setWorkDetails(workDetails);
 
-				projectMap.put("totalProjects", projectInfos.size());
-
-				int pjtNotStarted = 0;
-				int pjtStarted = 0;
-				int pjtClosed = 0;
-				for(int i=0;i<projectInfos.size();i++){
-					if(projectInfos.get(i).getProjectStatusId() == 1){
-						pjtNotStarted = pjtNotStarted + 1;
-					}else if(projectInfos.get(i).getProjectStatusId() == 2){
-						pjtStarted = pjtStarted + 1;
-					}else if(projectInfos.get(i).getProjectStatusId() == 5){
-						pjtClosed = pjtClosed + 1;
-					}
-				}
-				projectMap.put("pjtNotStarted",pjtNotStarted);
-				projectMap.put("pjtStarted",pjtStarted);
-				projectMap.put("pjtStarted",pjtStarted);
-
-				List<ProjectDocumentEntity> projectDocuments = projectDAO.getAllDocumentByProjectId(-1,-1);
-				projectMap.put("totalPjtDoc",projectDocuments.size());
-
-//				adminDashBoardModel.setProjectDetails(projectMap);
+				//				adminDashBoardModel.setProjectDetails(projectMap);
 				adminDashBoardModel.setDocAgaistDept(docAgainstDeptMap);
+				//Authorization 
+				AuthorizationEntity authEntity = userDAO.getAuthorizationByUserRole(2);
+				adminDashBoardModel.setAuthorizationEntity(authEntity);
 			}
 			//			// Employee
 			//			if(employee.getUserRoleId() == 3){
@@ -173,23 +155,43 @@ public class DashBoardServiceImpl implements DashBoardService {
 				List<WorkDetailsEntity> workDetailsEntities = projectDAO.getWorkDetailsEntitiesByDeptId(0, 1);
 				List<SubTaskEntity> subTaskList = projectDAO.getSubTaskEntitiesByWorkId(0, 1);
 				List<WorkDocumentEntity> workDocs = projectDAO.getAllWorkDocumentByDepartMentId(0);
-				
+
 				List<Integer> pendingVerificationList = workDocs.stream().
 						filter(work -> work.getVerificationStatus() == 0)
 						.map(w -> w.getVerificationStatus())
 						.collect(Collectors.toList());
-				
+
 				List<Integer> pendingApprovalList = workDocs.stream().
 						filter(workApp -> workApp.getApprovalStatus() == 0)
 						.map(wApp -> wApp.getApprovalStatus())
 						.collect(Collectors.toList());
-				
+
 				workDetailsMap.put("noOfWork", workDetailsEntities.size());
 				workDetailsMap.put("noOfSubTasks", subTaskList.size());
 				workDetailsMap.put("pendingVerification", pendingVerificationList.size());
 				workDetailsMap.put("pendingApproval", pendingApprovalList.size());
 			}
-			
+			// HOD or Department coordinator
+			if(employee.getUserRoleId() == 2 || employee.getUserRoleId() == 4){
+				List<WorkDetailsEntity> workDetailsEntities = projectDAO.getWorkDetailsEntitiesByDeptId(employee.getDepartmentId(),1 );
+				List<SubTaskEntity> subTaskList = projectDAO.getSubTaskEntitiesByWorkId(employee.getDepartmentId(), 1);
+				List<WorkDocumentEntity> workDocs = projectDAO.getAllWorkDocumentByDepartMentId(employee.getDepartmentId());
+
+				List<Integer> pendingVerificationList = workDocs.stream().
+						filter(work -> work.getVerificationStatus() == 0)
+						.map(w -> w.getVerificationStatus())
+						.collect(Collectors.toList());
+
+				List<Integer> pendingApprovalList = workDocs.stream().
+						filter(workApp -> workApp.getApprovalStatus() == 0)
+						.map(wApp -> wApp.getApprovalStatus())
+						.collect(Collectors.toList());
+
+				workDetailsMap.put("noOfWork", workDetailsEntities.size());
+				workDetailsMap.put("noOfSubTasks", subTaskList.size());
+				workDetailsMap.put("pendingVerification", pendingVerificationList.size());
+				workDetailsMap.put("pendingApproval", pendingApprovalList.size());
+			}
 
 		}catch(Exception e){
 			e.printStackTrace();
