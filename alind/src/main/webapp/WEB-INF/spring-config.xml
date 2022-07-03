@@ -79,6 +79,11 @@
 				<value>com.yaz.alind.entity.DeputationHistoryEntity</value> 
 				<value>com.yaz.alind.entity.EmployeeTaskAllocationEntity</value> 
 				<value>com.yaz.alind.entity.DocumentTypeEntity</value> 
+				<!--  -->
+				<value>com.yaz.alind.entity.AuthorizationEntity</value> 
+				<value>com.yaz.alind.entity.WorkIssuedDetailsEntity</value> 
+				<value>com.yaz.alind.entity.InterOfficeCommunicationEntity</value> 
+				<value>com.yaz.alind.entity.DepartmentCommunicationMessagesEntity</value> 
 			</list>
 		</property>
 		<property name="hibernateProperties">
