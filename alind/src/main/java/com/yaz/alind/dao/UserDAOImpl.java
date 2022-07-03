@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.yaz.alind.entity.AuthorizationEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DeputationEntity;
 import com.yaz.alind.entity.DeputationHistoryEntity;
@@ -35,7 +36,7 @@ public class UserDAOImpl implements UserDAO {
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel) {
 		try{
 			TokenEntity tModel = getTokenModelByUserId(tokenModel.getUserId());
-			System.out.println("saveOrUpdateToken,tModel: "+tModel);
+//			System.out.println("DAO,saveOrUpdateToken,tModel: "+tModel);
 			if(tModel != null){
 				this.sessionFactory.getCurrentSession().merge(tokenModel);
 			}else{
@@ -93,7 +94,7 @@ public class UserDAOImpl implements UserDAO {
 			cr.add(Restrictions.eq("userName", userName));
 			cr.add(Restrictions.eq("password", password));
 			List<EmployeeEntity> list = cr.list();
-			System.out.println("DAO,getAuthentication, user size: "+list.size());
+//			System.out.println("DAO,getAuthentication, user size: "+list.size());
 			if(list.size() > 0){
 				employee = list.get(0);
 			}
@@ -362,6 +363,35 @@ public class UserDAOImpl implements UserDAO {
 			logger.error("saveDeputationHistory: "+e.getMessage());
 		}
 		return depEntity;
+	}
+
+
+	@Override
+	public AuthorizationEntity getAuthorizationByUserRole(int userRoleId) {
+		AuthorizationEntity entity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(AuthorizationEntity.class);
+			cr.add(Restrictions.eq("userRoleId",userRoleId));
+			entity = (AuthorizationEntity) cr.list().get(0);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAuthorizationByUserRole: "+e.getMessage());
+		}
+		return entity;
+	}
+
+
+	@Override
+	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity) {
+		AuthorizationEntity authorizationEntity = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(entity);
+			authorizationEntity = entity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateAuthorization: "+e.getMessage());
+		}
+		return authorizationEntity;
 	}
 
 }

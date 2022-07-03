@@ -2,6 +2,7 @@ package com.yaz.alind.dao;
 
 import java.util.List;
 
+import com.yaz.alind.entity.AuthorizationEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DeputationEntity;
 import com.yaz.alind.entity.DeputationHistoryEntity;
@@ -9,6 +10,7 @@ import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
+import com.yaz.security.AuthenticatedUser;
 
 public interface UserDAO {
 
@@ -34,5 +36,9 @@ public interface UserDAO {
 	public DeputationEntity getDeputationById(int deputationId);
 	
 	public DeputationHistoryEntity saveDeputationHistory(DeputationHistoryEntity deputationHistory);
+	
+	public AuthorizationEntity getAuthorizationByUserRole(int userRoleId);
+	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity);
+	
 	
 }
