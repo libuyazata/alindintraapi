@@ -18,6 +18,7 @@ public class AdminDashBoardModel {
 //	private Map<String,Integer> projectDetails;
 	private Map<String,Integer> workDetails;
 	private List<DocumentUsersEntity> documentUsers;
+	private AuthorizationEntity authorizationEntity;
 	
 	public int getNoOfDepartments() {
 		return noOfDepartments;
@@ -61,4 +62,11 @@ public class AdminDashBoardModel {
 	public void setWorkDetails(Map<String, Integer> workDetails) {
 		this.workDetails = workDetails;
 	}
+	public AuthorizationEntity getAuthorizationEntity() {
+		return authorizationEntity;
+	}
+	public void setAuthorizationEntity(AuthorizationEntity authorizationEntity) {
+		this.authorizationEntity = authorizationEntity;
+	}
+	
 }
