@@ -91,15 +91,15 @@ public class UserServiceImpl implements UserService {
 		return userDAO.getTokenModelByUserId(userId);
 	}
 	@Override
-	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee,MultipartFile profilePic,String contextPath) {
+	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee) {
 
 		EmployeeEntity emp = null;
 		try{
 			EmployeeEntity lastEmp = userDAO.getLastEmployeeDetails();
 			//			System.out.println("Business,saveOrUpdateEmployee,lastEmp, id: "+lastEmp.getEmployeeId());
 			Date today = utilService.getTodaysDate();
-			String originalFileName = profilePic.getOriginalFilename();
-			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
+//			String originalFileName = profilePic.getOriginalFilename();
+//			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
 			if(employee.getEmpCode() == null){
 				int lastEmpCode = Integer.parseInt(lastEmp.getEmpCode());
 				employee.setEmpCode(Integer.toString(lastEmpCode+1));
@@ -107,23 +107,48 @@ public class UserServiceImpl implements UserService {
 				employee.setPassword(Integer.toString(lastEmpCode+1));
 				employee.setCreatedAt(utilService.dateToTimestamp(today));
 			}
-			employee.setUpdatedAt(utilService.dateToTimestamp(today));
-			employee.setProfilePicPath(fileName);
-			employee.setOrginalProfilePicName(originalFileName);
+//			employee.setUpdatedAt(utilService.dateToTimestamp(today));
+//			employee.setProfilePicPath(fileName);
+//			employee.setOrginalProfilePicName(originalFileName);
 			emp = userDAO.saveOrUpdateEmployee(employee);
 
-			String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+emp.getEmployeeId();
-			int status = utilService.saveFile(profilePic, contextPath, fileLocation);
-			if(status < 0){
-				emp = null;
-			}
+			//String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+emp.getEmployeeId();
+			//int status = utilService.saveFile(profilePic, contextPath, fileLocation);
+//			if(status < 0){
+//				emp = null;
+//			}
 
 			emp.setPassword(null);
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("getAuthentication: "+e.getMessage());
+			logger.error("saveOrUpdateEmployee: "+e.getMessage());
 		}
 		return emp;
+	}
+	
+	@Override
+	public int uploadEmployeeProfilePic(MultipartFile profilePic, int employeeId,String contextPath) {
+		int status = -1;
+		try{
+			String originalFileName = profilePic.getOriginalFilename();
+			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
+			String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+employeeId;
+			System.out.println("Business,uploadEmployeeProfilePic, fileLocation: "+fileLocation+", fileName: "+fileName);
+			status = utilService.saveFile(profilePic, contextPath, fileLocation);
+			if(status > 0){
+				EmployeeEntity employee = userDAO.getEmployeeById(employeeId);
+				Date today = utilService.getTodaysDate();
+				employee.setUpdatedAt(utilService.dateToTimestamp(today));
+				employee.setProfilePicPath(fileName);
+				employee.setOrginalProfilePicName(originalFileName);
+				employee = userDAO.saveOrUpdateEmployee(employee);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("uploadEmployeeProfilePic: "+e.getMessage());
+		}
+		return status;
 	}
 
 	@Override
@@ -508,7 +533,6 @@ public class UserServiceImpl implements UserService {
 		}
 		return authorizationEntity;
 	}
-
 
 
 }

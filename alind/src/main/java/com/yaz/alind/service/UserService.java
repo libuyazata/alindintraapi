@@ -18,7 +18,7 @@ public interface UserService {
 
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel);
 	public TokenEntity getTokenModelByUserId(int userId);
-	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee,MultipartFile profilePic,String contextPath);
+	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee);
 	public EmployeeEntity getAuthentication(String userName,String password);
 	public int deleteEmployeeEntity(int employeeId);
 	public TokenEntity getTokenModelByToken(String token);
@@ -42,4 +42,6 @@ public interface UserService {
 	
 	public AuthorizationEntity getAuthorizationByUserRole(int userRoleId);
 	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity);
+	
+	public int uploadEmployeeProfilePic(MultipartFile profilePic,int employeeId,String contextPath);
 }

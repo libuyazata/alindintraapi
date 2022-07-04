@@ -173,7 +173,7 @@ public class UtilServiceImpl implements UtilService{
 				new File(path).mkdirs();
 			}
 			destination = path+"/"+ fileName;
-			//			System.out.println("Util Business,saveFile,destination: "+destination);
+			System.out.println("Util Business,saveFile,destination: "+destination);
 			File file = new File(destination);
 			mulFile.transferTo(file);
 			val = 1;
@@ -456,12 +456,12 @@ public class UtilServiceImpl implements UtilService{
 	public Date getFirstDayOfYear(Date date) {
 		Date start = null;
 		try{
-//			int year=date.getYear(); 
+			//			int year=date.getYear(); 
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(date);
 			int year = cal.get(Calendar.YEAR);
-//			Calendar calendar = Calendar.getInstance();
-//			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+			//			Calendar calendar = Calendar.getInstance();
+			//			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
 			System.out.println("Utill, getFirstDayOfYear,year: "+year+", date: "+date);
 			cal.set(Calendar.YEAR, year);
 			cal.set(Calendar.DAY_OF_YEAR, 1);    
@@ -477,7 +477,7 @@ public class UtilServiceImpl implements UtilService{
 	public Date getLastDayOfYear(Date date) {
 		Date end = null;
 		try{
-//			int year=date.getYear(); 
+			//			int year=date.getYear(); 
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(date);
 			int year = cal.get(Calendar.YEAR);
