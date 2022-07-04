@@ -3,6 +3,7 @@ package com.yaz.alind.entity;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +15,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
@@ -134,7 +137,7 @@ public class EmployeeEntity implements Serializable {
 	
 	@Transient
 	private String token;
-
+		
 	public String getToken() {
 		return token;
 	}
@@ -435,7 +438,5 @@ public class EmployeeEntity implements Serializable {
 	public void setOrginalProfilePicName(String orginalProfilePicName) {
 		this.orginalProfilePicName = orginalProfilePicName;
 	}
-	
-	
 
 }
