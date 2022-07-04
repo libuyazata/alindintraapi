@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,11 +78,15 @@ public class UserController {
 	}
 
 
-	@RequestMapping(value="/user/saveOrUpdateEmployee", method = RequestMethod.POST,
-			consumes = { "multipart/form-data" })
+//	@RequestMapping(value="/user/saveOrUpdateEmployee", method = RequestMethod.POST,
+//			consumes = { "multipart/form-data" })
+//	public ResponseEntity<Map<String,Object>>  saveOrUpdateEmployee(
+//			@RequestBody EmployeeEntity employee,
+//			@RequestParam(value = "profileImage", required = false)MultipartFile profilePic,
+//			@RequestHeader("token") String token) throws Exception{
+	@RequestMapping(value="/user/saveOrUpdateEmployee", method = RequestMethod.POST)			
 	public ResponseEntity<Map<String,Object>>  saveOrUpdateEmployee(
-			@RequestBody EmployeeEntity employee,
-			@RequestParam(value = "profileImage", required = false)MultipartFile profilePic,
+			@RequestBody EmployeeEntity employee,		
 			@RequestHeader("token") String token) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
@@ -90,8 +95,8 @@ public class UserController {
 			System.out.println("saveOrUpdateUser,token: "+token+", User ID: "+employee.getEmployeeId());
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				String contextPath = context.getRealPath(""); 
-				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee,profilePic,contextPath);
+//				String contextPath = context.getRealPath(""); 
+				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee);
 				resultMap.put("user", emp);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -107,29 +112,30 @@ public class UserController {
 	}
 
 
-	@RequestMapping(value="/user/saveAndUploadEmployeeTest", method = RequestMethod.POST,
-			consumes = { "application/json", "multipart/form-data" })
+	@RequestMapping(value="/user/uploadEmployeeProfilePic/{employeeId}", method = RequestMethod.POST,
+			consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}) //consumes = { "application/json", "multipart/form-data" }
 //	public ResponseEntity<Map<String,Object>>  saveAndUploadEmployeeTest(
 //			@RequestPart("profilePic") MultipartFile profilePic,
 //						@RequestHeader("token") String token) throws Exception{
 	
-	public ResponseEntity<Map<String,Object>>  saveAndUploadEmployeeTest(
+	public ResponseEntity<Map<String,Object>>  uploadEmployeeProfilePic(
 			@RequestParam("profilePic") MultipartFile profilePic,
-			@RequestParam ("employee") EmployeeEntity employee,
+			@PathVariable("employeeId") int employeeId,
 						@RequestHeader("token") String token) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			//System.out.println("saveOrUpdateUser,token: "+token+", User ID: "+employee.getEmployeeId());
+			System.out.println("saveOrUpdateUser,token: "+token+", User ID: "+employeeId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				String contextPath = context.getRealPath(""); 
 				String fileExtension = FilenameUtils.getExtension(profilePic.getOriginalFilename());
 				System.out.println("saveAndUploadEmployeeTest,token: "+fileExtension);
+				int status = userService.uploadEmployeeProfilePic(profilePic, employeeId, contextPath);
 				//				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee,profilePic,contextPath);
 				//				resultMap.put("user", emp);
-				resultMap.put("user", null);
+				resultMap.put("status", status);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}
@@ -137,7 +143,7 @@ public class UserController {
 		}catch(Exception e){
 			e.printStackTrace();
 			resultMap.put("status", "failed");
-			logger.error("saveAndUploadEmployeeTest, "+e.getMessage());
+			logger.error("uploadEmployeeProfilePic, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
