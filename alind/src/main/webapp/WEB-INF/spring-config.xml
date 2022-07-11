@@ -84,6 +84,7 @@
 				<value>com.yaz.alind.entity.WorkIssuedDetailsEntity</value> 
 				<value>com.yaz.alind.entity.InterOfficeCommunicationEntity</value> 
 				<value>com.yaz.alind.entity.DepartmentCommunicationMessagesEntity</value> 
+				<value>com.yaz.alind.entity.InterCommRefNoEntity</value> 
 			</list>
 		</property>
 		<property name="hibernateProperties">
