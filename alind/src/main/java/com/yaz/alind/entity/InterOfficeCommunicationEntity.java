@@ -26,9 +26,8 @@ public class InterOfficeCommunicationEntity {
 	@ManyToOne
 	@JoinColumn(name="employee_id",insertable = false, updatable = false)
 	private EmployeeTypesEntity employeeTypes;
-
 	
-	@Column(name = "department_id")
+	@Column(name = "department_id", nullable = false )
 	private int departmentId;
 
 	//bi-directional many-to-one association to Department
@@ -36,14 +35,14 @@ public class InterOfficeCommunicationEntity {
 	@JoinColumn(name="department_id",insertable = false, updatable = false)
 	private DepartmentEntity department;
 
-	@Column(name = "work_details_id")
+	@Column(name = "work_details_id", nullable = false)
 	private int workDetailsId;
 	
 	@ManyToOne
 	@JoinColumn(name="work_details_id",insertable = false, updatable = false)
 	private WorkDetailsEntity workDetailsEntity;
 
-	@Column(name = "sub_task_id")
+	@Column(name = "sub_task_id", nullable = false)
 	private int subTaskId;
 	
 	@ManyToOne
@@ -53,7 +52,7 @@ public class InterOfficeCommunicationEntity {
 	@Column(name = "subject")
 	private String subject;
 
-	@Column(name = "reference_no")
+	@Column(name = "reference_no", nullable = false)
 	private String referenceNo;
 
 	@Column(name = "description")

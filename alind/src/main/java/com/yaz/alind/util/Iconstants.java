@@ -1,4 +1,4 @@
-package com.yaz.security;
+package com.yaz.alind.util;
 
 public interface Iconstants {
 

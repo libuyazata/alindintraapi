@@ -31,7 +31,7 @@ public class DepartmentCommunicationMessagesEntity {
 	private int officeCommunicationId;
 
 	//To
-	@Column(name = "department_id")
+	@Column(name = "department_id", nullable = false)
 	private int departmentId;
 
 	//bi-directional many-to-one association to Department
