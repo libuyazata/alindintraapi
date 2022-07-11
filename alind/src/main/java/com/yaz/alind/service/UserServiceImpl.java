@@ -21,7 +21,7 @@ import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
 import com.yaz.alind.model.ui.DeputationModel;
 import com.yaz.alind.model.ui.EmployeeModel;
-import com.yaz.security.Iconstants;
+import com.yaz.alind.util.Iconstants;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,7 +36,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel) {
 		try{
-
 			String uuid = utilService.createToken();
 			tokenModel.setToken(uuid);
 		}catch(Exception e){
@@ -92,14 +91,12 @@ public class UserServiceImpl implements UserService {
 	}
 	@Override
 	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee) {
-
+       // EmployeeModel empModel = null;
 		EmployeeEntity emp = null;
 		try{
 			EmployeeEntity lastEmp = userDAO.getLastEmployeeDetails();
 			//			System.out.println("Business,saveOrUpdateEmployee,lastEmp, id: "+lastEmp.getEmployeeId());
 			Date today = utilService.getTodaysDate();
-//			String originalFileName = profilePic.getOriginalFilename();
-//			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
 			if(employee.getEmpCode() == null){
 				int lastEmpCode = Integer.parseInt(lastEmp.getEmpCode());
 				employee.setEmpCode(Integer.toString(lastEmpCode+1));
@@ -107,18 +104,9 @@ public class UserServiceImpl implements UserService {
 				employee.setPassword(Integer.toString(lastEmpCode+1));
 				employee.setCreatedAt(utilService.dateToTimestamp(today));
 			}
-//			employee.setUpdatedAt(utilService.dateToTimestamp(today));
-//			employee.setProfilePicPath(fileName);
-//			employee.setOrginalProfilePicName(originalFileName);
 			emp = userDAO.saveOrUpdateEmployee(employee);
-
-			//String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+emp.getEmployeeId();
-			//int status = utilService.saveFile(profilePic, contextPath, fileLocation);
-//			if(status < 0){
-//				emp = null;
-//			}
-
 			emp.setPassword(null);
+			//empModel = createEmployeeModel(emp);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveOrUpdateEmployee: "+e.getMessage());
@@ -168,10 +156,17 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<EmployeeEntity> getAllEmployees(String token) {
+		//List<EmployeeModel> empModelList = null;
 		List<EmployeeEntity> employees = null;
 		try{
-
+			//empModelList = new ArrayList<EmployeeModel>();
 			employees = userDAO.getAllEmployees();
+			/**
+			for(EmployeeEntity e: employees){
+				EmployeeModel m = createEmployeeModel(e);
+				empModelList.add(m);
+			}*/
+			
 			/**
 			EmployeeEntity employee = getEmployeeByToken(token);
 			// Admin
@@ -220,10 +215,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public EmployeeEntity getEmployeeById(int employeeId) {
+//		EmployeeModel empModel = null;
 		EmployeeEntity employee = null;
 		try{
 			employee = userDAO.getEmployeeById(employeeId);
-			//			employee.setPassword(null);
+//			empModel = createEmployeeModel(employee);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeById: "+e.getMessage());
@@ -233,10 +229,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public EmployeeEntity getEmployeeByToken(String token) {
+		//EmployeeModel empModel = null;
 		EmployeeEntity employee = null;
 		try{
 			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
 			employee = userDAO.getEmployeeById(tokenModel.getUserId());
+			//empModel = createEmployeeModel(employee);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeByToken: "+e.getMessage());
@@ -426,6 +424,61 @@ public class UserServiceImpl implements UserService {
 		return entity;
 	}
 
+	private EmployeeEntity createEmployeeEntity(EmployeeModel model){
+		EmployeeEntity enity = null;
+		try{
+			enity = new EmployeeEntity();
+			enity.setAccommodationLocation(model.getAccommodationLocation());
+			enity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedAt()));
+			enity.setDepartmentId(model.getDepartmentId());
+			//enity.setDepartmentName(entity.getDepartment().getDepartmentName());
+			enity.setEmailId(model.getEmailId());
+			enity.setEmergencyContactName(model.getEmergencyContactName());
+			enity.setEmergencyContactPhone(model.getEmergencyContactPhone());
+			enity.setEmpCode(model.getEmpCode());
+			enity.setEmployeeId(model.getEmployeeId());
+			//enity.setEmployeeTypeName(entity.getEmployeeTypes().getEmployeeTypeName());
+			enity.setFirstName(model.getFirstName());
+			//enity.setEmpFullName(entity.getFirstName()+" "+entity.getLastName());
+//			enity.setEmpFullNameWithEmpCode(entity.getFirstName()+" "+entity.getLastName()+" - "+
+//					entity.getEmpCode());
+			enity.setGender(model.getGender());
+			enity.setHealthCardNo(model.getHealthCardNo());
+//			if(enity.getHealthCardValidity() != null){
+				enity.setHealthCardValidity(utilService.stringDateToTimestamp(model.getHealthCardValidity()));
+//			}
+			enity.setInsurancePolicyNo(model.getInsurancePolicyNo());
+			enity.setIsActive(model.getIsActive());
+			enity.setLastName(enity.getLastName());
+//			if(entity.getLastWorkingDay() != null){
+				enity.setLastWorkingDay(utilService.stringDateToTimestamp(model.getLastWorkingDay()));
+//			}
+			enity.setNationality(model.getNationality());
+			enity.setNativeAddress(model.getNativeAddress());
+			enity.setOrginalProfilePicName(model.getOrginalProfilePicName());
+			enity.setOtherDetails(model.getOtherDetails());
+			enity.setPassportNo(model.getPassportNo());
+			enity.setPrimaryMobileNo(model.getPrimaryMobileNo());
+			//            model.setProfilePicPath(profilePicPath);
+			enity.setRelationship(model.getRelationship());
+			//enity.setRoleName(entity.getUsrRole().getRoleName());
+			enity.setSecondaryEmailId(model.getSecondaryEmailId());
+			enity.setSecondaryMobileNo(model.getSecondaryMobileNo());
+			enity.setToken(model.getToken());
+			//if(enity.getUpdatedAt() != null){
+			enity.setUpdatedAt(utilService.stringDateToTimestamp(model.getUpdatedAt()));
+			//}
+			enity.setUploadId(model.getUploadId());
+			enity.setUserName(model.getUserName());
+			enity.setUserRoleId(model.getUserRoleId());
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createEmployeeModel: "+e.getMessage());
+		}
+		return enity; 
+	}
+	
 	private EmployeeModel createEmployeeModel(EmployeeEntity entity){
 		EmployeeModel model = null;
 		try{

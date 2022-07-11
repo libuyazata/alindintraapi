@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.yaz.alind.entity.InterCommRefNoEntity;
+
 
 
 public interface UtilService {
@@ -31,7 +33,7 @@ public interface UtilService {
 	public Date getCurrentDate();
 	public Date stringToDate(String date );
 	public String createDownLoadFileName();
-	
+//	public String interComRefNo(InterCommRefNoEntity refNo);
 	
 //	public Document getWaterMarkPDF(String fileName,Employee employee);
 }

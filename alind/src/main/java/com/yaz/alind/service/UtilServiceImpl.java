@@ -20,8 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yaz.alind.dao.UserDAO;
+import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.TokenEntity;
-import com.yaz.security.Iconstants;
+import com.yaz.alind.util.Iconstants;
 
 @Service
 public class UtilServiceImpl implements UtilService{
@@ -350,9 +351,9 @@ public class UtilServiceImpl implements UtilService{
 	public String updatedDocumentNumber(String lastDocumentNo) {
 		String updateSeries = null;
 		try{
-			System.out.println("Util, Business,updatedDocumentNumber, lastDocumentNo: "+lastDocumentNo);
+		//	System.out.println("Util, Business,updatedDocumentNumber, lastDocumentNo: "+lastDocumentNo);
 			String[] strArr = lastDocumentNo.split(" ");
-			System.out.println("Util, Business,updatedDocumentNumber, strArr.length: "+strArr.length);
+			//System.out.println("Util, Business,updatedDocumentNumber, strArr.length: "+strArr.length);
 			String lastStr = null;
 
 			if(strArr.length > 2){
@@ -491,6 +492,26 @@ public class UtilServiceImpl implements UtilService{
 		}
 		return end;
 	}
+
+//	@Override
+//	public String interComRefNo(InterCommRefNoEntity refNo) {
+//		String refNum = null;
+//		int number = 0;
+//		try{
+//			Date today = getCurrentDate();
+//			int currentYear = getYearByDate(today);
+//			if( currentYear == refNo.getCurrentYear()){
+//				number = refNo.getNo() + 1;
+//			}else{
+//				number = 1;
+//			}
+//			
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			logger.error("interComRefNo: "+e.getMessage());
+//		}
+//		return refNum;
+//	}
 
 
 	//	@Override

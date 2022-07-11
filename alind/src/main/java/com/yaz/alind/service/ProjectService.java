@@ -2,6 +2,7 @@ package com.yaz.alind.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -103,12 +104,16 @@ public interface ProjectService {
     
   //Inter Office Communication
     public InterOfficeCommunicationModel saveInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
+    public InterOfficeCommunicationModel replyInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
     public InterOfficeCommunicationModel updateInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
     public InterOfficeCommunicationModel getCommunicationById(int officeCommunicationId);
+    public List<InterOfficeCommunicationModel> getCommunicationListById(int officeCommunicationId);
     public InterOfficeCommunicationModel deleteCommunicationById(int officeCommunicationId);
     public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(int subTaskId);
     public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(int workDetailsId);
     public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId );
+    public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
+			String startDate, String endDate,int departmentId );
     
     public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(int deptCommId,String token);
 
