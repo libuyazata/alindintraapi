@@ -61,7 +61,7 @@ import com.yaz.alind.model.ui.WorkIssuedModel;
 import com.yaz.alind.service.ProjectService;
 import com.yaz.alind.service.UserService;
 import com.yaz.alind.service.UtilService;
-import com.yaz.security.Iconstants;
+import com.yaz.alind.util.Iconstants;
 
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -1565,6 +1565,35 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 	
+	@RequestMapping(value="/project/replyInterOfficeCommunication", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> replyInterOfficeCommunication(@RequestHeader("token") String token,
+			@RequestBody InterOfficeCommunicationModel model ) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("replyInterOfficeCommunication,ReferenceNo: "+model.getReferenceNo());
+			System.out.println("Controller, replyInterOfficeCommunication,Dept Id: "
+					+model.getDepartmentId()+",Description: "+model.getDescription());
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				InterOfficeCommunicationModel communicationModel= projectService.replyInterOfficeCommunication(model,token);
+				resultMap.put("communicationModel", communicationModel);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("replyInterOfficeCommunication, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
 	@RequestMapping(value="/project/updateInterOfficeCommunication", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>> updateInterOfficeCommunication(@RequestHeader("token") String token,
 			@RequestBody InterOfficeCommunicationModel model ) throws Exception {
@@ -1602,8 +1631,9 @@ public class ProjectController {
 			System.out.println("getCommunicationById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				InterOfficeCommunicationModel communicationModel = projectService.getCommunicationById(officeCommunicationId);
-				resultMap.put("communicationModel", communicationModel);
+//				InterOfficeCommunicationModel communicationModel = projectService.getCommunicationById(officeCommunicationId);
+				List<InterOfficeCommunicationModel> list = projectService.getCommunicationListById(officeCommunicationId);
+				resultMap.put("communicationModelList", list);
 				resultMap.put("status", "success");
 			}else{
 				resultMap.put("status", "failed");
@@ -1695,6 +1725,35 @@ public class ProjectController {
 			e.printStackTrace();
 			resultMap.put("status", "failed");
 			logger.error("communicationListByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/project/searchInterDeptCommList", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  searchInterDeptCommList(@RequestHeader("token") String token
+			,String searchKeyWord,String startDate,String endDate
+			,int departmentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("searchInterDeptCommList,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<InterOfficeCommunicationModel> list = projectService.searchInterDeptCommList
+						(searchKeyWord,startDate,endDate,departmentId);
+				resultMap.put("communicationModelList", list);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("searchInterDeptCommList, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yaz.alind.entity.EmployeeEntity;
-import com.yaz.security.Iconstants;
+import com.yaz.alind.util.Iconstants;
 
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
