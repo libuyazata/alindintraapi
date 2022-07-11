@@ -23,6 +23,7 @@ import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
+import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
@@ -692,6 +693,8 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return workDetailsEntities;
 	}
 
+
+
 	/**
 	 *  Details by Updated date
 	 * @param startDate
@@ -1132,6 +1135,43 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return commEntity;
 	}
 
+	/**
+	 * Searching the Inter department messages
+	 */
+	@Override
+	public List<InterOfficeCommunicationEntity> searchInterDeptCommList(
+			String searchKeyWord, Date startDate, Date endDate, int departmentId) {
+		List<InterOfficeCommunicationEntity> comList = null;
+		try{
+			comList = new ArrayList<InterOfficeCommunicationEntity>();
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class,"workDetails");
+
+			if(startDate != null){
+				cr.add(Restrictions.ge("createdOn", startDate) );
+			}
+			if(endDate != null){
+				cr.add(Restrictions.lt("createdOn", endDate) );
+			}
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			Disjunction disj = Restrictions.disjunction();
+			if(!searchKeyWord.isEmpty()){
+				disj.add(Restrictions.like("subject", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.like("referenceNo", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.like("description", searchKeyWord,MatchMode.ANYWHERE));
+				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
+			}
+			cr.add(disj);
+			comList = cr.list();
+			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchInterDeptCommList: "+e.getMessage());
+		}
+		return comList;
+	}
+
 	@Override
 	public List<DepartmentCommunicationMessagesEntity> saveDepartmentCommunicationMessages
 	(List<DepartmentCommunicationMessagesEntity> deptMessages){
@@ -1187,6 +1227,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
 			cr.add(Restrictions.eq("deptCommId", deptCommId));
 			List<DepartmentCommunicationMessagesEntity> list = cr.list();
+			System.out.println("DAO,getDepartmentCommunicationMessagesById,size: "+list.size());
 			depEntity = list.get(0);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1210,5 +1251,40 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return deptCommMesgeList;
 	}
+
+
+	@Override
+	public InterCommRefNoEntity updateInterCommRefNo(
+			InterCommRefNoEntity comRefNo) {
+		InterCommRefNoEntity refNo = null ;
+		try{
+			this.sessionFactory.getSessionFactory().getCurrentSession().update(comRefNo);
+			refNo = comRefNo;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateInterCommRefNo: "+e.getMessage());
+		}
+		return refNo;
+	}
+
+
+	@Override
+	public InterCommRefNoEntity getInterCommRefByDeptId(int departmentId) {
+		InterCommRefNoEntity refNo = null ;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterCommRefNoEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			List<InterCommRefNoEntity> list = cr.list();
+			if(list.size() > 0){
+				refNo = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getInterCommRefByDeptId: "+e.getMessage());
+		}
+		return refNo;
+	}
+
+
 
 }

@@ -6,9 +6,9 @@ import java.util.List;
 import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
-import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
+import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
@@ -104,8 +104,10 @@ public interface ProjectDAO {
 	public DepartmentCommunicationMessagesEntity getDepartmentCommunicationMessagesById(int deptCommId);
 	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByOffCommId
 	(int officeCommunicationId);
+	public List<InterOfficeCommunicationEntity> searchInterDeptCommList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId);
 
-
-
+    public InterCommRefNoEntity updateInterCommRefNo(InterCommRefNoEntity comRefNo);
+    public InterCommRefNoEntity getInterCommRefByDeptId(int departmentId);
 
 }
