@@ -416,7 +416,8 @@ public class ProjectController {
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				ProjectDocumentEntity projectDocument = projectService.getDocumentById(Integer.parseInt(projectDocumentId));
-				EmployeeEntity employee = userService.getEmployeeById(Integer.parseInt(employeeId));
+//				EmployeeEntity employee = userService.getEmployeeById(Integer.parseInt(employeeId));
+				EmployeeModel employee = userService.getEmployeeById(Integer.parseInt(employeeId));
 				ByteArrayOutputStream archivo = new ByteArrayOutputStream();
 
 				String contextPath = context.getRealPath(""); 

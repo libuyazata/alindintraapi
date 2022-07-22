@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.rmi.CORBA.Util;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,17 +48,20 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public EmployeeEntity getAuthentication(String userName, String password) {
-		EmployeeEntity employee = null;
+	//	public EmployeeEntity getAuthentication(String userName, String password) {
+	public EmployeeModel getAuthentication(String userName, String password) {
+		//EmployeeEntity employee = null;
 		TokenEntity tokenModel = null;
 		boolean timeStatus = false;
+		EmployeeModel empModel = null;
 		try{
-			employee = userDAO.getAuthentication(userName, password);
-			tokenModel = userDAO.getTokenModelByUserId(employee.getEmployeeId());
-//			System.out.println("UserServiceImpl,getAuthentication,getEmployeeId: "+employee.getEmployeeId()+", token: "+tokenModel.getToken());
-			if(employee != null ){
+			EmployeeEntity empEnity =  userDAO.getAuthentication(userName, password);
+			empModel = createEmployeeModel(empEnity);
+			tokenModel = userDAO.getTokenModelByUserId(empModel.getEmployeeId());
+			//			System.out.println("UserServiceImpl,getAuthentication,getEmployeeId: "+employee.getEmployeeId()+", token: "+tokenModel.getToken());
+			if(empModel != null ){
 				if(tokenModel != null){
-					employee.setPassword(null);
+					//employee.setPassword(null);
 					timeStatus = utilService.evaluateSessionTime(tokenModel.getDateTime(), utilService.getCurrentDateTime());
 					//				System.out.println("UserServiceImpl,getAuthentication,timeStatus: "+timeStatus);
 					String token = utilService.createToken();
@@ -64,56 +69,122 @@ public class UserServiceImpl implements UserService {
 					tokenModel.setToken(token);
 					tokenModel.setDateTime(date);
 					tokenModel = userDAO.saveOrUpdateToken(tokenModel);
-					employee.setToken(tokenModel.getToken());
+					//employee.setToken(tokenModel.getToken());
+					empModel.setToken(tokenModel.getToken());
 				}else{
 					tokenModel = new TokenEntity();
 					timeStatus = utilService.evaluateSessionTime(tokenModel.getDateTime(), utilService.getCurrentDateTime());
 					//				System.out.println("UserServiceImpl,getAuthentication,timeStatus: "+timeStatus);
 					String token = utilService.createToken();
 					Date date = utilService.getCurrentDateTime();
-					tokenModel.setUserId(employee.getEmployeeId());
+					tokenModel.setUserId(empModel.getEmployeeId());
 					tokenModel.setToken(token);
 					tokenModel.setDateTime(date);
 					tokenModel = userDAO.saveOrUpdateToken(tokenModel);
-					employee.setToken(tokenModel.getToken());
+					//employee.setToken(tokenModel.getToken());
+					empModel.setToken(tokenModel.getToken());
 				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAuthentication: "+e.getMessage());
 		}
-		return employee;
+		return empModel;
+		//		return employee;
 	}
 
 	@Override
 	public TokenEntity getTokenModelByUserId(int userId) {
 		return userDAO.getTokenModelByUserId(userId);
 	}
+	/**
 	@Override
-	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee) {
-       // EmployeeModel empModel = null;
+	public EmployeeModel saveOrUpdateEmployee(EmployeeModel employee) {
+		EmployeeModel empModel = null;
 		EmployeeEntity emp = null;
 		try{
 			EmployeeEntity lastEmp = userDAO.getLastEmployeeDetails();
 			//			System.out.println("Business,saveOrUpdateEmployee,lastEmp, id: "+lastEmp.getEmployeeId());
 			Date today = utilService.getTodaysDate();
+			EmployeeEntity empEntity = createEmployeeEntity(employee);
 			if(employee.getEmpCode() == null){
 				int lastEmpCode = Integer.parseInt(lastEmp.getEmpCode());
-				employee.setEmpCode(Integer.toString(lastEmpCode+1));
-				employee.setUserName(Integer.toString(lastEmpCode+1));
-				employee.setPassword(Integer.toString(lastEmpCode+1));
-				employee.setCreatedAt(utilService.dateToTimestamp(today));
+				empEntity.setEmpCode(Integer.toString(lastEmpCode+1));
+				empEntity.setUserName(Integer.toString(lastEmpCode+1));
+				empEntity.setPassword(Integer.toString(lastEmpCode+1));
+				//				empEntity.setCreatedAt(utilService.dateToTimestamp(today));
+				empEntity.setCreatedAt(today);
+				//				empEntity.setIsActive(1);
 			}
-			emp = userDAO.saveOrUpdateEmployee(employee);
-			emp.setPassword(null);
-			//empModel = createEmployeeModel(emp);
+			EmployeeEntity empFromDB = userDAO.getEmployeeById(employee.getEmployeeId());
+			empEntity.setPassword(empFromDB.getPassword());
+			empEntity.setIsActive(1);
+			empEntity.setEmpCode(empFromDB.getEmpCode());
+			empEntity.setUpdatedAt(empFromDB.getCreatedAt());
+			//			empEntity.setUpdatedAt(utilService.dateToTimestamp(today));
+			empEntity.setUpdatedAt(today);
+			emp = userDAO.saveOrUpdateEmployee(empEntity);
+			System.out.println("saveOrUpdateEmployee,Last name: "+emp.getLastName());
+			System.out.println("saveOrUpdateEmployee,EmpolyeeTypeId: "+emp.getEmployeeTypes().getEmpolyeeTypeId());
+			empModel = createEmployeeModel(emp);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveOrUpdateEmployee: "+e.getMessage());
 		}
-		return emp;
+		return empModel;
+		//return emp;
+	}
+	**/
+	@Override
+	public EmployeeModel saveEmployee(EmployeeModel employee){
+		EmployeeModel empModel = null;
+		EmployeeEntity emp = null;
+		try{
+			EmployeeEntity lastEmp = userDAO.getLastEmployeeDetails();
+			//			System.out.println("Business,saveOrUpdateEmployee,lastEmp, id: "+lastEmp.getEmployeeId());
+			Date today = utilService.getTodaysDate();
+			EmployeeEntity empEntity = createEmployeeEntity(employee);
+			int lastEmpCode = Integer.parseInt(lastEmp.getEmpCode());
+			empEntity.setEmpCode(Integer.toString(lastEmpCode+1));
+			empEntity.setUserName(Integer.toString(lastEmpCode+1));
+			empEntity.setPassword(Integer.toString(lastEmpCode+1));
+			empEntity.setIsActive(1);
+			empEntity.setCreatedAt(utilService.dateToTimestamp(today));
+			empEntity.setUpdatedAt(utilService.dateToTimestamp(today));
+			emp = userDAO.saveEmployee(empEntity);
+			emp = userDAO.getEmployeeById(emp.getEmployeeId());
+			//System.out.println("saveOrUpdateEmployee,Last name: "+emp.getLastName());
+			//System.out.println("saveOrUpdateEmployee,EmpolyeeTypeId: "+emp.getEmployeeTypes().getEmpolyeeTypeId());
+			empModel = createEmployeeModel(emp);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveEmployee: "+e.getMessage());
+		}
+		return empModel;
 	}
 	
+	@Override
+	public EmployeeModel updateEmployee(EmployeeModel employee){
+		EmployeeModel empModel = null;
+		try{
+			EmployeeEntity emp = userDAO.getEmployeeById(employee.getEmployeeId());
+			Date today = utilService.getTodaysDate();
+			EmployeeEntity empEntity = createEmployeeEntity(employee);
+			empEntity.setCreatedAt(emp.getCreatedAt());
+			empEntity.setUpdatedAt(utilService.dateToTimestamp(today));
+			empEntity.setIsActive(1);
+			empEntity.setPassword(emp.getPassword());
+			empEntity.setUserName(emp.getUserName());
+			emp = userDAO.updateEmployee(empEntity);
+			emp = userDAO.getEmployeeById(emp.getEmployeeId());
+			empModel = createEmployeeModel(emp);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateEmployee: "+e.getMessage());
+		}
+		return empModel;
+	}
+
 	@Override
 	public int uploadEmployeeProfilePic(MultipartFile profilePic, int employeeId,String contextPath) {
 		int status = -1;
@@ -129,9 +200,10 @@ public class UserServiceImpl implements UserService {
 				employee.setUpdatedAt(utilService.dateToTimestamp(today));
 				employee.setProfilePicPath(fileName);
 				employee.setOrginalProfilePicName(originalFileName);
-				employee = userDAO.saveOrUpdateEmployee(employee);
+//				employee = userDAO.saveOrUpdateEmployee(employee);
+				employee = userDAO.updateEmployee(employee);
 			}
-			
+
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("uploadEmployeeProfilePic: "+e.getMessage());
@@ -155,18 +227,19 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<EmployeeEntity> getAllEmployees(String token) {
-		//List<EmployeeModel> empModelList = null;
-		List<EmployeeEntity> employees = null;
+	public List<EmployeeModel> getAllEmployees(String token) {
+		//		public List<EmployeeEntity> getAllEmployees(String token) {
+		List<EmployeeModel> empModelList = null;
+		//List<EmployeeEntity> employees = null;
 		try{
-			//empModelList = new ArrayList<EmployeeModel>();
-			employees = userDAO.getAllEmployees();
-			/**
+			empModelList = new ArrayList<EmployeeModel>();
+			List<EmployeeEntity> employees = userDAO.getAllEmployees();
+
 			for(EmployeeEntity e: employees){
 				EmployeeModel m = createEmployeeModel(e);
 				empModelList.add(m);
-			}*/
-			
+			}
+
 			/**
 			EmployeeEntity employee = getEmployeeByToken(token);
 			// Admin
@@ -178,14 +251,15 @@ public class UserServiceImpl implements UserService {
 				employees = userDAO.getAllEmployeesByDept(employee.getDepartmentId());
 			}**/
 
-			for(int i=0;i<employees.size();i++){
-				employees.get(i).setPassword(null);
-			}
+			//			for(int i=0;i<employees.size();i++){
+			//				employees.get(i).setPassword(null);
+			//			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAllEmployees: "+e.getMessage());
 		}
-		return employees;
+		return empModelList;
+		//return employees;
 	}
 
 	@Override
@@ -214,27 +288,26 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public EmployeeEntity getEmployeeById(int employeeId) {
-//		EmployeeModel empModel = null;
-		EmployeeEntity employee = null;
+	public EmployeeModel getEmployeeById(int employeeId) {
+		EmployeeModel empModel = null;
+		//EmployeeEntity employee = null;
 		try{
-			employee = userDAO.getEmployeeById(employeeId);
-//			empModel = createEmployeeModel(employee);
+			EmployeeEntity	employee = userDAO.getEmployeeById(employeeId);
+			empModel = createEmployeeModel(employee);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeById: "+e.getMessage());
 		}
-		return employee;
+		return empModel;
+		//return employee;
 	}
 
 	@Override
 	public EmployeeEntity getEmployeeByToken(String token) {
-		//EmployeeModel empModel = null;
 		EmployeeEntity employee = null;
 		try{
 			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
 			employee = userDAO.getEmployeeById(tokenModel.getUserId());
-			//empModel = createEmployeeModel(employee);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeByToken: "+e.getMessage());
@@ -248,7 +321,8 @@ public class UserServiceImpl implements UserService {
 		try{
 			EmployeeEntity emplEntity = userDAO.getEmployeeById(employeeId);
 			emplEntity.setIsActive(-1);
-			emplEntity = userDAO.saveOrUpdateEmployee(emplEntity);
+//			emplEntity = userDAO.saveOrUpdateEmployee(emplEntity);
+			emplEntity = userDAO.updateEmployee(emplEntity);
 			if(emplEntity.getIsActive() == -1){
 				status = 1;
 			}
@@ -385,6 +459,24 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public List<EmployeeModel> searchEmployee(String searchKeyWord, int departmentId){
+		List<EmployeeModel> empModels = null;
+		try{
+			empModels = new ArrayList<EmployeeModel>();
+			List<EmployeeEntity> empEntityList = userDAO.searchEmployee(searchKeyWord, departmentId);
+			for(EmployeeEntity et: empEntityList){
+				EmployeeModel eModel = createEmployeeModel(et)   ;
+				empModels.add(eModel);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchEmployee: "+e.getMessage());
+		}
+		return empModels;
+	}
+
+	@Override
 	public List<EmployeeModel> getDeputedEmployeeListByDeptId(int departmentId) {
 		List<EmployeeModel> employeeModels = null;
 		try{
@@ -429,7 +521,7 @@ public class UserServiceImpl implements UserService {
 		try{
 			enity = new EmployeeEntity();
 			enity.setAccommodationLocation(model.getAccommodationLocation());
-			enity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedAt()));
+			//enity.setCreatedAt(utilService.stringDateToTimestamp(model.getCreatedAt()));
 			enity.setDepartmentId(model.getDepartmentId());
 			//enity.setDepartmentName(entity.getDepartment().getDepartmentName());
 			enity.setEmailId(model.getEmailId());
@@ -437,22 +529,23 @@ public class UserServiceImpl implements UserService {
 			enity.setEmergencyContactPhone(model.getEmergencyContactPhone());
 			enity.setEmpCode(model.getEmpCode());
 			enity.setEmployeeId(model.getEmployeeId());
+			enity.setEmpolyeeTypeId(model.getEmpolyeeTypeId());
 			//enity.setEmployeeTypeName(entity.getEmployeeTypes().getEmployeeTypeName());
 			enity.setFirstName(model.getFirstName());
 			//enity.setEmpFullName(entity.getFirstName()+" "+entity.getLastName());
-//			enity.setEmpFullNameWithEmpCode(entity.getFirstName()+" "+entity.getLastName()+" - "+
-//					entity.getEmpCode());
+			//			enity.setEmpFullNameWithEmpCode(entity.getFirstName()+" "+entity.getLastName()+" - "+
+			//					entity.getEmpCode());
 			enity.setGender(model.getGender());
 			enity.setHealthCardNo(model.getHealthCardNo());
-//			if(enity.getHealthCardValidity() != null){
+			if(enity.getHealthCardValidity() != null){
 				enity.setHealthCardValidity(utilService.stringDateToTimestamp(model.getHealthCardValidity()));
-//			}
+			}
 			enity.setInsurancePolicyNo(model.getInsurancePolicyNo());
 			enity.setIsActive(model.getIsActive());
-			enity.setLastName(enity.getLastName());
-//			if(entity.getLastWorkingDay() != null){
+			enity.setLastName(model.getLastName());
+			if(enity.getLastWorkingDay() != null){
 				enity.setLastWorkingDay(utilService.stringDateToTimestamp(model.getLastWorkingDay()));
-//			}
+			}
 			enity.setNationality(model.getNationality());
 			enity.setNativeAddress(model.getNativeAddress());
 			enity.setOrginalProfilePicName(model.getOrginalProfilePicName());
@@ -465,26 +558,28 @@ public class UserServiceImpl implements UserService {
 			enity.setSecondaryEmailId(model.getSecondaryEmailId());
 			enity.setSecondaryMobileNo(model.getSecondaryMobileNo());
 			enity.setToken(model.getToken());
-			//if(enity.getUpdatedAt() != null){
-			enity.setUpdatedAt(utilService.stringDateToTimestamp(model.getUpdatedAt()));
-			//}
+//			if(enity.getUpdatedAt() != null){
+//			enity.setUpdatedAt(utilService.stringDateToTimestamp(model.getUpdatedAt()));
+//			}
 			enity.setUploadId(model.getUploadId());
 			enity.setUserName(model.getUserName());
 			enity.setUserRoleId(model.getUserRoleId());
-			
+
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createEmployeeModel: "+e.getMessage());
 		}
 		return enity; 
 	}
-	
+
 	private EmployeeModel createEmployeeModel(EmployeeEntity entity){
 		EmployeeModel model = null;
 		try{
 			model = new EmployeeModel();
+			String profImageLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+entity.getEmployeeId();
 			model.setAccommodationLocation(entity.getAccommodationLocation());
-			model.setCreatedAt(utilService.dateToString(entity.getCreatedAt()));
+//			model.setCreatedAt(utilService.dateToString(entity.getCreatedAt()));
+			model.setCreatedAt(utilService.dateToString(utilService.dateToTimestamp(entity.getCreatedAt())));
 			model.setDepartmentId(entity.getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
 			model.setEmailId(entity.getEmailId());
@@ -492,6 +587,7 @@ public class UserServiceImpl implements UserService {
 			model.setEmergencyContactPhone(entity.getEmergencyContactPhone());
 			model.setEmpCode(entity.getEmpCode());
 			model.setEmployeeId(entity.getEmployeeId());
+			model.setEmpolyeeTypeId(entity.getEmpolyeeTypeId());
 			model.setEmployeeTypeName(entity.getEmployeeTypes().getEmployeeTypeName());
 			model.setFirstName(entity.getFirstName());
 			model.setEmpFullName(entity.getFirstName()+" "+entity.getLastName());
@@ -513,6 +609,12 @@ public class UserServiceImpl implements UserService {
 			model.setOrginalProfilePicName(entity.getOrginalProfilePicName());
 			model.setOtherDetails(entity.getOtherDetails());
 			model.setPassportNo(entity.getPassportNo());
+			//Profile image setting
+			if(entity.getProfilePicPath() != null){
+				model.setProfilePicPath(profImageLocation+"/"+entity.getProfilePicPath());
+			}else{
+				model.setProfilePicPath(Iconstants.DEFAULT_PROFILE_IMAGE);
+			}
 			model.setPrimaryMobileNo(entity.getPrimaryMobileNo());
 			//            model.setProfilePicPath(profilePicPath);
 			model.setRelationship(entity.getRelationship());

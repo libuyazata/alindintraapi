@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +29,7 @@ import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
 import com.yaz.alind.entity.UserRolesEntity;
 import com.yaz.alind.model.ui.DeputationModel;
+import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.service.DashBoardService;
 import com.yaz.alind.service.UserService;
 import com.yaz.alind.service.UtilService;
@@ -57,7 +57,8 @@ public class UserController {
 		try{
 			//			System.out.println("UserController,getAuthentication,userName: "+employee.getUserName()+", password: "+employee.getPassword());
 			resultMap = new HashMap<String,Object>();
-			EmployeeEntity emp = userService.getAuthentication(employee.getUserName(), employee.getPassword());
+//			EmployeeEntity emp = userService.getAuthentication(employee.getUserName(), employee.getPassword());
+			EmployeeModel emp = userService.getAuthentication(employee.getUserName(), employee.getPassword());
 			resultMap.put("loginDetails", emp);
 			//			if(emp!=null){
 			//				if(emp.getUserRoleId()==1){
@@ -77,6 +78,7 @@ public class UserController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
+	/**
 
 //	@RequestMapping(value="/user/saveOrUpdateEmployee", method = RequestMethod.POST,
 //			consumes = { "multipart/form-data" })
@@ -86,7 +88,7 @@ public class UserController {
 //			@RequestHeader("token") String token) throws Exception{
 	@RequestMapping(value="/user/saveOrUpdateEmployee", method = RequestMethod.POST)			
 	public ResponseEntity<Map<String,Object>>  saveOrUpdateEmployee(
-			@RequestBody EmployeeEntity employee,		
+			@RequestBody EmployeeModel employee,		
 			@RequestHeader("token") String token) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
@@ -96,7 +98,8 @@ public class UserController {
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 //				String contextPath = context.getRealPath(""); 
-				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee);
+//				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee);
+				EmployeeModel emp= userService.saveOrUpdateEmployee(employee);
 				resultMap.put("user", emp);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -106,6 +109,59 @@ public class UserController {
 			e.printStackTrace();
 			resultMap.put("status", "failed");
 			logger.error("saveOrUpdateEmployee, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	**/
+	
+	@RequestMapping(value="/user/saveEmployee", method = RequestMethod.POST)			
+	public ResponseEntity<Map<String,Object>>  saveEmployee(
+			@RequestBody EmployeeModel employee,		
+			@RequestHeader("token") String token) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("saveEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				EmployeeModel emp= userService.saveEmployee(employee);
+				resultMap.put("user", emp);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("saveEmployee, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/user/updateEmployee", method = RequestMethod.POST)			
+	public ResponseEntity<Map<String,Object>>  updateEmployee(
+			@RequestBody EmployeeModel employee,		
+			@RequestHeader("token") String token) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("updateEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				EmployeeModel emp= userService.updateEmployee(employee);
+				resultMap.put("user", emp);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("updateEmployee, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
@@ -204,7 +260,8 @@ public class UserController {
 			//			System.out.println("getAllEmployees,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<EmployeeEntity> employees= userService.getAllEmployees(token);
+//				List<EmployeeEntity> employees= userService.getAllEmployees(token);
+				List<EmployeeModel> employees= userService.getAllEmployees(token);
 				resultMap.put("employees", employees);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -287,6 +344,7 @@ public class UserController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	
 
 
 	@RequestMapping(value="/user/getEmployeeById", method = RequestMethod.GET)
@@ -299,7 +357,7 @@ public class UserController {
 			System.out.println("getEmployeeById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				EmployeeEntity employee= userService.getEmployeeById(Integer.parseInt(employeeId));
+				EmployeeModel employee= userService.getEmployeeById(Integer.parseInt(employeeId));
 				resultMap.put("employee", employee);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -308,6 +366,31 @@ public class UserController {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeById, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value="/user/searchEmployee", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  searchEmployee(@RequestHeader("token") String token,
+			String searchKeyWord, int departmentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("searchEmployee,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<EmployeeModel> empModels= userService.searchEmployee(searchKeyWord,departmentId);
+				resultMap.put("empModels", empModels);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchEmployee, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);

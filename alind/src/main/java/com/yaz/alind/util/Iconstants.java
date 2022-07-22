@@ -14,6 +14,7 @@ public interface Iconstants {
 	public final static String EMPLOYEE_DOCUMENT_LOCATION = "AlindUploadFiles/Employee/Doc/";
 	public final static String PROJECT_DOCUMENT_LOCATION = "AlindUploadFiles/WorkDetails/";
 	public final static String EMPLOYEE_PROFILE_PIC_LOCATION = "AlindUploadFiles/Employee/ProfilePic/";
+	public final static String DEFAULT_PROFILE_IMAGE = "AlindUploadFiles/Employee/ProfilePic/default/default.jpg";
 //	public final static String PROJECT_DOCUMENT_LOCATION = "F:/Test/AlindUploadFiles/Project/";
 	
 	public final static String  ANNEXURE_FORMAT= "PS/ANX/09";

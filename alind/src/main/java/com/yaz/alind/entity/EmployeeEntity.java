@@ -36,6 +36,7 @@ public class EmployeeEntity implements Serializable {
 
 	@Column(name="created_at")
 	private Timestamp createdAt;
+//	private Date createdAt;
 
 	@Column(name="email_id")
 	private String emailId;
@@ -66,6 +67,7 @@ public class EmployeeEntity implements Serializable {
 
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
+//	private Date updatedAt;
 
 	@Column(name="user_name")
 	private String userName;

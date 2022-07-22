@@ -2073,7 +2073,7 @@ public class ProjectServiceImpl implements ProjectService {
 	(InterOfficeCommunicationEntity entity){
 		InterOfficeCommunicationModel model = null;
 		try{
-			EmployeeEntity emp = userService.getEmployeeById(entity.getEmployeeId());
+			EmployeeModel emp = userService.getEmployeeById(entity.getEmployeeId());
 			model = new InterOfficeCommunicationModel();
 			model.setAnnexureFormat(Iconstants.ANNEXURE_FORMAT);
 			if(entity.getCreatedOn() != null){

@@ -6,6 +6,8 @@ import javax.transaction.Transactional;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -21,6 +23,7 @@ import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
+import com.yaz.alind.model.ui.EmployeeModel;
 
 @Repository
 @Transactional
@@ -69,21 +72,53 @@ public class UserDAOImpl implements UserDAO {
 		return tokenModel;
 	}
 
-
+/**
 	@Override
 	@Transactional
 	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee) {
 		EmployeeEntity emp = null;
 		try{
 			this.sessionFactory.getCurrentSession().saveOrUpdate(employee);
+			System.out.println("DAO, saveOrUpdateUser, EmployeeId: "+employee.getEmployeeId());
 			emp = employee;
+			System.out.println("DAO, saveOrUpdateUser, lastname: "+emp.getLastName());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveOrUpdateUser: "+e.getMessage());
 		}
 		return emp;
 	}
+	**/
+	@Override
+	public EmployeeEntity saveEmployee(EmployeeEntity employee){
+		EmployeeEntity emp = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(employee);
+			System.out.println("DAO, saveEmployee, EmployeeId: "+employee.getEmployeeId());
+			emp = employee;
+			System.out.println("DAO, saveEmployee, lastname: "+emp.getLastName());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveEmployee: "+e.getMessage());
+		}
+		return emp;
+	}
 
+	@Override
+	public EmployeeEntity updateEmployee(EmployeeEntity employee){
+		EmployeeEntity emp = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(employee);
+//			this.sessionFactory.getSessionFactory().getCurrentSession().update(employee);
+			System.out.println("DAO, updateEmployee, EmployeeId: "+employee.getEmployeeId());
+			emp = employee;
+			System.out.println("DAO, updateEmployee, lastname: "+emp.getLastName());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateEmployee: "+e.getMessage());
+		}
+		return emp;
+	}
 
 	@Override
 	@Transactional
@@ -94,7 +129,7 @@ public class UserDAOImpl implements UserDAO {
 			cr.add(Restrictions.eq("userName", userName));
 			cr.add(Restrictions.eq("password", password));
 			List<EmployeeEntity> list = cr.list();
-//			System.out.println("DAO,getAuthentication, user size: "+list.size());
+			System.out.println("DAO,getAuthentication, user size: "+list.size());
 			if(list.size() > 0){
 				employee = list.get(0);
 			}
@@ -188,6 +223,46 @@ public class UserDAOImpl implements UserDAO {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAllEmployeesByDept: "+e.getMessage());
+		}
+		return employees;
+	}
+	
+	@Override
+	@Transactional
+	public List<EmployeeEntity> searchEmployee(String searchKeyWord, int departmentId){
+		List<EmployeeEntity> employees = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeEntity.class);
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId",departmentId));
+			}
+			cr.addOrder(Order.asc("employeeId"));
+			Disjunction disj = Restrictions.disjunction();
+			if(searchKeyWord != null){
+				disj.add(Restrictions.ilike("emailId", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("empCode", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("firstName", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("gender", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("lastName", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("primaryMobileNo", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("secondaryEmailId", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("secondaryMobileNo", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("userName", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("nationality", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("passportNo", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("accommodationLocation", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("insurancePolicyNo", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("nativeAddress", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("emergencyContactName", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("emergencyContactPhone", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("relationship", searchKeyWord,MatchMode.ANYWHERE));
+				disj.add(Restrictions.ilike("otherDetails", searchKeyWord,MatchMode.ANYWHERE));
+			}
+			cr.add(disj);
+			employees = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchEmployee: "+e.getMessage());
 		}
 		return employees;
 	}
