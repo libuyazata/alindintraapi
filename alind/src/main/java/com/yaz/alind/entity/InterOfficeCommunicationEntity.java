@@ -25,7 +25,7 @@ public class InterOfficeCommunicationEntity {
 
 	@ManyToOne
 	@JoinColumn(name="employee_id",insertable = false, updatable = false)
-	private EmployeeTypesEntity employeeTypes;
+	private EmployeeEntity employee;
 	
 	@Column(name = "department_id", nullable = false )
 	private int departmentId;
@@ -147,12 +147,12 @@ public class InterOfficeCommunicationEntity {
 		this.subTaskId = subTaskId;
 	}
 
-	public EmployeeTypesEntity getEmployeeTypes() {
-		return employeeTypes;
+	public EmployeeEntity getEmployee() {
+		return employee;
 	}
 
-	public void setEmployeeTypes(EmployeeTypesEntity employeeTypes) {
-		this.employeeTypes = employeeTypes;
+	public void setEmployeeTypes(EmployeeEntity employee) {
+		this.employee = employee;
 	}
 
 	public DepartmentEntity getDepartment() {

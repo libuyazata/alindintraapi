@@ -36,6 +36,8 @@ public interface UserService {
 	public int deleteDepartmentEntity(int departmentId);
 	public List<EmployeeTypesEntity> getAllEmployeeTypes();
 	public EmployeeModel getEmployeeById(int employeeId);
+	// Only for UI purpose
+	public List<EmployeeModel> getEmployeeListTypeById(int employeeId);
 	public EmployeeEntity getEmployeeByToken(String token);
 	public List<EmployeeModel> getAllEmployeesByDept(int departmentId);
 	public List<EmployeeModel> searchEmployee(String searchKeyWord, int departmentId);

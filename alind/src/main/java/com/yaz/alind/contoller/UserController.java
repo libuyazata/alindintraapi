@@ -357,8 +357,10 @@ public class UserController {
 			System.out.println("getEmployeeById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				EmployeeModel employee= userService.getEmployeeById(Integer.parseInt(employeeId));
-				resultMap.put("employee", employee);
+//				EmployeeModel employee= userService.getEmployeeById(Integer.parseInt(employeeId));
+				//	resultMap.put("employee", employee);
+				List<EmployeeModel> employeeList = userService.getEmployeeListTypeById(Integer.parseInt(employeeId));
+				resultMap.put("employeeList", employeeList);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
 			}

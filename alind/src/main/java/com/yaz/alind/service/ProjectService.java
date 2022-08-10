@@ -114,8 +114,10 @@ public interface ProjectService {
     public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId );
     public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId );
+    public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(int departmentId );
     
     public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(int deptCommId,String token);
-
+   // public List<DepartmentCommunicationMessagesModel> getMessagesForDepartmentByDeptId(int departmentId );
+    
     public List<DepartmentEntity> getDepartmentListByWorkId(int workDetailsId);
 }

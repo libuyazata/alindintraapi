@@ -192,7 +192,8 @@ public class UserServiceImpl implements UserService {
 			String originalFileName = profilePic.getOriginalFilename();
 			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
 			String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+employeeId;
-			System.out.println("Business,uploadEmployeeProfilePic, fileLocation: "+fileLocation+", fileName: "+fileName);
+			System.out.println("Business,uploadEmployeeProfilePic, fileLocation: "+fileLocation
+					+", fileName: "+fileName+", employeeId: "+employeeId);
 			status = utilService.saveFile(profilePic, contextPath, fileLocation);
 			if(status > 0){
 				EmployeeEntity employee = userDAO.getEmployeeById(employeeId);
@@ -300,6 +301,26 @@ public class UserServiceImpl implements UserService {
 		}
 		return empModel;
 		//return employee;
+	}
+	
+	/***
+	 * Only for UI purpose
+	 * @param employeeId
+	 * @return
+	 */
+	@Override
+	public List<EmployeeModel> getEmployeeListTypeById(int employeeId) {
+		List<EmployeeModel> empModelList = null;
+		try{
+			empModelList = new ArrayList<EmployeeModel>();
+			EmployeeEntity	employee = userDAO.getEmployeeById(employeeId);
+			EmployeeModel empModel = createEmployeeModel(employee);
+			empModelList.add(empModel);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getEmployeeById: "+e.getMessage());
+		}
+		return empModelList;
 	}
 
 	@Override
@@ -579,7 +600,9 @@ public class UserServiceImpl implements UserService {
 			String profImageLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+entity.getEmployeeId();
 			model.setAccommodationLocation(entity.getAccommodationLocation());
 //			model.setCreatedAt(utilService.dateToString(entity.getCreatedAt()));
+			if(entity.getCreatedAt() != null){
 			model.setCreatedAt(utilService.dateToString(utilService.dateToTimestamp(entity.getCreatedAt())));
+			}
 			model.setDepartmentId(entity.getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
 			model.setEmailId(entity.getEmailId());

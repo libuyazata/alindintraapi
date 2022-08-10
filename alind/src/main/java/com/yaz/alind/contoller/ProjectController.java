@@ -1575,7 +1575,7 @@ public class ProjectController {
 			resultMap = new HashMap<String,Object>();
 			System.out.println("replyInterOfficeCommunication,ReferenceNo: "+model.getReferenceNo());
 			System.out.println("Controller, replyInterOfficeCommunication,Dept Id: "
-					+model.getDepartmentId()+",Description: "+model.getDescription());
+					+model.getDepartmentId()+",Description: "+model.getDescription()+", ReferenceNo: "+model.getReferenceNo());
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				InterOfficeCommunicationModel communicationModel= projectService.replyInterOfficeCommunication(model,token);
@@ -1726,6 +1726,74 @@ public class ProjectController {
 			e.printStackTrace();
 			resultMap.put("status", "failed");
 			logger.error("communicationListByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	/**
+	 *  Sent message details to other departments
+	 * @param token
+	 * @param departmentId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/project/getSentMessageListByDeptId/{departmentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getSentMessageListByDeptId(@RequestHeader("token") String token
+			,@PathVariable("departmentId") int departmentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("communicationListByDeptId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<InterOfficeCommunicationModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
+				resultMap.put("communicationList", communicationList);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("communicationListByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	/**
+	 * Inbox messages. The message from other departments
+	 * @param token
+	 * @param departmentId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/project/getInboxMessageByDeptId/{departmentId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getInboxMessageByDeptId(@RequestHeader("token") String token
+			,@PathVariable("departmentId") int departmentId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			System.out.println("getInboxMessageByDeptId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<InterOfficeCommunicationModel> communicationList = projectService.getInboxMessageByDeptId(departmentId);
+				resultMap.put("inboxMessages", communicationList);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getInboxMessageByDeptId, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);

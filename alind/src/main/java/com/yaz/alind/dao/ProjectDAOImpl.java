@@ -1049,11 +1049,16 @@ public class ProjectDAOImpl implements ProjectDAO {
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
 			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
-			commEntity =(InterOfficeCommunicationEntity) cr.list().get(0);
+			List<InterOfficeCommunicationEntity> list = cr.list();
+			System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
+			if(list.size() >0){
+				commEntity = list.get(0);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getCommunicationEntityById: "+e.getMessage());
 		}
+
 		return commEntity;
 	}
 
@@ -1177,14 +1182,19 @@ public class ProjectDAOImpl implements ProjectDAO {
 	(List<DepartmentCommunicationMessagesEntity> deptMessages){
 		List<DepartmentCommunicationMessagesEntity> deptMessageList = null;
 		try{
+			System.out.println("DAO, saveDepartmentCommunicationMessages, size: "+deptMessages.size());
+			deptMessageList = new ArrayList<DepartmentCommunicationMessagesEntity>();
 			for(DepartmentCommunicationMessagesEntity dm: deptMessages){
+				System.out.println("DAO, saveDepartmentCommunicationMessages: ");
 				this.sessionFactory.getCurrentSession().save(dm);
+				deptMessageList.add(dm);
 			}
-			deptMessageList = deptMessages;
+			//			deptMessageList = deptMessages;
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveDepartmentCommunicationMessages: "+e.getMessage());
 		}
+		System.out.println("DAO, saveDepartmentCommunicationMessages, deptMessageList,size: "+deptMessageList.size());
 		return deptMessageList;
 	}
 
