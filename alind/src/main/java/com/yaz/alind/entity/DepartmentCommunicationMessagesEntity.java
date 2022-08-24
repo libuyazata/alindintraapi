@@ -1,5 +1,6 @@
 package com.yaz.alind.entity;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -29,6 +30,9 @@ public class DepartmentCommunicationMessagesEntity {
 
 	@Column(name = "office_communication_id")
 	private int officeCommunicationId;
+	@ManyToOne
+	@JoinColumn(name="office_communication_id",insertable = false, updatable = false)
+	private InterOfficeCommunicationEntity interOfficeCommunicationEntity;
 
 	//To
 	@Column(name = "department_id", nullable = false)
@@ -44,10 +48,12 @@ public class DepartmentCommunicationMessagesEntity {
 	private int viewStatus;
 
 	@Column(name = "created_on")
-	private Date createdOn;
+//	private Date createdOn;
+	private Timestamp createdOn;
 
 	@Column(name = "updated_on")
-	private Date updatedOn;
+//	private Date updatedOn;
+	private Timestamp updatedOn;
 
 	public int getDeptCommId() {
 		return deptCommId;
@@ -81,28 +87,57 @@ public class DepartmentCommunicationMessagesEntity {
 		this.viewStatus = viewStatus;
 	}
 
-	public Date getCreatedOn() {
-		return createdOn;
-	}
+//	public Date getCreatedOn() {
+//		return createdOn;
+//	}
+//
+//	public void setCreatedOn(Date createdOn) {
+//		this.createdOn = createdOn;
+//	}
 
-	public void setCreatedOn(Date createdOn) {
-		this.createdOn = createdOn;
-	}
+//	public Date getUpdatedOn() {
+//		return updatedOn;
+//	}
 
-	public Date getUpdatedOn() {
-		return updatedOn;
-	}
-
-	public void setUpdatedOn(Date updatedOn) {
-		this.updatedOn = updatedOn;
-	}
+//	public void setUpdatedOn(Date updatedOn) {
+//		this.updatedOn = updatedOn;
+//	}
+	
+	
 
 	public DepartmentEntity getDepartment() {
 		return department;
 	}
 
+	public Timestamp getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Timestamp createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Timestamp getUpdatedOn() {
+		return updatedOn;
+	}
+
+	public void setUpdatedOn(Timestamp updatedOn) {
+		this.updatedOn = updatedOn;
+	}
+
 	public void setDepartment(DepartmentEntity department) {
 		this.department = department;
 	}
+
+	public InterOfficeCommunicationEntity getInterOfficeCommunicationEntity() {
+		return interOfficeCommunicationEntity;
+	}
+
+	public void setInterOfficeCommunicationEntity(
+			InterOfficeCommunicationEntity interOfficeCommunicationEntity) {
+		this.interOfficeCommunicationEntity = interOfficeCommunicationEntity;
+	}
+	
+	
 	
 }

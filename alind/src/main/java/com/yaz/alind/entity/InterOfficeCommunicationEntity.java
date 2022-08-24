@@ -1,6 +1,6 @@
 package com.yaz.alind.entity;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,10 +59,12 @@ public class InterOfficeCommunicationEntity {
 	private String description;
 
 	@Column(name = "created_on")
-	private Date createdOn;
+	//private Date createdOn;
+	private Timestamp createdOn;
 
 	@Column(name = "updated_on")
-	private Date updatedOn;
+//	private Date updatedOn;
+	private Timestamp updatedOn;
 	
 	@Column(name="is_active")
 	private int isActive;
@@ -115,19 +117,19 @@ public class InterOfficeCommunicationEntity {
 		this.description = description;
 	}
 
-	public Date getCreatedOn() {
+	public Timestamp getCreatedOn() {
 		return createdOn;
 	}
 
-	public void setCreatedOn(Date createdOn) {
+	public void setCreatedOn(Timestamp createdOn) {
 		this.createdOn = createdOn;
 	}
 
-	public Date getUpdatedOn() {
+	public Timestamp getUpdatedOn() {
 		return updatedOn;
 	}
 
-	public void setUpdatedOn(Date updatedOn) {
+	public void setUpdatedOn(Timestamp updatedOn) {
 		this.updatedOn = updatedOn;
 	}
 
