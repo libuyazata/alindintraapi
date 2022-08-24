@@ -3,7 +3,10 @@ package com.yaz.alind.service;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 
@@ -19,6 +22,7 @@ import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
+import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
 import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
@@ -111,10 +115,15 @@ public interface ProjectService {
     public InterOfficeCommunicationModel deleteCommunicationById(int officeCommunicationId);
     public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(int subTaskId);
     public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(int workDetailsId);
-    public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId );
-    public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
+//    public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId );
+    public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId );
+//    public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
+//			String startDate, String endDate,int departmentId );
+    public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId );
-    public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(int departmentId );
+//    public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(int departmentId );
+    public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId );
+//    public List<CommunicationMessageFormatModel> testInboxMessageByDeptId(int departmentId );
     
     public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(int deptCommId,String token);
    // public List<DepartmentCommunicationMessagesModel> getMessagesForDepartmentByDeptId(int departmentId );

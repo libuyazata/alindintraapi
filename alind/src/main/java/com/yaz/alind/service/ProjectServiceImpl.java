@@ -3,9 +3,9 @@ package com.yaz.alind.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.transaction.Transactional;
 
@@ -57,6 +58,8 @@ import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
+import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
+import com.yaz.alind.model.ui.CommunicationMessageRefNoDetailsModel;
 import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
@@ -1716,9 +1719,12 @@ public class ProjectServiceImpl implements ProjectService {
 			String refNo = getInterCommRefNo(model.getDepartmentId());
 			//			System.out.println("Business, saveWorkIssuedDetails,Dept Id: "
 			//			+model.getDepartmentId()+",Description: "+model.getDescription());
-			Date today = utilService.getTodaysDate();
-			model.setCreatedOn(utilService.dateToString(today));
-			model.setUpdatedOn(utilService.dateToString(today));
+			//			Date today = utilService.getTodaysDate();
+			//			model.setCreatedOn(utilService.dateToString(today));
+			//			model.setUpdatedOn(utilService.dateToString(today));
+			Timestamp timestamp = utilService.getCurrentDateTimeStamp();
+			model.setCreatedOn(utilService.timeStampToString(timestamp));
+			model.setUpdatedOn(utilService.timeStampToString(timestamp));
 			model.setReferenceNo(refNo);
 			model.setIsActive(1);
 			List<DepartmentCommunicationMessagesModel> deptMesgList = new ArrayList<DepartmentCommunicationMessagesModel>();
@@ -1756,9 +1762,12 @@ public class ProjectServiceImpl implements ProjectService {
 			//String refNo = getInterCommRefNo(model.getDepartmentId());
 			//			System.out.println("Business, saveWorkIssuedDetails,Dept Id: "
 			//			+model.getDepartmentId()+",Description: "+model.getDescription());
-			Date today = utilService.getTodaysDate();
-			model.setCreatedOn(utilService.dateToString(today));
-			model.setUpdatedOn(utilService.dateToString(today));
+			//			Date today = utilService.getTodaysDate();
+			Timestamp timestamp = utilService.getCurrentDateTimeStamp();
+			//			model.setCreatedOn(utilService.dateToString(today));
+			//			model.setUpdatedOn(utilService.dateToString(today));
+			model.setCreatedOn(utilService.timeStampToString(timestamp));
+			model.setUpdatedOn(utilService.timeStampToString(timestamp));
 			model.setIsActive(1);
 			List<DepartmentCommunicationMessagesModel> deptMesgList = new ArrayList<DepartmentCommunicationMessagesModel>();
 			//			System.out.println("Business, saveWorkIssuedDetails,deptMessageList size: "+deptMessageList.size());
@@ -1767,11 +1776,12 @@ public class ProjectServiceImpl implements ProjectService {
 			//			}
 			InterOfficeCommunicationEntity entity = createInterOfficeCommunicationEntity(model);
 			entity = projectDAO.saveInterOfficeCommunicationEntity(entity);
-			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
-					+", Dept Id: "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
-//			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
-//			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
-//					+", "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
+			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
+			//			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
+			//					+", Dept Id: "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
+			//			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
+			//			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
+			//					+", "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
 			List<DepartmentCommunicationMessagesEntity> departCommEntities = 
 					saveDepartmentCommunicationMessagesEntity(model.getDeptCommList(),entity.getOfficeCommunicationId());
 			departCommEntities = projectDAO.getDepartmentCommunicationMessagesByOffCommId(entity.getOfficeCommunicationId());
@@ -1799,8 +1809,11 @@ public class ProjectServiceImpl implements ProjectService {
 	 * @return
 	 */
 	@Override
-	public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
+//	public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
+//			String startDate, String endDate,int departmentId ){
+	public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId ){
+		List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
 		List<InterOfficeCommunicationModel> interOffComList = null;
 		Date stDate =null;
 		Date eDate = null;
@@ -1829,12 +1842,15 @@ public class ProjectServiceImpl implements ProjectService {
 				}
 				model.setDeptCommList(depModel);
 				interOffComList.add(model);
+				
+				commMsgList = getCommunicationMessageFormatModel(interOffComList);
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("searchInterDeptCommList: "+e.getMessage());
 		}
-		return interOffComList;
+//		return interOffComList;
+		return commMsgList;
 	}
 
 
@@ -1843,20 +1859,23 @@ public class ProjectServiceImpl implements ProjectService {
 		List<DepartmentCommunicationMessagesEntity> departCommEntities = null;
 		try{
 			departCommEntities = new ArrayList<DepartmentCommunicationMessagesEntity>();
-			logger.info("Business,saveDepartmentCommunicationMessagesEntity, deptMessageList.size: "+deptMessageList.size());
+			//logger.info("Business,saveDepartmentCommunicationMessagesEntity, deptMessageList.size: "+deptMessageList.size());
 			if(officeCommunicationId > 0){
 				Date today = utilService.getTodaysDate();
+				Timestamp timestamp = utilService.getCurrentDateTimeStamp();
 				//				model.setCreatedOn(utilService.dateToString(today));
 				//				model.setUpdatedOn(utilService.dateToString(today));
 				for(DepartmentCommunicationMessagesModel dc: deptMessageList){
 					dc.setOfficeCommunicationId(officeCommunicationId);
 					dc.setDepartmentId(dc.getDepartmentId());
-					dc.setCreatedOn(utilService.dateToString(today));
-					dc.setUpdatedOn(utilService.dateToString(today));
+					//					dc.setCreatedOn(utilService.dateToString(today));
+					//					dc.setUpdatedOn(utilService.dateToString(today));
+					dc.setCreatedOn(utilService.timeStampToString(timestamp));
+					dc.setUpdatedOn(utilService.timeStampToString(timestamp));
 					DepartmentCommunicationMessagesEntity e = createDepartmentCommunicationMessagesEntity(dc);
 					departCommEntities.add(e);
 				}
-				System.out.println("Business,saveDepartmentCommunicationMessagesEntity, departCommEntities,size: "+departCommEntities.size());
+				//	System.out.println("Business,saveDepartmentCommunicationMessagesEntity, departCommEntities,size: "+departCommEntities.size());
 				departCommEntities = projectDAO.saveDepartmentCommunicationMessages(departCommEntities);
 			}
 		}catch(Exception e){
@@ -2010,8 +2029,192 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	/**
+	 *  Inbox / Incoming messages
+	 */
+	@Override
+	//	public List<CommunicationMessageFormatModel> testInboxMessageByDeptId(int departmentId ){
+	public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId ){
+		List<CommunicationMessageFormatModel> messageList = null;
+
+		try{
+			messageList = new ArrayList<CommunicationMessageFormatModel>();
+			TreeMap<String, HashMap<String, List<InterOfficeCommunicationModel>>> sortedTreeSet = new TreeMap<>(Collections.reverseOrder());
+			HashMap<String,HashMap<String, List<InterOfficeCommunicationModel>>> dateMap = 
+					new HashMap<String, HashMap<String,List<InterOfficeCommunicationModel>>>();
+			HashMap<String, List<InterOfficeCommunicationModel>> referenceNoMap = null;
+			List<InterOfficeCommunicationModel> commList = null;
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			referenceNoMap = new HashMap<String, List<InterOfficeCommunicationModel>>();
+
+			List<DepartmentCommunicationMessagesEntity> deptMessageList = projectDAO.
+					getDepartmentCommunicationMessagesByDeptId(departmentId);
+			
+			for(DepartmentCommunicationMessagesEntity deptCommMesg: deptMessageList){
+				InterOfficeCommunicationEntity entity = deptCommMesg.getInterOfficeCommunicationEntity();
+				
+				InterOfficeCommunicationModel interOffCommModel = createInterOfficeCommunicationModel(entity);
+				DepartmentCommunicationMessagesModel deptComMsgModel = 
+						createDepartmentCommunicationMessagesModel(deptCommMesg);
+				List<DepartmentCommunicationMessagesEntity> deptMsgEnyList = 
+						projectDAO.getDepartmentCommunicationMessagesByOffCommId(interOffCommModel.getOfficeCommunicationId());
+				List<DepartmentCommunicationMessagesModel> deptMsgModelList = new ArrayList<DepartmentCommunicationMessagesModel>();
+				for(DepartmentCommunicationMessagesEntity e: deptMsgEnyList){
+					DepartmentCommunicationMessagesModel deptModel = createDepartmentCommunicationMessagesModel(e);
+					deptMsgModelList.add(deptModel);
+				}
+				interOffCommModel.setDeptCommList(deptMsgModelList);
+				commList.add(interOffCommModel);
+			}
+			
+			messageList = getCommunicationMessageFormatModel(commList);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("testInboxMessageByDeptId: "+e.getMessage());
+		}
+		return messageList;
+	}
+
+	private List<CommunicationMessageFormatModel> getCommunicationMessageFormatModel
+	(List<InterOfficeCommunicationModel> commList){
+		List<CommunicationMessageFormatModel> messageList = null;
+		try{
+			messageList = new ArrayList<CommunicationMessageFormatModel>();
+			TreeMap<String, HashMap<String, List<InterOfficeCommunicationModel>>> sortedTreeSet = new TreeMap<>(Collections.reverseOrder());
+			HashMap<String,HashMap<String, List<InterOfficeCommunicationModel>>> dateMap = 
+					new HashMap<String, HashMap<String,List<InterOfficeCommunicationModel>>>();
+			HashMap<String, List<InterOfficeCommunicationModel>> 
+			referenceNoMap = new HashMap<String, List<InterOfficeCommunicationModel>>();
+			// Groping based on the reference number.
+			for(InterOfficeCommunicationModel cm: commList){
+				if(referenceNoMap.containsKey(cm.getReferenceNo())){
+					List<InterOfficeCommunicationModel> list = referenceNoMap.get(cm.getReferenceNo());
+					list.add(cm);
+					referenceNoMap.put(cm.getReferenceNo(), list);
+				}else{
+					List<InterOfficeCommunicationModel> list = new ArrayList<InterOfficeCommunicationModel>();
+					list.add(cm);
+					referenceNoMap.put(cm.getReferenceNo(), list);
+				}
+			}
+
+			for (Map.Entry<String, List<InterOfficeCommunicationModel>> map : referenceNoMap.entrySet()){
+				List<InterOfficeCommunicationModel> list = map.getValue();
+				list.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
+				Collections.reverse(list);
+				referenceNoMap.put(map.getKey(), list);
+				dateMap.put(list.get(0).getCreatedOn(), referenceNoMap);
+			}
+
+			sortedTreeSet.putAll(dateMap);
+			for (Map.Entry<String, HashMap<String, List<InterOfficeCommunicationModel>>>
+			entry : sortedTreeSet.entrySet()){
+				CommunicationMessageFormatModel msgFormat = new CommunicationMessageFormatModel();
+				msgFormat.setTitleDate(entry.getKey());
+				HashMap<String, List<InterOfficeCommunicationModel>> refMap = entry.getValue();
+				List< CommunicationMessageRefNoDetailsModel> comMsgRefList = 
+						new ArrayList<CommunicationMessageRefNoDetailsModel>();
+				for (Map.Entry<String, List<InterOfficeCommunicationModel>> rMap :
+					refMap.entrySet()) {
+					CommunicationMessageRefNoDetailsModel model = new CommunicationMessageRefNoDetailsModel();
+					model.setTitleRefNo(rMap.getKey());
+					model.setOffCommList(rMap.getValue());
+					comMsgRefList.add(model);
+				}
+				msgFormat.setComMsgRefList(comMsgRefList);
+				messageList.add(msgFormat);
+			}//for (Map.Entry<String, HashMap<String, List<InterOfficeCommunicationModel>>>
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationMessageFormatModel: "+e.getMessage());
+		}
+		return messageList;
+	}
+
+	/**
 	 * Sent message details to other departments
 	 */
+
+	@Override
+	public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId ){
+		List<CommunicationMessageFormatModel> messageList = null;
+		try{
+			messageList = new ArrayList<CommunicationMessageFormatModel>();
+			List<InterOfficeCommunicationModel> commList = new ArrayList<InterOfficeCommunicationModel>();
+			HashMap<String, List<InterOfficeCommunicationModel>> referenceNoMap = null;
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			referenceNoMap = new HashMap<String, List<InterOfficeCommunicationModel>>();
+			HashMap<String,HashMap<String, List<InterOfficeCommunicationModel>>> dateMap = 
+					new HashMap<String, HashMap<String,List<InterOfficeCommunicationModel>>>();
+			TreeMap<String, HashMap<String, List<InterOfficeCommunicationModel>>> sortedTreeSet = new TreeMap<>(Collections.reverseOrder());
+			int status = 1;
+			List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityByDeptId(departmentId);
+			for(InterOfficeCommunicationEntity e: entityList){
+				InterOfficeCommunicationModel intOffComMod = createInterOfficeCommunicationModel(e);
+				// Dept Message
+				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+						(e.getOfficeCommunicationId());
+				if(depMesgList != null){
+					List<DepartmentCommunicationMessagesModel> deptComMsgList = new ArrayList<DepartmentCommunicationMessagesModel>();
+					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+						DepartmentCommunicationMessagesModel departComMod = createDepartmentCommunicationMessagesModel(deptMsg);
+						deptComMsgList.add(departComMod);
+					}
+					intOffComMod.setDeptCommList(deptComMsgList);
+				}
+				commList.add(intOffComMod);
+				messageList = getCommunicationMessageFormatModel(commList);
+			/**
+				// Groping based on the reference number.
+				for(InterOfficeCommunicationModel cm: commList){
+					if(referenceNoMap.containsKey(cm.getReferenceNo())){
+						List<InterOfficeCommunicationModel> list = referenceNoMap.get(cm.getReferenceNo());
+						list.add(cm);
+						referenceNoMap.put(cm.getReferenceNo(), list);
+					}else{
+						List<InterOfficeCommunicationModel> list = new ArrayList<InterOfficeCommunicationModel>();
+						list.add(cm);
+						referenceNoMap.put(cm.getReferenceNo(), list);
+					}
+				}
+
+				for (Map.Entry<String, List<InterOfficeCommunicationModel>> map : referenceNoMap.entrySet()){
+					List<InterOfficeCommunicationModel> list = map.getValue();
+					list.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
+					Collections.reverse(list);
+					referenceNoMap.put(map.getKey(), list);
+					dateMap.put(list.get(0).getCreatedOn(), referenceNoMap);
+				}
+				sortedTreeSet.putAll(dateMap);
+				for (Map.Entry<String, HashMap<String, List<InterOfficeCommunicationModel>>>
+				entry : sortedTreeSet.entrySet()){
+					CommunicationMessageFormatModel msgFormat = new CommunicationMessageFormatModel();
+					msgFormat.setTitleDate(entry.getKey());
+					HashMap<String, List<InterOfficeCommunicationModel>> refMap = entry.getValue();
+					List< CommunicationMessageRefNoDetailsModel> comMsgRefList = 
+							new ArrayList<CommunicationMessageRefNoDetailsModel>();
+					for (Map.Entry<String, List<InterOfficeCommunicationModel>> rMap :
+						refMap.entrySet()) {
+						CommunicationMessageRefNoDetailsModel model = new CommunicationMessageRefNoDetailsModel();
+						model.setTitleRefNo(rMap.getKey());
+						model.setOffCommList(rMap.getValue());
+
+						comMsgRefList.add(model);
+					}
+					msgFormat.setComMsgRefList(comMsgRefList);
+					messageList.add(msgFormat);
+				}//for (Map.Entry<String, HashMap<String, List<InterOfficeCommunicationModel>>>
+				**/
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationListByDeptId: "+e.getMessage());
+		}
+		return messageList;
+	}
+	/**
 	@Override
 	public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId ){
 		List<InterOfficeCommunicationModel> commList = null;
@@ -2019,6 +2222,7 @@ public class ProjectServiceImpl implements ProjectService {
 			commList = new ArrayList<InterOfficeCommunicationModel>();
 			int status = 1;
 			List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityByDeptId(departmentId);
+
 			for(InterOfficeCommunicationEntity e: entityList){
 				InterOfficeCommunicationModel m = createInterOfficeCommunicationModel(e);
 				// Dept Message
@@ -2033,15 +2237,13 @@ public class ProjectServiceImpl implements ProjectService {
 					m.setDeptCommList(mList);
 				}
 				commList.add(m);
-				
-				/**
-				 *  Sorting based on dates
-				 */
-				Collections.sort(commList, new Comparator<InterOfficeCommunicationModel>() {
-					public int compare(InterOfficeCommunicationModel o1, InterOfficeCommunicationModel o2) {
-						return o1.getCreatedOn().compareTo(o2.getCreatedOn());
-					}
-				});
+
+
+				//				List<InterOfficeCommunicationModel> list = new ArrayList<>();
+				//				list.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
+				//				commList.sort((e1, e2) -> utilService.stringDateToTimestamp(e1.getCreatedOn())
+				//						.compareTo(utilService.stringDateToTimestamp(e2.getCreatedOn())));
+				commList.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
 				Collections.reverse(commList);
 			}
 			//System.out.println("Business, getCommunicationListByDeptId, size: "+commList.size());
@@ -2051,55 +2253,63 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 		return commList;
 	}
+	 **/
 
 	/**
 	 *    The message from other department
 	 */
-	@Override
-	public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(
-			int departmentId) {
-		List<InterOfficeCommunicationModel> commList = null;
-		try{
-			commList = new ArrayList<InterOfficeCommunicationModel>();
-			List<DepartmentCommunicationMessagesEntity> deptMessageList = projectDAO.
-					getDepartmentCommunicationMessagesByDeptId(departmentId);
-//			System.out.println("Business,getInboxMessageByDeptId, size: "+deptMessageList.size()
-//					+", departmentId: "+departmentId);
-			for(DepartmentCommunicationMessagesEntity deptCommMesg: deptMessageList){
-				InterOfficeCommunicationEntity entity = 
-						projectDAO.getCommunicationEntityById(deptCommMesg.getOfficeCommunicationId());
-//				System.out.println("Business,getInboxMessageByDeptId, Emp Id: "+entity.getEmployee().getEmployeeId()
-//						+", departmentId: "+departmentId);
-				InterOfficeCommunicationModel interOffCommModel = createInterOfficeCommunicationModel(entity);
-				// Dept Messages
-				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
-						(entity.getOfficeCommunicationId());
+	//	@Override
+	//	public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(
+	//			int departmentId) {
+	//		List<InterOfficeCommunicationModel> commList = null;
+	//		try{
+	//			commList = new ArrayList<InterOfficeCommunicationModel>();
+	//			List<DepartmentCommunicationMessagesEntity> deptMessageList = projectDAO.
+	//					getDepartmentCommunicationMessagesByDeptId(departmentId);
+	//			//			System.out.println("Business,getInboxMessageByDeptId, size: "+deptMessageList.size()
+	//			//					+", departmentId: "+departmentId);
+	//			for(DepartmentCommunicationMessagesEntity deptCommMesg: deptMessageList){
+	//				InterOfficeCommunicationEntity entity = 
+	//						projectDAO.getCommunicationEntityById(deptCommMesg.getOfficeCommunicationId());
+	//				//				System.out.println("Business,getInboxMessageByDeptId, Emp Id: "+entity.getEmployee().getEmployeeId()
+	//				//						+", departmentId: "+departmentId);
+	//				InterOfficeCommunicationModel interOffCommModel = createInterOfficeCommunicationModel(entity);
+	//				// Dept Messages
+	//				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+	//						(entity.getOfficeCommunicationId());
+	//
+	//				if(depMesgList != null){
+	//					List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
+	//					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+	//						DepartmentCommunicationMessagesModel mod = createDepartmentCommunicationMessagesModel(deptMsg);
+	//						mList.add(mod);
+	//					}
+	//					interOffCommModel.setDeptCommList(mList);
+	//				}
+	//				commList.add(interOffCommModel);
+	//				/**
+	//				 *  Sorting based on dates
+	//
+	//				Collections.sort(commList, new Comparator<InterOfficeCommunicationModel>() {
+	//					public int compare(InterOfficeCommunicationModel o1, InterOfficeCommunicationModel o2) {
+	//						return o1.getCreatedOn().compareTo(o2.getCreatedOn());
+	//					}
+	//				});
+	//				Collections.reverse(commList);
+	//				 */
+	//				//				commList.sort((e1, e2) -> utilService.stringDateToTimestamp(e1.getCreatedOn())
+	//				//						.compareTo(utilService.stringDateToTimestamp(e2.getCreatedOn())));
+	//				commList.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
+	//				Collections.reverse(commList);
+	//			}
+	//		}catch(Exception e){
+	//			e.printStackTrace();
+	//			logger.error("getInboxMessageByDeptId: "+e.getMessage());
+	//		}
+	//		return commList;
+	//	} 
 
-				if(depMesgList != null){
-					List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
-					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
-						DepartmentCommunicationMessagesModel mod = createDepartmentCommunicationMessagesModel(deptMsg);
-						mList.add(mod);
-					}
-					interOffCommModel.setDeptCommList(mList);
-				}
-				commList.add(interOffCommModel);
-				/**
-				 *  Sorting based on dates
-				 */
-				Collections.sort(commList, new Comparator<InterOfficeCommunicationModel>() {
-					public int compare(InterOfficeCommunicationModel o1, InterOfficeCommunicationModel o2) {
-						return o1.getCreatedOn().compareTo(o2.getCreatedOn());
-					}
-				});
-				Collections.reverse(commList);
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("getInboxMessageByDeptId: "+e.getMessage());
-		}
-		return commList;
-	}
+
 
 
 	private DepartmentCommunicationMessagesModel createDepartmentCommunicationMessagesModel
@@ -2107,12 +2317,13 @@ public class ProjectServiceImpl implements ProjectService {
 		DepartmentCommunicationMessagesModel model = null;
 		try{
 			model = new DepartmentCommunicationMessagesModel();
-			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+			model.setCreatedOn(utilService.timeStampToString(entity.getCreatedOn()));
 			model.setDepartmentId(entity.getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
 			model.setDeptCommId(entity.getDeptCommId());
 			model.setOfficeCommunicationId(entity.getOfficeCommunicationId());
-			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+//			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setUpdatedOn(utilService.timeStampToString(entity.getCreatedOn()));
 			model.setViewStatus(entity.getViewStatus());
 		}catch(Exception e){
 			e.printStackTrace();
@@ -2126,11 +2337,15 @@ public class ProjectServiceImpl implements ProjectService {
 		DepartmentCommunicationMessagesEntity entity = null;
 		try{
 			entity = new DepartmentCommunicationMessagesEntity();
-			entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+			//			entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+			entity.setCreatedOn(utilService.stringDateToTimestamp(model.getCreatedOn()));
 			entity.setDepartmentId(model.getDepartmentId());
 			entity.setOfficeCommunicationId(model.getOfficeCommunicationId());
-			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			//			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			entity.setUpdatedOn(utilService.stringDateToTimestamp(model.getUpdatedOn()));
 			entity.setViewStatus(model.getViewStatus());
+			//			System.out.println("Business,createDepartmentCommunicationMessagesEntity, time stamp str: "+model.getCreatedOn()
+			//					+", Timestamp: "+entity.getCreatedOn());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDepartmentCommunicationMessagesEntity: "+e.getMessage());
@@ -2146,9 +2361,8 @@ public class ProjectServiceImpl implements ProjectService {
 			model = new InterOfficeCommunicationModel();
 			model.setAnnexureFormat(Iconstants.ANNEXURE_FORMAT);
 			if(entity.getCreatedOn() != null){
-				model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
+				model.setCreatedOn(utilService.timeStampToString(entity.getCreatedOn()));
 			}
-			//			model.setCreatedOn(utilService.dateToString(entity.getCreatedOn()));
 			model.setDepartmentId(entity.getDepartment().getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
 			model.setDescription(entity.getDescription());
@@ -2157,7 +2371,8 @@ public class ProjectServiceImpl implements ProjectService {
 			model.setEmployeeName(emp.getFirstName()+" "+emp.getLastName());
 			model.setOfficeCommunicationId(entity.getOfficeCommunicationId());
 			model.setReferenceNo(entity.getReferenceNo());
-			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			//			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
+			model.setUpdatedOn(utilService.timeStampToString(entity.getUpdatedOn()));
 			model.setSubTaskId(entity.getSubTaskId());
 			model.setSubTaskName(entity.getSubTaskEntity().getSubTaskName());
 			model.setWorkDetailsId(entity.getWorkDetailsId());
@@ -2177,14 +2392,16 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			entity = new InterOfficeCommunicationEntity();
 			if(model.getCreatedOn() != null){
-				entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+				//				entity.setCreatedOn(utilService.getDateFromString(model.getCreatedOn()));
+				entity.setCreatedOn(utilService.stringToTimestamp(model.getCreatedOn()));
 			}
 			entity.setDepartmentId(model.getDepartmentId());
 			entity.setDescription(model.getDescription());
 			entity.setEmployeeId(model.getEmployeeId());
 			entity.setOfficeCommunicationId(model.getOfficeCommunicationId());
 			entity.setReferenceNo(model.getReferenceNo());
-			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			//			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
+			entity.setUpdatedOn(utilService.stringToTimestamp(model.getUpdatedOn()));
 			entity.setSubTaskId(model.getSubTaskId());
 			entity.setWorkDetailsId(model.getWorkDetailsId());
 			entity.setSubject(model.getSubject());
@@ -2223,6 +2440,7 @@ public class ProjectServiceImpl implements ProjectService {
 	public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(
 			int deptCommId, String token) {
 		DepartmentCommunicationMessagesModel model = null;
+//		System.out.println("viewUpdateDepartmentCommunicationMessage,deptCommId: "+utilService.getCurrentDateTimeStamp());
 		try{
 			DepartmentCommunicationMessagesEntity entity = projectDAO.getDepartmentCommunicationMessagesById(deptCommId);
 			System.out.println("viewUpdateDepartmentCommunicationMessage,DepartmentId: "+entity.getDepartment().getDepartmentId());
@@ -2232,7 +2450,9 @@ public class ProjectServiceImpl implements ProjectService {
 			// Admin, HOD or Co-ordinator 
 			if(roleId == 1 || roleId == 2 || roleId == 4){
 				entity.setViewStatus(1); //
-				entity.setUpdatedOn(utilService.getCurrentDateTime());
+				//entity.setUpdatedOn(utilService.getCurrentDateTime());
+				entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
+//				System.out.println("viewUpdateDepartmentCommunicationMessage,CurrentDateTimeStamp: "+utilService.getCurrentDateTimeStamp());
 				entity = projectDAO.updateDepartmentCommunicationMessage(entity);
 			}
 			model = createDepartmentCommunicationMessagesModel(entity);

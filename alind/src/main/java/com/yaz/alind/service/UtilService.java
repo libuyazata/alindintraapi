@@ -33,6 +33,9 @@ public interface UtilService {
 	public Date getCurrentDate();
 	public Date stringToDate(String date );
 	public String createDownLoadFileName();
+	public Timestamp stringToTimestamp(String strDate);
+	public Timestamp getCurrentDateTimeStamp();
+	public String timeStampToString(Timestamp timestamp);
 //	public String interComRefNo(InterCommRefNoEntity refNo);
 	
 //	public Document getWaterMarkPDF(String fileName,Employee employee);

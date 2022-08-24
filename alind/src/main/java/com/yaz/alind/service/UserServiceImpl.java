@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.rmi.CORBA.Util;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +46,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	//	public EmployeeEntity getAuthentication(String userName, String password) {
 	public EmployeeModel getAuthentication(String userName, String password) {
 		//EmployeeEntity employee = null;
 		TokenEntity tokenModel = null;
@@ -97,44 +94,6 @@ public class UserServiceImpl implements UserService {
 	public TokenEntity getTokenModelByUserId(int userId) {
 		return userDAO.getTokenModelByUserId(userId);
 	}
-	/**
-	@Override
-	public EmployeeModel saveOrUpdateEmployee(EmployeeModel employee) {
-		EmployeeModel empModel = null;
-		EmployeeEntity emp = null;
-		try{
-			EmployeeEntity lastEmp = userDAO.getLastEmployeeDetails();
-			//			System.out.println("Business,saveOrUpdateEmployee,lastEmp, id: "+lastEmp.getEmployeeId());
-			Date today = utilService.getTodaysDate();
-			EmployeeEntity empEntity = createEmployeeEntity(employee);
-			if(employee.getEmpCode() == null){
-				int lastEmpCode = Integer.parseInt(lastEmp.getEmpCode());
-				empEntity.setEmpCode(Integer.toString(lastEmpCode+1));
-				empEntity.setUserName(Integer.toString(lastEmpCode+1));
-				empEntity.setPassword(Integer.toString(lastEmpCode+1));
-				//				empEntity.setCreatedAt(utilService.dateToTimestamp(today));
-				empEntity.setCreatedAt(today);
-				//				empEntity.setIsActive(1);
-			}
-			EmployeeEntity empFromDB = userDAO.getEmployeeById(employee.getEmployeeId());
-			empEntity.setPassword(empFromDB.getPassword());
-			empEntity.setIsActive(1);
-			empEntity.setEmpCode(empFromDB.getEmpCode());
-			empEntity.setUpdatedAt(empFromDB.getCreatedAt());
-			//			empEntity.setUpdatedAt(utilService.dateToTimestamp(today));
-			empEntity.setUpdatedAt(today);
-			emp = userDAO.saveOrUpdateEmployee(empEntity);
-			System.out.println("saveOrUpdateEmployee,Last name: "+emp.getLastName());
-			System.out.println("saveOrUpdateEmployee,EmpolyeeTypeId: "+emp.getEmployeeTypes().getEmpolyeeTypeId());
-			empModel = createEmployeeModel(emp);
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("saveOrUpdateEmployee: "+e.getMessage());
-		}
-		return empModel;
-		//return emp;
-	}
-	**/
 	@Override
 	public EmployeeModel saveEmployee(EmployeeModel employee){
 		EmployeeModel empModel = null;

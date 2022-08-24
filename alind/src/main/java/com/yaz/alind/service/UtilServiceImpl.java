@@ -5,11 +5,13 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.yaz.alind.dao.UserDAO;
-import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.util.Iconstants;
 
@@ -45,6 +46,23 @@ public class UtilServiceImpl implements UtilService{
 	public Date getCurrentDateTime() {
 
 		return new Date(System.currentTimeMillis());
+	}
+	
+	@Override
+	public Timestamp getCurrentDateTimeStamp(){
+		Timestamp timestamp = null;
+		try{
+		Date date = new Date();
+		DateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		String dateStr = format.format(date);
+		date = format.parse(dateStr);
+		timestamp = new Timestamp(date.getTime());
+        System.out.println("Current Time Stamp: "+timestamp);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCurrentDateTimeStamp: "+e.getMessage());
+		}
+        return timestamp;
 	}
 
 	@Override
@@ -142,6 +160,15 @@ public class UtilServiceImpl implements UtilService{
 			logger.error("getDateFromString,"+e.getMessage());
 		}
 		return date;
+	}
+	
+	@Override
+	public Timestamp stringToTimestamp(String strDate){
+		String pattern = "yyyy-MM-dd HH:mm:ss.S";
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+		LocalDateTime localDateTime = LocalDateTime.from(formatter.parse(strDate));
+		Timestamp stamp = Timestamp.valueOf(localDateTime);
+		return stamp;
 	}
 
 	@Override
@@ -393,6 +420,18 @@ public class UtilServiceImpl implements UtilService{
 
 		return strDate;
 	}
+	
+	@Override
+	public String timeStampToString(Timestamp timestamp){
+		String timeStStr = null;
+		try{
+			timeStStr =  timestamp.toString();
+		}catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Exception, timeStampToString: "+e.getMessage());
+		}
+		return timeStStr;
+	}
 
 	@Override
 	public Date getCurrentDate() {
@@ -443,7 +482,8 @@ public class UtilServiceImpl implements UtilService{
 	public Timestamp stringDateToTimestamp(String dateStr) {
 		Timestamp timestamp = null;
 		try{
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+//			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
 			Date parsedDate = dateFormat.parse(dateStr);
 			timestamp = new java.sql.Timestamp(parsedDate.getTime());
 		}catch(Exception e){
