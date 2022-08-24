@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletResponse;
@@ -50,6 +52,7 @@ import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
+import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
 import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
@@ -1711,10 +1714,11 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("communicationListByDeptId,token: "+token);
+//			System.out.println("communicationListByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<InterOfficeCommunicationModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
+//				List<InterOfficeCommunicationModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
+				List<CommunicationMessageFormatModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
 				resultMap.put("communicationList", communicationList);
 				resultMap.put("status", "success");
 			}else{
@@ -1748,7 +1752,8 @@ public class ProjectController {
 			System.out.println("communicationListByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<InterOfficeCommunicationModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
+//				List<InterOfficeCommunicationModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
+				List<CommunicationMessageFormatModel> communicationList = projectService.getCommunicationListByDeptId(departmentId);
 				resultMap.put("communicationList", communicationList);
 				resultMap.put("status", "success");
 			}else{
@@ -1782,7 +1787,8 @@ public class ProjectController {
 			System.out.println("getInboxMessageByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<InterOfficeCommunicationModel> communicationList = projectService.getInboxMessageByDeptId(departmentId);
+//				List<InterOfficeCommunicationModel> communicationList = projectService.getInboxMessageByDeptId(departmentId);
+				List<CommunicationMessageFormatModel> communicationList = projectService.getInboxMessageByDeptId(departmentId);
 				resultMap.put("inboxMessages", communicationList);
 				resultMap.put("status", "success");
 			}else{
@@ -1810,7 +1816,7 @@ public class ProjectController {
 			System.out.println("searchInterDeptCommList,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<InterOfficeCommunicationModel> list = projectService.searchInterDeptCommList
+				List<CommunicationMessageFormatModel> list = projectService.searchInterDeptCommList
 						(searchKeyWord,startDate,endDate,departmentId);
 				resultMap.put("communicationModelList", list);
 				resultMap.put("status", "success");
@@ -1889,24 +1895,24 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 	
+	/*
+		@RequestMapping(value="/project/test", method = RequestMethod.GET)
+		public ResponseEntity<Map<String,Object>>  test(@RequestParam int departmentId) throws Exception{
+			Map<String,Object> resultMap = null;
+			try{
+				resultMap = new HashMap<String,Object>();
+//				List<CommunicationMessageFormatModel> modelMap = projectService.testInboxMessageByDeptId(departmentId);
+				List<CommunicationMessageFormatModel> modelMap = projectService.testCommunicationListByDeptId(departmentId);
+				resultMap.put("modelMap", modelMap);
 	
-	//	@RequestMapping(value="/project/test", method = RequestMethod.GET)
-	//	public ResponseEntity<Map<String,Object>>  test(@RequestParam int subTaskId,@RequestParam int documentCategoryId) throws Exception{
-	//		Map<String,Object> resultMap = null;
-	//		try{
-	//			resultMap = new HashMap<String,Object>();
-	//			String contextPath = context.getRealPath(""); 
-	//			WorkDocumentModel model = projectService.getLatestWorkDocument(subTaskId,documentCategoryId,contextPath);
-	//			resultMap.put("model", model);
-	//
-	//		}catch(Exception e){
-	//			e.printStackTrace();
-	//			resultMap.put("status", "failed");
-	//			logger.error("test, "+e.getMessage());
-	//			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-	//		}
-	//		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	//	}
-
+			}catch(Exception e){
+				e.printStackTrace();
+				resultMap.put("status", "failed");
+				logger.error("test, "+e.getMessage());
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+			}
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+		}
+**/
 
 }
