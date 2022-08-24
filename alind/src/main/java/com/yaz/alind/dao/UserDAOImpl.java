@@ -23,7 +23,6 @@ import com.yaz.alind.entity.EmployeeEntity;
 import com.yaz.alind.entity.EmployeeTypesEntity;
 import com.yaz.alind.entity.TokenEntity;
 import com.yaz.alind.entity.UserRolesEntity;
-import com.yaz.alind.model.ui.EmployeeModel;
 
 @Repository
 @Transactional

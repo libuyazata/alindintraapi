@@ -539,15 +539,15 @@ public class ProjectDAOImpl implements ProjectDAO {
 
 		try{
 			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class);
-			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId: "+departmentId);
+//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId: "+departmentId);
 			if(departmentId != 0){
-				System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId != 0: ");
+				//System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId != 0: ");
 				cr.add(Restrictions.eq("departmentId", departmentId));
 			}
 			cr.addOrder(Order.desc("createdOn"));
 			cr.add(Restrictions.eq("status", status));
 			workDetailsEntities = cr.list();
-			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,size: "+workDetailsEntities.size());
+			//System.out.println("DAO, getWorkDetailsEntitiesByDeptId,size: "+workDetailsEntities.size());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getWorkDetailsEntitiesByDeptId: "+e.getMessage());
@@ -1050,7 +1050,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
 			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
 			List<InterOfficeCommunicationEntity> list = cr.list();
-			System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
+		//	System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
 			if(list.size() >0){
 				commEntity = list.get(0);
 			}
@@ -1149,26 +1149,53 @@ public class ProjectDAOImpl implements ProjectDAO {
 		List<InterOfficeCommunicationEntity> comList = null;
 		try{
 			comList = new ArrayList<InterOfficeCommunicationEntity>();
-			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class,"workDetails");
-
+			Criteria intOffCr = this.sessionFactory.getCurrentSession().
+					createCriteria(InterOfficeCommunicationEntity.class,"intOffCom");
+			intOffCr.createAlias("employee", "emp"); 
+			intOffCr.createAlias("department", "dept"); 
+			intOffCr.createAlias("workDetailsEntity", "work"); 
 			if(startDate != null){
-				cr.add(Restrictions.ge("createdOn", startDate) );
+				intOffCr.add(Restrictions.ge("intOffCom.createdOn", startDate) );
 			}
 			if(endDate != null){
-				cr.add(Restrictions.lt("createdOn", endDate) );
+				intOffCr.add(Restrictions.lt("intOffCom.createdOn", endDate) );
 			}
 			if(departmentId > 0){
-				cr.add(Restrictions.eq("departmentId", departmentId));
+				intOffCr.add(Restrictions.eq("intOffCom.departmentId", departmentId));
 			}
-			Disjunction disj = Restrictions.disjunction();
+			
 			if(!searchKeyWord.isEmpty()){
-				disj.add(Restrictions.like("subject", searchKeyWord,MatchMode.ANYWHERE));
-				disj.add(Restrictions.like("referenceNo", searchKeyWord,MatchMode.ANYWHERE));
-				disj.add(Restrictions.like("description", searchKeyWord,MatchMode.ANYWHERE));
+				
+				Criterion empFirstName = Restrictions.ilike("emp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empLastName = Restrictions.ilike("emp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empCode = Restrictions.ilike("emp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+				
+				Criterion subject = Restrictions.ilike("intOffCom.subject", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion referenceNo = Restrictions.ilike("intOffCom.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion description = Restrictions.ilike("intOffCom.description", searchKeyWord, MatchMode.ANYWHERE);
+				
+				Criterion workName = Restrictions.ilike("work.workName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion workDescription = Restrictions.ilike("work.description", searchKeyWord, MatchMode.ANYWHERE);
+			
+				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
+			
+				Disjunction disj = Restrictions.disjunction();
+				disj.add(empFirstName);
+				disj.add(empLastName);
+				disj.add(empCode);
+				disj.add(subject);
+				
+				disj.add(referenceNo);
+				disj.add(description);
+				disj.add(workName);
+				disj.add(workDescription);
+				disj.add(departmentName);
+				
+				intOffCr.add(disj);
 				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
 			}
-			cr.add(disj);
-			comList = cr.list();
+			
+			comList = intOffCr.list();
 			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1182,10 +1209,10 @@ public class ProjectDAOImpl implements ProjectDAO {
 	(List<DepartmentCommunicationMessagesEntity> deptMessages){
 		List<DepartmentCommunicationMessagesEntity> deptMessageList = null;
 		try{
-			System.out.println("DAO, saveDepartmentCommunicationMessages, size: "+deptMessages.size());
+			//System.out.println("DAO, saveDepartmentCommunicationMessages, size: "+deptMessages.size());
 			deptMessageList = new ArrayList<DepartmentCommunicationMessagesEntity>();
 			for(DepartmentCommunicationMessagesEntity dm: deptMessages){
-				System.out.println("DAO, saveDepartmentCommunicationMessages: ");
+				//System.out.println("DAO, saveDepartmentCommunicationMessages: ");
 				this.sessionFactory.getCurrentSession().save(dm);
 				deptMessageList.add(dm);
 			}
@@ -1194,7 +1221,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			e.printStackTrace();
 			logger.error("saveDepartmentCommunicationMessages: "+e.getMessage());
 		}
-		System.out.println("DAO, saveDepartmentCommunicationMessages, deptMessageList,size: "+deptMessageList.size());
+		//System.out.println("DAO, saveDepartmentCommunicationMessages, deptMessageList,size: "+deptMessageList.size());
 		return deptMessageList;
 	}
 
