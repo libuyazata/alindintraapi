@@ -2,47 +2,33 @@ package com.yaz.alind.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
-
-import javax.servlet.ServletContext;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
-import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
-import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
-import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
-import com.yaz.alind.entity.WorkIssuedDetailsEntity;
 import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
 import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
+import com.yaz.alind.model.ui.GeneralMessageFormatModel;
+import com.yaz.alind.model.ui.GeneralMessageModel;
 import com.yaz.alind.model.ui.InterOfficeCommunicationModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
 import com.yaz.alind.model.ui.WorkDocumentModel;
 import com.yaz.alind.model.ui.WorkIssuedModel;
+import com.yaz.alind.model.ui.WorkMessageAttachmentModel;
 
 public interface ProjectService {
 
 	public ProjectInfoEntity saveOrUpdateProject(ProjectInfoEntity projectInfo);
 	public List<ProjectInfoEntity> getAllProject(int departmentId,int projectId,String token);
 	public ProjectInfoEntity getProjectInfoById(int projectId);
-	
-//	public List<DocumentTypesEntity> getAllDocumentTypes();
-//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes);
-//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes);
-//	public int deleteDocumentTypesById(int documentTypeId); 	
-//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId);
 	
 	public List<ProjectDocumentEntity> getAllDocumentByProjectId(int projectId,int documentTypeId,String realPath,String token );
 	public ProjectDocumentEntity saveOrUpdateDocument(ProjectDocumentEntity document);
@@ -108,25 +94,34 @@ public interface ProjectService {
     
   //Inter Office Communication
     public InterOfficeCommunicationModel saveInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
-    public InterOfficeCommunicationModel replyInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
+    public InterOfficeCommunicationModel replyInterOfficeCommunication(String token, MultipartFile multipartFile,
+    		String contextPath,List<Integer> toDeptList,int workDetailsId,
+    		int subTaskId, String subject,String description,String referenceNo);
+    public InterOfficeCommunicationModel sendWorkMessage(String token, MultipartFile multipartFile,
+    		String contextPath,
+    		List<Integer> toDeptList,int workDetailsId,int subTaskId, String subject,String description);
     public InterOfficeCommunicationModel updateInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
     public InterOfficeCommunicationModel getCommunicationById(int officeCommunicationId);
-    public List<InterOfficeCommunicationModel> getCommunicationListById(int officeCommunicationId);
+    public List<InterOfficeCommunicationModel> getCommunicationListById(String contextPath,int officeCommunicationId);
     public InterOfficeCommunicationModel deleteCommunicationById(int officeCommunicationId);
     public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(int subTaskId);
     public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(int workDetailsId);
-//    public List<InterOfficeCommunicationModel> getCommunicationListByDeptId(int departmentId );
     public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId );
-//    public List<InterOfficeCommunicationModel> searchInterDeptCommList(String searchKeyWord,
-//			String startDate, String endDate,int departmentId );
     public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId );
-//    public List<InterOfficeCommunicationModel> getInboxMessageByDeptId(int departmentId );
     public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId );
-//    public List<CommunicationMessageFormatModel> testInboxMessageByDeptId(int departmentId );
+    
+    
     
     public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(int deptCommId,String token);
-   // public List<DepartmentCommunicationMessagesModel> getMessagesForDepartmentByDeptId(int departmentId );
     
     public List<DepartmentEntity> getDepartmentListByWorkId(int workDetailsId);
+    
+    public List<WorkMessageAttachmentModel> getWorkMessageAttachmentByOffComId(String realPath,int officeCommunicationId);
+
+    public GeneralMessageModel sendToGeneralMessage(String token, MultipartFile[] multipartFiles,
+    		String contextPath,
+    		List<Integer> toDeptList, String subject,String description);
+    public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId );
+    public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId );
 }

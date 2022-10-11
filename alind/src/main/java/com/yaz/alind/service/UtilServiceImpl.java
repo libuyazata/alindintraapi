@@ -57,7 +57,7 @@ public class UtilServiceImpl implements UtilService{
 		String dateStr = format.format(date);
 		date = format.parse(dateStr);
 		timestamp = new Timestamp(date.getTime());
-        System.out.println("Current Time Stamp: "+timestamp);
+       // System.out.println("Current Time Stamp: "+timestamp);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getCurrentDateTimeStamp: "+e.getMessage());

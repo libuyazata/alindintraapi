@@ -558,7 +558,6 @@ public class UserServiceImpl implements UserService {
 			model = new EmployeeModel();
 			String profImageLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+entity.getEmployeeId();
 			model.setAccommodationLocation(entity.getAccommodationLocation());
-//			model.setCreatedAt(utilService.dateToString(entity.getCreatedAt()));
 			if(entity.getCreatedAt() != null){
 			model.setCreatedAt(utilService.dateToString(utilService.dateToTimestamp(entity.getCreatedAt())));
 			}
