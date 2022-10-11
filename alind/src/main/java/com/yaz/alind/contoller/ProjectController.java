@@ -2091,6 +2091,33 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
+	@RequestMapping(value="/project/getGeneralMessageById/{genMessageId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getGeneralMessageById(@RequestHeader("token") String token
+			,@PathVariable("genMessageId") int genMessageId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("getGeneralInboxByDeptId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				GeneralMessageModel generalMessageModel = projectService.getGeneralMessageById(genMessageId);
+				resultMap.put("model", generalMessageModel);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getGeneralMessageById, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
 
 	/*
 		@RequestMapping(value="/project/test", method = RequestMethod.GET)

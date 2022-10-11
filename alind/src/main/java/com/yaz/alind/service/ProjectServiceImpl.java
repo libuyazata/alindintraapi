@@ -2843,5 +2843,26 @@ public class ProjectServiceImpl implements ProjectService {
 		return generalMessageFormatModels;
 	}
 
+	@Override
+	public GeneralMessageModel getGeneralMessageById(int genMessageId) {
+		GeneralMessageModel model = null;
+		try{
+			GeneralMessageEntity entity = projectDAO.getGeneralMessageById(genMessageId);
+			List<DepartmentGeneralMessageModel> depMsgModelList = new ArrayList<DepartmentGeneralMessageModel>();
+			List<DepartmentGeneralMessageEntity> depMsgList = 
+					projectDAO.getDepartmentGeneralMessageListByGenMsgId(genMessageId);
+			for(DepartmentGeneralMessageEntity e: depMsgList){
+				DepartmentGeneralMessageModel m = createDepartmentGenMessageModel(e);
+				depMsgModelList.add(m);
+			}
+			model = createGeneralMessageModel(entity);
+			model.setDepartmentGeneralMessageModels(depMsgModelList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageById: "+e.getMessage());
+		}
+		return model;
+	}
+
 
 }

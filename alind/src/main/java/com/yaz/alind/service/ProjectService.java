@@ -124,4 +124,5 @@ public interface ProjectService {
     		List<Integer> toDeptList, String subject,String description);
     public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId );
     public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId );
+    public GeneralMessageModel getGeneralMessageById(int genMessageId);
 }
