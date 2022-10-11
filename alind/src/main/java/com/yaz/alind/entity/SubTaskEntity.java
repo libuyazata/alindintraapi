@@ -1,5 +1,6 @@
 package com.yaz.alind.entity;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -34,10 +35,11 @@ public class SubTaskEntity {
 	private String description;
 
 	@Column(name = "start_date")
-	private Date startDate;
+	private Timestamp startDate;
 
 	@Column(name = "end_date")
-	private Date endDate;
+//	private Date endDate;
+	private Timestamp endDate;
 
 	//On going,Short closed,Completed
 	@Column(name = "work_status_id")
@@ -55,10 +57,12 @@ public class SubTaskEntity {
 	private EmployeeEntity createdEmp;
 
 	@Column(name = "created_on")
-	private Date createdOn;
+//	private Date createdOn;
+	private Timestamp createdOn;
 
 	@Column(name = "updated_on")
-	private Date updatedOn;
+	//private Date updatedOn;
+	private Timestamp updatedOn;
 	
 	@Column(name = "status")
 	private int status;
@@ -103,21 +107,21 @@ public class SubTaskEntity {
 		this.description = description;
 	}
 
-	public Date getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
+//	public Date getStartDate() {
+//		return startDate;
+//	}
+//
+//	public void setStartDate(Date startDate) {
+//		this.startDate = startDate;
+//	}
+//
+//	public Date getEndDate() {
+//		return endDate;
+//	}
+//
+//	public void setEndDate(Date endDate) {
+//		this.endDate = endDate;
+//	}
 
 	public int getWorkStatusId() {
 		return workStatusId;
@@ -143,24 +147,42 @@ public class SubTaskEntity {
 		this.createdEmp = createdEmp;
 	}
 
-	public Date getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(Date createdOn) {
-		this.createdOn = createdOn;
-	}
-
-	public Date getUpdatedOn() {
-		return updatedOn;
-	}
-
-	public void setUpdatedOn(Date updatedOn) {
-		this.updatedOn = updatedOn;
-	}
+//	public Date getCreatedOn() {
+//		return createdOn;
+//	}
+//
+//	public void setCreatedOn(Date createdOn) {
+//		this.createdOn = createdOn;
+//	}
+//
+//	public Date getUpdatedOn() {
+//		return updatedOn;
+//	}
+//
+//	public void setUpdatedOn(Date updatedOn) {
+//		this.updatedOn = updatedOn;
+//	}
+	
+	
 
 	public int getStatus() {
 		return status;
+	}
+
+	public Timestamp getCreatedOn() {
+		return createdOn;
+	}
+
+	public void setCreatedOn(Timestamp createdOn) {
+		this.createdOn = createdOn;
+	}
+
+	public Timestamp getUpdatedOn() {
+		return updatedOn;
+	}
+
+	public void setUpdatedOn(Timestamp updatedOn) {
+		this.updatedOn = updatedOn;
 	}
 
 	public void setStatus(int status) {
@@ -173,6 +195,22 @@ public class SubTaskEntity {
 
 	public void setCreatedEmpId(int createdEmpId) {
 		this.createdEmpId = createdEmpId;
+	}
+
+	public Timestamp getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Timestamp startDate) {
+		this.startDate = startDate;
+	}
+
+	public Timestamp getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Timestamp endDate) {
+		this.endDate = endDate;
 	}
 
 	

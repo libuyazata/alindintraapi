@@ -57,15 +57,34 @@ public class InterOfficeCommunicationEntity {
 
 	@Column(name = "description")
 	private String description;
+	
+	@Column(name = "file_type")
+	private String fileType;
+	
+	@Column(name = "orginal_file_name")
+	private String orginalFileName;
+	
+	/**
+	 *  0 -> No attachment
+	 *  1 -> File attached
+	 */
+	@Column(name = "attachement_status",columnDefinition="Int default '0'")
+	private int attachementStatus;
 
 	@Column(name = "created_on")
-	//private Date createdOn;
 	private Timestamp createdOn;
 
 	@Column(name = "updated_on")
-//	private Date updatedOn;
 	private Timestamp updatedOn;
 	
+	public int getAttachementStatus() {
+		return attachementStatus;
+	}
+
+	public void setAttachementStatus(int attachementStatus) {
+		this.attachementStatus = attachementStatus;
+	}
+
 	@Column(name="is_active")
 	private int isActive;
 
@@ -189,4 +208,21 @@ public class InterOfficeCommunicationEntity {
 		this.isActive = isActive;
 	}
 
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
+
+	public String getOrginalFileName() {
+		return orginalFileName;
+	}
+
+	public void setOrginalFileName(String orginalFileName) {
+		this.orginalFileName = orginalFileName;
+	}
+
+	
 }

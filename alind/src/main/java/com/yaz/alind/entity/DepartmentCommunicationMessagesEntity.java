@@ -30,6 +30,7 @@ public class DepartmentCommunicationMessagesEntity {
 
 	@Column(name = "office_communication_id")
 	private int officeCommunicationId;
+	
 	@ManyToOne
 	@JoinColumn(name="office_communication_id",insertable = false, updatable = false)
 	private InterOfficeCommunicationEntity interOfficeCommunicationEntity;
@@ -48,11 +49,9 @@ public class DepartmentCommunicationMessagesEntity {
 	private int viewStatus;
 
 	@Column(name = "created_on")
-//	private Date createdOn;
 	private Timestamp createdOn;
 
 	@Column(name = "updated_on")
-//	private Date updatedOn;
 	private Timestamp updatedOn;
 
 	public int getDeptCommId() {
