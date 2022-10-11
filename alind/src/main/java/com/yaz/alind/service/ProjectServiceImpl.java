@@ -69,6 +69,7 @@ import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
 import com.yaz.alind.model.ui.DepartmentGeneralMessageModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
+import com.yaz.alind.model.ui.GeneralMessageAttachmentModel;
 import com.yaz.alind.model.ui.GeneralMessageFormatModel;
 import com.yaz.alind.model.ui.GeneralMessageModel;
 import com.yaz.alind.model.ui.GeneralMessageRefNoDetailsModel;
@@ -428,7 +429,7 @@ public class ProjectServiceImpl implements ProjectService {
 			//			documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
 
 			String fileLocation = Iconstants.PROJECT_DOCUMENT_LOCATION + workDetailsId +"/"+ subTaskId;
-			System.out.println("Business,saveWorkDocument,fileLocation : "+fileLocation);
+			//System.out.println("Business,saveWorkDocument,fileLocation : "+fileLocation);
 			int status = utilService.saveFile(file, contextPath, fileLocation);
 			//			String originalFileName = file.getOriginalFilename();
 			String fileName = utilService.createFileName(file.getOriginalFilename());
@@ -2023,7 +2024,7 @@ public class ProjectServiceImpl implements ProjectService {
 			InterOfficeCommunicationEntity entity = projectDAO.getCommunicationEntityById(officeCommunicationId);
 			List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
 					(entity.getOfficeCommunicationId());
-			System.out.println("Bussiness, getCommunicationById, CommunicationId: "+entity.getOfficeCommunicationId());
+		//	System.out.println("Bussiness, getCommunicationById, CommunicationId: "+entity.getOfficeCommunicationId());
 			commModel = createInterOfficeCommunicationModel(entity);
 			if(depMesgList != null){
 				List<DepartmentCommunicationMessagesModel> mList = new ArrayList<DepartmentCommunicationMessagesModel>();
@@ -2160,8 +2161,8 @@ public class ProjectServiceImpl implements ProjectService {
 				InterOfficeCommunicationEntity entity = deptCommMesg.getInterOfficeCommunicationEntity();
 
 				InterOfficeCommunicationModel interOffCommModel = createInterOfficeCommunicationModel(entity);
-				DepartmentCommunicationMessagesModel deptComMsgModel = 
-						createDepartmentCommunicationMessagesModel(deptCommMesg);
+//				DepartmentCommunicationMessagesModel deptComMsgModel = 
+//						createDepartmentCommunicationMessagesModel(deptCommMesg);
 				List<DepartmentCommunicationMessagesEntity> deptMsgEnyList = 
 						projectDAO.getDepartmentCommunicationMessagesByOffCommId(interOffCommModel.getOfficeCommunicationId());
 				List<DepartmentCommunicationMessagesModel> deptMsgModelList = new ArrayList<DepartmentCommunicationMessagesModel>();
@@ -2849,17 +2850,43 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			GeneralMessageEntity entity = projectDAO.getGeneralMessageById(genMessageId);
 			List<DepartmentGeneralMessageModel> depMsgModelList = new ArrayList<DepartmentGeneralMessageModel>();
+			List<GeneralMessageAttachmentModel> attachModel = new ArrayList<GeneralMessageAttachmentModel>();
 			List<DepartmentGeneralMessageEntity> depMsgList = 
 					projectDAO.getDepartmentGeneralMessageListByGenMsgId(genMessageId);
+			List<GeneralMessageAttachmentEntity> attchementEntity = projectDAO.getGeneralMessageAttachmentByGenMessageId(genMessageId);
+			
 			for(DepartmentGeneralMessageEntity e: depMsgList){
 				DepartmentGeneralMessageModel m = createDepartmentGenMessageModel(e);
 				depMsgModelList.add(m);
 			}
+			for(GeneralMessageAttachmentEntity e: attchementEntity){
+				GeneralMessageAttachmentModel mod = createGeneralMessageAttachmentModel(e);
+				attachModel.add(mod);
+			}
 			model = createGeneralMessageModel(entity);
 			model.setDepartmentGeneralMessageModels(depMsgModelList);
+			model.setGeneralMessageAttachmentModels(attachModel);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getGeneralMessageById: "+e.getMessage());
+		}
+		return model;
+	}
+	
+	
+	private GeneralMessageAttachmentModel createGeneralMessageAttachmentModel
+				(GeneralMessageAttachmentEntity entity){
+		GeneralMessageAttachmentModel model = null;
+		try{
+			model = new GeneralMessageAttachmentModel();
+			String fileLocation = Iconstants.WORK_MESSAGE_DOCUMENT+entity.getGenMessageId();
+			model.setFileLocation(fileLocation+"/"+entity.getFileName());
+			model.setFileName(entity.getFileName());
+			model.setGenMessageId(entity.getGenMessageId());
+			model.setOrginalFileName(entity.getOrginalFileName());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("createGeneralMessageAttachmentModel: "+e.getMessage());
 		}
 		return model;
 	}
