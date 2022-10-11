@@ -35,6 +35,23 @@ public class InterOfficeCommunicationModel {
 	private String subject;
 
 	private String description;
+	
+	private int attachementStatus;
+	
+	private String fileType;
+	
+	private String orginalFileName;
+	
+	private List<WorkMessageAttachmentModel> attachmentModels;
+	
+
+	public int getAttachementStatus() {
+		return attachementStatus;
+	}
+
+	public void setAttachementStatus(int attachementStatus) {
+		this.attachementStatus = attachementStatus;
+	}
 
 	private String createdOn;
 
@@ -186,6 +203,31 @@ public class InterOfficeCommunicationModel {
 
 	public void setIsActive(int isActive) {
 		this.isActive = isActive;
+	}
+
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
+
+	public String getOrginalFileName() {
+		return orginalFileName;
+	}
+
+	public void setOrginalFileName(String orginalFileName) {
+		this.orginalFileName = orginalFileName;
+	}
+
+	public List<WorkMessageAttachmentModel> getAttachmentModels() {
+		return attachmentModels;
+	}
+
+	public void setAttachmentModels(
+			List<WorkMessageAttachmentModel> attachmentModels) {
+		this.attachmentModels = attachmentModels;
 	}
 	
 }
