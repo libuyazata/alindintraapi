@@ -128,7 +128,7 @@ public class UserDAOImpl implements UserDAO {
 			cr.add(Restrictions.eq("userName", userName));
 			cr.add(Restrictions.eq("password", password));
 			List<EmployeeEntity> list = cr.list();
-			System.out.println("DAO,getAuthentication, user size: "+list.size());
+//			System.out.println("DAO,getAuthentication, user size: "+list.size());
 			if(list.size() > 0){
 				employee = list.get(0);
 			}
@@ -145,6 +145,7 @@ public class UserDAOImpl implements UserDAO {
 	public TokenEntity getTokenModelByToken(String token) {
 		TokenEntity tokenModel = null;
 		try{
+//			System.out.println("DAO,getTokenModelByToken, token: "+token);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(TokenEntity.class);
 			cr.add(Restrictions.eq("token", token));
 			List<TokenEntity> list = cr.list();

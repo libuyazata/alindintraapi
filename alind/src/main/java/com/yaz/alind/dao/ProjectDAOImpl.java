@@ -19,10 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
+import com.yaz.alind.entity.DepartmentGeneralMessageEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
+import com.yaz.alind.entity.GeneralMessageAttachmentEntity;
+import com.yaz.alind.entity.GeneralMessageEntity;
 import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
@@ -32,6 +35,7 @@ import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
+import com.yaz.alind.entity.WorkMessageAttachmentEntity;
 
 @Repository
 @Transactional
@@ -539,7 +543,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 
 		try{
 			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class);
-//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId: "+departmentId);
+			//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId: "+departmentId);
 			if(departmentId != 0){
 				//System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId != 0: ");
 				cr.add(Restrictions.eq("departmentId", departmentId));
@@ -1041,6 +1045,25 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return commEntity;
 	}
 
+	@Override
+	public List<WorkMessageAttachmentEntity> getWorkWorkMessageAttachmentByOffComId(int officeCommunicationId){
+		List<WorkMessageAttachmentEntity> listEntity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkMessageAttachmentEntity.class);
+			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
+			List<WorkMessageAttachmentEntity> list = cr.list();
+			listEntity = list;
+			//	System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
+			//			if(list.size() >0){
+			//				entity = list.get(0);
+			//			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkWorkMessageAttachmentByOffComId: "+e.getMessage());
+		}
+		return listEntity;
+	}
+
 
 	@Override
 	public InterOfficeCommunicationEntity getCommunicationEntityById(
@@ -1050,7 +1073,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
 			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
 			List<InterOfficeCommunicationEntity> list = cr.list();
-		//	System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
+			//	System.out.println("DAO,getCommunicationEntityById,size: "+list.size());
 			if(list.size() >0){
 				commEntity = list.get(0);
 			}
@@ -1163,38 +1186,38 @@ public class ProjectDAOImpl implements ProjectDAO {
 			if(departmentId > 0){
 				intOffCr.add(Restrictions.eq("intOffCom.departmentId", departmentId));
 			}
-			
+
 			if(!searchKeyWord.isEmpty()){
-				
+
 				Criterion empFirstName = Restrictions.ilike("emp.firstName", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion empLastName = Restrictions.ilike("emp.lastName", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion empCode = Restrictions.ilike("emp.empCode", searchKeyWord, MatchMode.ANYWHERE);
-				
+
 				Criterion subject = Restrictions.ilike("intOffCom.subject", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion referenceNo = Restrictions.ilike("intOffCom.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion description = Restrictions.ilike("intOffCom.description", searchKeyWord, MatchMode.ANYWHERE);
-				
+
 				Criterion workName = Restrictions.ilike("work.workName", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion workDescription = Restrictions.ilike("work.description", searchKeyWord, MatchMode.ANYWHERE);
-			
+
 				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
-			
+
 				Disjunction disj = Restrictions.disjunction();
 				disj.add(empFirstName);
 				disj.add(empLastName);
 				disj.add(empCode);
 				disj.add(subject);
-				
+
 				disj.add(referenceNo);
 				disj.add(description);
 				disj.add(workName);
 				disj.add(workDescription);
 				disj.add(departmentName);
-				
+
 				intOffCr.add(disj);
 				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
 			}
-			
+
 			comList = intOffCr.list();
 			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
 		}catch(Exception e){
@@ -1279,6 +1302,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			int officeCommunicationId) {
 		List<DepartmentCommunicationMessagesEntity> deptCommMesgeList = null;
 		try{
+			//System.out.println("Pjt DAO,getDepartmentCommunicationMessagesByOffCommId, id: "+officeCommunicationId);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
 			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
 			deptCommMesgeList = cr.list();
@@ -1289,6 +1313,33 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return deptCommMesgeList;
 	}
 
+	@Override
+	public WorkMessageAttachmentEntity saveWorkMessageAttachment(WorkMessageAttachmentEntity entity){
+		WorkMessageAttachmentEntity woEntity = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(entity);
+			woEntity = entity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveWorkMessageAttachment: "+e.getMessage());
+		}
+		return woEntity;
+	}
+
+	@Override
+	public List<WorkMessageAttachmentEntity> getWorkMessageAttachmentByByOffCommId
+	(int officeCommunicationId){
+		List<WorkMessageAttachmentEntity> woEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkMessageAttachmentEntity.class);
+			cr.add(Restrictions.eq("officeCommunicationId", officeCommunicationId));
+			woEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkMessageAttachmentByByOffCommId: "+e.getMessage());
+		}
+		return woEntities;
+	}
 
 	@Override
 	public InterCommRefNoEntity updateInterCommRefNo(
@@ -1320,6 +1371,188 @@ public class ProjectDAOImpl implements ProjectDAO {
 			logger.error("getInterCommRefByDeptId: "+e.getMessage());
 		}
 		return refNo;
+	}
+
+
+	@Override
+	public GeneralMessageEntity saveGeneralMessage(GeneralMessageEntity entity) {
+		GeneralMessageEntity genEntity = null;
+		try{
+			this.sessionFactory.getSessionFactory().getCurrentSession().save(entity);
+			genEntity = entity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveGeneralMessage: "+e.getMessage());
+		}
+		return genEntity;
+	}
+
+	@Override
+	public GeneralMessageEntity updateGeneralMessage(GeneralMessageEntity entity) {
+		GeneralMessageEntity genEntity = null;
+		try{
+			this.sessionFactory.getSessionFactory().getCurrentSession().update(entity);
+			genEntity = entity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateGeneralMessage: "+e.getMessage());
+		}
+		return genEntity;
+	}
+	
+	@Override
+	public GeneralMessageEntity getGeneralMessageById(int genMessageId) {
+		GeneralMessageEntity genEntity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
+			cr.add(Restrictions.eq("genMessageId", genMessageId));
+			List<GeneralMessageEntity> list = cr.list();
+			if(list.size() > 0){
+				genEntity = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageById: "+e.getMessage());
+		}
+		return genEntity;
+	}
+
+
+	@Override
+	public List<GeneralMessageEntity> getGeneralMessageListByDeptId(
+			int departmentId) {
+		List<GeneralMessageEntity> genEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			genEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageListByDeptId: "+e.getMessage());
+		}
+		return genEntities;
+	}
+
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> saveDepartmentGeneralMessageList(
+			List<DepartmentGeneralMessageEntity> entities) {
+		List<DepartmentGeneralMessageEntity> genEntityList = null;
+		try{
+			genEntityList = new ArrayList<DepartmentGeneralMessageEntity>();
+			for(DepartmentGeneralMessageEntity dep: entities){
+				this.sessionFactory.getSessionFactory().getCurrentSession().save(dep);
+				genEntityList.add(dep);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDepartmentGeneralMessageList: "+e.getMessage());
+		}
+		return genEntityList;
+	}
+
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByGenMsgId(
+			int genMessageId) {
+		List<DepartmentGeneralMessageEntity> entities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("genMessageId", genMessageId));
+			entities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListByGenMsgId: "+e.getMessage());
+		}
+		return entities;
+	}
+
+
+	@Override
+	public DepartmentGeneralMessageEntity getDepartmentGeneralMessageListById(
+			int deptGeneralMsgId) {
+		DepartmentGeneralMessageEntity entity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("deptGeneralMsgId", deptGeneralMsgId));
+			List<DepartmentGeneralMessageEntity> list = cr.list();
+			if(list.size() >0){
+				entity = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListById: "+e.getMessage());
+		}
+		return entity;
+	}
+
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(
+			int departmentId) {
+		List<DepartmentGeneralMessageEntity> entities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			entities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListByDeptId: "+e.getMessage());
+		}
+		return entities;
+	}
+
+
+	@Override
+	public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment(
+			List<GeneralMessageAttachmentEntity> entities) {
+		List<GeneralMessageAttachmentEntity> attachmentEntities = null;
+		try{
+			attachmentEntities = new ArrayList<GeneralMessageAttachmentEntity>();
+			for(GeneralMessageAttachmentEntity gen: entities){
+				this.sessionFactory.getSessionFactory().getCurrentSession().save(gen);
+				attachmentEntities.add(gen);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveGeneralMessageAttachment: "+e.getMessage());
+		}
+		return attachmentEntities;
+	}
+
+
+	@Override
+	public List<GeneralMessageAttachmentEntity> getGeneralMessageAttachmentByGenMessageId(
+			int genMessageId) {
+		List<GeneralMessageAttachmentEntity> attachmentEntities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageAttachmentEntity.class);
+			cr.add(Restrictions.eq("genMessageId", genMessageId));
+			attachmentEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageAttachmentByGenMessageId: "+e.getMessage());
+		}
+		return attachmentEntities;
+	}
+
+
+	@Override
+	public GeneralMessageAttachmentEntity getGeneralMessageAttachmentById(
+			int genMsgAthId) {
+		GeneralMessageAttachmentEntity attachmentEntity = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageAttachmentEntity.class);
+			cr.add(Restrictions.eq("genMsgAthId", genMsgAthId));
+			List<GeneralMessageAttachmentEntity> list= cr.list();
+			if(list.size() > 0){
+				attachmentEntity = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageAttachmentById: "+e.getMessage());
+		}
+		return attachmentEntity;
 	}
 
 

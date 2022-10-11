@@ -4,10 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
+import com.yaz.alind.entity.DepartmentGeneralMessageEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
 import com.yaz.alind.entity.EmployeeTaskAllocationEntity;
+import com.yaz.alind.entity.GeneralMessageAttachmentEntity;
+import com.yaz.alind.entity.GeneralMessageEntity;
 import com.yaz.alind.entity.InterCommRefNoEntity;
 import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
@@ -17,6 +20,7 @@ import com.yaz.alind.entity.SubTaskEntity;
 import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
+import com.yaz.alind.entity.WorkMessageAttachmentEntity;
 
 public interface ProjectDAO {
 
@@ -88,12 +92,14 @@ public interface ProjectDAO {
 
 	//Inter Office Communication
 	public InterOfficeCommunicationEntity saveInterOfficeCommunicationEntity(InterOfficeCommunicationEntity entity);
+	
 	public InterOfficeCommunicationEntity updateInterOfficeCommunicationEntity(InterOfficeCommunicationEntity entity);
 	public InterOfficeCommunicationEntity getCommunicationEntityById(int officeCommunicationId);
 	public List<InterOfficeCommunicationEntity> getCommunicationEntityBySubTaskId(int subTaskId);
 	public List<InterOfficeCommunicationEntity> getCommunicationEntityByWorkId(int workDetailsId);
 	public List<InterOfficeCommunicationEntity> getCommunicationEntityByWorkList(List<WorkDetailsEntity> workList);
 	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId);
+	public List<WorkMessageAttachmentEntity> getWorkWorkMessageAttachmentByOffComId(int officeCommunicationId);
 
 	public List<DepartmentCommunicationMessagesEntity> saveDepartmentCommunicationMessages
 	(List<DepartmentCommunicationMessagesEntity> deptMessages);
@@ -106,8 +112,26 @@ public interface ProjectDAO {
 	(int officeCommunicationId);
 	public List<InterOfficeCommunicationEntity> searchInterDeptCommList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId);
+	public WorkMessageAttachmentEntity saveWorkMessageAttachment(WorkMessageAttachmentEntity entity);
+	public List<WorkMessageAttachmentEntity> getWorkMessageAttachmentByByOffCommId(int officeCommunicationId); 
 
     public InterCommRefNoEntity updateInterCommRefNo(InterCommRefNoEntity comRefNo);
     public InterCommRefNoEntity getInterCommRefByDeptId(int departmentId);
+    
+    public GeneralMessageEntity saveGeneralMessage(GeneralMessageEntity entity);
+    public GeneralMessageEntity updateGeneralMessage(GeneralMessageEntity entity);
+    public GeneralMessageEntity getGeneralMessageById(int genMessageId);
+    public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId);
+    
+    public List<DepartmentGeneralMessageEntity> saveDepartmentGeneralMessageList
+    (List<DepartmentGeneralMessageEntity> entities) ;
+    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByGenMsgId(int genMessageId);
+    public DepartmentGeneralMessageEntity getDepartmentGeneralMessageListById(int deptGeneralMsgId);
+    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId);
+    
+    public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment
+    (List<GeneralMessageAttachmentEntity> entities);
+    public List<GeneralMessageAttachmentEntity> getGeneralMessageAttachmentByGenMessageId(int genMessageId);
+    public GeneralMessageAttachmentEntity getGeneralMessageAttachmentById(int genMsgAthId);
 
 }
