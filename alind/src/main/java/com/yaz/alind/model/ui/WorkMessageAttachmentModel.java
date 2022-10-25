@@ -11,17 +11,12 @@ public class WorkMessageAttachmentModel {
 
 	private String fileName;
 	
-//	private byte[] docByte;
-	
-//	private  InputStream docStream;
 
 	private String fileType;
 
 	private String orginalFileName;
 	
 	private String contentType;
-	
-//	private ByteArrayResource docByteArray;
 	
 	private String fileLocation;
 

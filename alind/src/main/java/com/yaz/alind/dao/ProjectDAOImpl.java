@@ -1287,7 +1287,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
 			cr.add(Restrictions.eq("deptCommId", deptCommId));
 			List<DepartmentCommunicationMessagesEntity> list = cr.list();
-			System.out.println("DAO,getDepartmentCommunicationMessagesById,size: "+list.size());
+//			System.out.println("DAO,getDepartmentCommunicationMessagesById,size: "+list.size());
 			depEntity = list.get(0);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1450,6 +1450,20 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return genEntityList;
 	}
+	
+	@Override
+	 public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
+	    (DepartmentGeneralMessageEntity entity){
+		DepartmentGeneralMessageEntity enty = null;
+		try{
+			this.sessionFactory.getSessionFactory().getCurrentSession().update(entity);
+			enty = entity;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDepartmentGeneralMessageEntity: "+e.getMessage());
+		}
+		return enty;
+	 }
 
 
 	@Override

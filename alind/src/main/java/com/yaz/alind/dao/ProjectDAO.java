@@ -128,6 +128,8 @@ public interface ProjectDAO {
     public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByGenMsgId(int genMessageId);
     public DepartmentGeneralMessageEntity getDepartmentGeneralMessageListById(int deptGeneralMsgId);
     public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId);
+    public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
+    (DepartmentGeneralMessageEntity entity);
     
     public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment
     (List<GeneralMessageAttachmentEntity> entities);

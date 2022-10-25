@@ -13,6 +13,7 @@ import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
 import com.yaz.alind.model.ui.DepartmentCommunicationMessagesModel;
+import com.yaz.alind.model.ui.DepartmentGeneralMessageModel;
 import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
 import com.yaz.alind.model.ui.GeneralMessageFormatModel;
@@ -94,10 +95,10 @@ public interface ProjectService {
     
   //Inter Office Communication
     public InterOfficeCommunicationModel saveInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
-    public InterOfficeCommunicationModel replyInterOfficeCommunication(String token, MultipartFile multipartFile,
+    public InterOfficeCommunicationModel replyInterOfficeCommunication(String token, MultipartFile[] multipartFiles,
     		String contextPath,List<Integer> toDeptList,int workDetailsId,
     		int subTaskId, String subject,String description,String referenceNo);
-    public InterOfficeCommunicationModel sendWorkMessage(String token, MultipartFile multipartFile,
+    public InterOfficeCommunicationModel sendWorkMessage(String token, MultipartFile[] multipartFiles,
     		String contextPath,
     		List<Integer> toDeptList,int workDetailsId,int subTaskId, String subject,String description);
     public InterOfficeCommunicationModel updateInterOfficeCommunication(InterOfficeCommunicationModel model,String token);
@@ -122,7 +123,12 @@ public interface ProjectService {
     public GeneralMessageModel sendToGeneralMessage(String token, MultipartFile[] multipartFiles,
     		String contextPath,
     		List<Integer> toDeptList, String subject,String description);
+    public GeneralMessageModel replyGeneralMessage(String token, MultipartFile[] multipartFiles,
+    		String contextPath,
+    		List<Integer> toDeptList, String subject,String description, String referenceNo);
     public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId );
     public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId );
     public GeneralMessageModel getGeneralMessageById(int genMessageId);
+    public List<GeneralMessageModel> getGeneralMessageListById(int genMessageId);
+    public DepartmentGeneralMessageModel viewUpdateDepartmentGenMessage(int deptGeneralMsgId,String token);
 }

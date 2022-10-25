@@ -28,7 +28,12 @@ public class WorkMessageAttachmentEntity {
 
 	@Column(name = "file_name", nullable = false)
 	private String fileName;
+	
+	@Column(name = "orginal_file_name")
+	private String orginalFileName;
 
+	@Column(name = "content_type")
+	private String contentType;
 
 	public int getWorkMsgAthId() {
 		return workMsgAthId;
@@ -52,5 +57,23 @@ public class WorkMessageAttachmentEntity {
 	public InterOfficeCommunicationEntity getInterOfficeCommunicationEntity() {
 		return interOfficeCommunicationEntity;
 	}
+	public String getOrginalFileName() {
+		return orginalFileName;
+	}
+	public void setOrginalFileName(String orginalFileName) {
+		this.orginalFileName = orginalFileName;
+	}
+	public void setInterOfficeCommunicationEntity(
+			InterOfficeCommunicationEntity interOfficeCommunicationEntity) {
+		this.interOfficeCommunicationEntity = interOfficeCommunicationEntity;
+	}
+	public String getContentType() {
+		return contentType;
+	}
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+	
+	
 
 }

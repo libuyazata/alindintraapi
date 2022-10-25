@@ -43,7 +43,7 @@ public class GeneralMessageEntity {
 	@Column(name = "reference_no", nullable = false)
 	private String referenceNo;
 
-	@Column(name = "description", nullable = false)
+	@Column(name = "description", nullable = false, length=2000)
 	private String description;
 	
 	

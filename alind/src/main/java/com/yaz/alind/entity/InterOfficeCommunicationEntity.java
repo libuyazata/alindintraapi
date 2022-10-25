@@ -58,11 +58,11 @@ public class InterOfficeCommunicationEntity {
 	@Column(name = "description")
 	private String description;
 	
-	@Column(name = "file_type")
-	private String fileType;
+//	@Column(name = "file_type")
+//	private String fileType;
 	
-	@Column(name = "orginal_file_name")
-	private String orginalFileName;
+//	@Column(name = "orginal_file_name")
+//	private String orginalFileName;
 	
 	/**
 	 *  0 -> No attachment
@@ -208,21 +208,21 @@ public class InterOfficeCommunicationEntity {
 		this.isActive = isActive;
 	}
 
-	public String getFileType() {
-		return fileType;
-	}
-
-	public void setFileType(String fileType) {
-		this.fileType = fileType;
-	}
-
-	public String getOrginalFileName() {
-		return orginalFileName;
-	}
-
-	public void setOrginalFileName(String orginalFileName) {
-		this.orginalFileName = orginalFileName;
-	}
+//	public String getFileType() {
+//		return fileType;
+//	}
+//
+//	public void setFileType(String fileType) {
+//		this.fileType = fileType;
+//	}
+//
+//	public String getOrginalFileName() {
+//		return orginalFileName;
+//	}
+//
+//	public void setOrginalFileName(String orginalFileName) {
+//		this.orginalFileName = orginalFileName;
+//	}
 
 	
 }
