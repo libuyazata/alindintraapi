@@ -2,7 +2,10 @@ package com.yaz.alind.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -12,6 +15,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +40,8 @@ import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
 import com.yaz.alind.entity.WorkMessageAttachmentEntity;
+import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
 
 @Repository
 @Transactional
@@ -1163,6 +1169,8 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return commEntity;
 	}
 
+
+
 	/**
 	 * Searching the Inter department messages
 	 */
@@ -1215,16 +1223,220 @@ public class ProjectDAOImpl implements ProjectDAO {
 				disj.add(departmentName);
 
 				intOffCr.add(disj);
-				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
+				//				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
 			}
 
 			comList = intOffCr.list();
-			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
+			//			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("searchInterDeptCommList: "+e.getMessage());
 		}
 		return comList;
+	}
+
+	@Override
+	public List<GeneralMessageEntity> searchGeneralMessageList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId){
+		List<GeneralMessageEntity> genMsgList = null;
+		try{
+			genMsgList = new ArrayList<GeneralMessageEntity>();
+			Criteria genMsg = this.sessionFactory.getCurrentSession().
+					createCriteria(GeneralMessageEntity.class,"genMsg");
+			genMsg.createAlias("employee", "emp"); 
+			genMsg.createAlias("department", "dept"); 
+			//			genMsg.createAlias("generalMessageEntity", "gen"); 
+
+			if(startDate != null){
+				genMsg.add(Restrictions.ge("genMsg.createdOn", startDate) );
+			}
+			if(endDate != null){
+				genMsg.add(Restrictions.lt("genMsg.createdOn", endDate) );
+			}
+			if(departmentId > 0){
+				genMsg.add(Restrictions.eq("genMsg.departmentId", departmentId));
+			}
+			if(!searchKeyWord.isEmpty()){
+				Criterion empFirstName = Restrictions.ilike("emp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empLastName = Restrictions.ilike("emp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empCode = Restrictions.ilike("emp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion subject = Restrictions.ilike("genMsg.subject", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion referenceNo = Restrictions.ilike("genMsg.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion description = Restrictions.ilike("genMsg.description", searchKeyWord, MatchMode.ANYWHERE);
+
+				//				Criterion workName = Restrictions.ilike("gen.workName", searchKeyWord, MatchMode.ANYWHERE);
+				//				Criterion workDescription = Restrictions.ilike("gen.description", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
+
+				Disjunction disj = Restrictions.disjunction();
+				disj.add(empFirstName);
+				disj.add(empLastName);
+				disj.add(empCode);
+				disj.add(subject);
+
+				disj.add(referenceNo);
+				disj.add(description);
+				disj.add(departmentName);
+
+				genMsg.add(disj);
+			}
+			genMsgList = genMsg.list();
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchGeneralMessageList: "+e.getMessage());
+		}
+		return genMsgList;
+	}
+
+	@Override
+	public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount){
+		GeneralMessageSearchListModel genMsgModel = null;
+		int expectedRowSize = 0;
+		try{
+			expectedRowSize = ((pageNo - 1) * pageCount);
+			genMsgModel = new GeneralMessageSearchListModel();
+
+			Criteria genMsg = this.sessionFactory.getCurrentSession().
+					createCriteria(GeneralMessageEntity.class,"genMsg");
+			genMsg.createAlias("employee", "emp"); 
+			genMsg.createAlias("department", "dept");
+
+
+			if(startDate != null){
+				genMsg.add(Restrictions.ge("genMsg.createdOn", startDate) );
+			}
+			if(endDate != null){
+				genMsg.add(Restrictions.lt("genMsg.createdOn", endDate) );
+			}
+			if(departmentId > 0){
+				genMsg.add(Restrictions.eq("genMsg.departmentId", departmentId));
+			}
+			if(!searchKeyWord.isEmpty()){
+				Criterion empFirstName = Restrictions.ilike("emp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empLastName = Restrictions.ilike("emp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empCode = Restrictions.ilike("emp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion subject = Restrictions.ilike("genMsg.subject", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion referenceNo = Restrictions.ilike("genMsg.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion description = Restrictions.ilike("genMsg.description", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
+
+				Disjunction disj = Restrictions.disjunction();
+				disj.add(empFirstName);
+				disj.add(empLastName);
+				disj.add(empCode);
+				disj.add(subject);
+
+				disj.add(referenceNo);
+				disj.add(description);
+				disj.add(departmentName);
+
+				genMsg.add(disj);
+			}
+			List<GeneralMessageEntity> totalGenMessageEntities = genMsg.list(); 
+
+			Map<String,GeneralMessageEntity> map = new HashMap<String,GeneralMessageEntity>();
+			for (GeneralMessageEntity i : totalGenMessageEntities) map.put(i.getReferenceNo(),i);
+
+			genMsgModel.setTotalCount(map.size());
+
+			// Based on pagination
+			genMsg.setFirstResult(expectedRowSize);
+			genMsg.setMaxResults(pageCount);			
+			List<GeneralMessageEntity> pageNationGenMsgList = genMsg.list(); 
+			genMsgModel.setGeneralMessageEntities(pageNationGenMsgList);
+			System.out.println("DAO,searchGeneralMessageList, generalMessageEntities, size: "+totalGenMessageEntities.size()
+					+", genMsgCountList, size: "+pageNationGenMsgList.size());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchGeneralMessageList: "+e.getMessage());
+		}
+		return genMsgModel;
+	}
+
+	@Override
+	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount){
+
+		InterOfficeCommunicationSearchModel interOfficeCommunicationSearchModel = null;
+		//		List<InterOfficeCommunicationEntity> comList = null;
+		int expectedRowSize = 0;
+		try{
+			//			List<InterOfficeCommunicationEntity> comList  = new ArrayList<InterOfficeCommunicationEntity>();
+			interOfficeCommunicationSearchModel = new InterOfficeCommunicationSearchModel();
+			expectedRowSize = ((pageNo - 1) * pageCount);
+
+			Criteria intOffCr = this.sessionFactory.getCurrentSession().
+					createCriteria(InterOfficeCommunicationEntity.class,"intOffCom");
+			intOffCr.createAlias("employee", "emp"); 
+			intOffCr.createAlias("department", "dept"); 
+			intOffCr.createAlias("workDetailsEntity", "work"); 
+			if(startDate != null){
+				intOffCr.add(Restrictions.ge("intOffCom.createdOn", startDate) );
+			}
+			if(endDate != null){
+				intOffCr.add(Restrictions.lt("intOffCom.createdOn", endDate) );
+			}
+			if(departmentId > 0){
+				intOffCr.add(Restrictions.eq("intOffCom.departmentId", departmentId));
+			}
+
+			if(!searchKeyWord.isEmpty()){
+
+				Criterion empFirstName = Restrictions.ilike("emp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empLastName = Restrictions.ilike("emp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion empCode = Restrictions.ilike("emp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion subject = Restrictions.ilike("intOffCom.subject", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion referenceNo = Restrictions.ilike("intOffCom.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion description = Restrictions.ilike("intOffCom.description", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion workName = Restrictions.ilike("work.workName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion workDescription = Restrictions.ilike("work.description", searchKeyWord, MatchMode.ANYWHERE);
+
+				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
+
+				Disjunction disj = Restrictions.disjunction();
+				disj.add(empFirstName);
+				disj.add(empLastName);
+				disj.add(empCode);
+				disj.add(subject);
+
+				disj.add(referenceNo);
+				disj.add(description);
+				disj.add(workName);
+				disj.add(workDescription);
+				disj.add(departmentName);
+
+				intOffCr.add(disj);
+				//				System.out.println("DAO, searchInterDeptCommList, searchKeyWord: "+searchKeyWord);
+			}
+
+			List<InterOfficeCommunicationEntity> comList = intOffCr.list();
+			Map<String,InterOfficeCommunicationEntity> map = new HashMap<String,InterOfficeCommunicationEntity>();
+			for (InterOfficeCommunicationEntity i : comList) map.put(i.getReferenceNo(),i);
+			//			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
+			// Based on pagenation
+			intOffCr.setFirstResult(expectedRowSize);
+			intOffCr.setMaxResults(pageCount);			
+			List<InterOfficeCommunicationEntity> pageNationMsgList = intOffCr.list(); 
+			interOfficeCommunicationSearchModel.setCommunicationEntities(pageNationMsgList);
+			interOfficeCommunicationSearchModel.setTotalCount(map.size());
+			
+//			System.out.println("DAO,searchGeneralMessageList, comList, size: "+comList.size()
+//					+", pageNationMsgList, size: "+pageNationMsgList.size());
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchInterDeptCommList: "+e.getMessage());
+		}
+		return interOfficeCommunicationSearchModel;
+
 	}
 
 	@Override
@@ -1279,6 +1491,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 
+
 	@Override
 	public DepartmentCommunicationMessagesEntity getDepartmentCommunicationMessagesById(
 			int deptCommId) {
@@ -1287,7 +1500,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
 			cr.add(Restrictions.eq("deptCommId", deptCommId));
 			List<DepartmentCommunicationMessagesEntity> list = cr.list();
-//			System.out.println("DAO,getDepartmentCommunicationMessagesById,size: "+list.size());
+			//			System.out.println("DAO,getDepartmentCommunicationMessagesById,size: "+list.size());
 			depEntity = list.get(0);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1399,7 +1612,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return genEntity;
 	}
-	
+
 	@Override
 	public GeneralMessageEntity getGeneralMessageById(int genMessageId) {
 		GeneralMessageEntity genEntity = null;
@@ -1434,6 +1647,75 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 
+
+	@Override
+	public int getGeneralInboxMessageCountByDeptId(int departmentId){
+		int count = 0;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.setProjection(Projections.distinct(Projections.property("referenceNo")));
+			if( departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			count = cr.list().size();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralInboxMessageCountByDeptId: "+e.getMessage());
+		}
+		return count;
+	}
+
+	@Override
+	public int getInterOfficeMessageCountByDeptId(int departmentId){
+		int count = 0;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
+			cr.setProjection(Projections.distinct(Projections.property("referenceNo")));
+			if( departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			count = cr.list().size();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getInterOfficeMessageCountByDeptId: "+e.getMessage());
+		}
+		return count;
+	}
+
+	@Override
+	public int getInboxWorkMessagesCount(int departmentId){
+		int count = 0;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
+			cr.setProjection(Projections.distinct(Projections.property("referenceNo")));
+			if( departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			count = cr.list().size();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getInboxWorkMessagesCount: "+e.getMessage());
+		}
+		return count;
+	}
+
+	@Override
+	public int getGeneralMessageCountByDeptId(int departmentId){
+		int count = 0;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
+			cr.setProjection(Projections.distinct(Projections.property("referenceNo")));
+			if( departmentId > 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			count = cr.list().size();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageCountByDeptId: "+e.getMessage());
+		}
+		return count;
+	}
+
 	@Override
 	public List<DepartmentGeneralMessageEntity> saveDepartmentGeneralMessageList(
 			List<DepartmentGeneralMessageEntity> entities) {
@@ -1450,10 +1732,10 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}
 		return genEntityList;
 	}
-	
+
 	@Override
-	 public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
-	    (DepartmentGeneralMessageEntity entity){
+	public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
+	(DepartmentGeneralMessageEntity entity){
 		DepartmentGeneralMessageEntity enty = null;
 		try{
 			this.sessionFactory.getSessionFactory().getCurrentSession().update(entity);
@@ -1463,7 +1745,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			logger.error("updateDepartmentGeneralMessageEntity: "+e.getMessage());
 		}
 		return enty;
-	 }
+	}
 
 
 	@Override
@@ -1516,6 +1798,176 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return entities;
 	}
 
+	@Override
+	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+			int pageNo, int pageCount){
+
+		List<InterOfficeCommunicationEntity> commEntity = null;
+		int refNoCount = 0;
+		int expectedRowSize = 0;
+		try{
+			expectedRowSize = ((pageNo - 1) * pageCount);
+			refNoCount = expectedRowSize;
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
+			cr.addOrder(Order.desc("updatedOn"));
+			do{
+				if(departmentId != 0){
+					cr.add(Restrictions.eq("departmentId", departmentId));
+				}
+				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+				if(refNoCount < expectedRowSize){
+					int diff = expectedRowSize - refNoCount;
+					refNoCount = refNoCount + diff;
+				}
+				HashMap<String, InterOfficeCommunicationEntity> map= new HashMap<String, InterOfficeCommunicationEntity>();
+				cr.setFirstResult(refNoCount);
+				cr.setMaxResults(pageCount);
+				List<InterOfficeCommunicationEntity> list = cr.list();
+				for(InterOfficeCommunicationEntity off: list){
+					map.put(off.getReferenceNo(), off);
+				}
+				int mapSize = map.size();
+				refNoCount = mapSize;
+				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
+			}while(expectedRowSize == refNoCount);
+			commEntity = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationEntityByDeptId: "+e.getMessage());
+		}
+		return commEntity;
+	}
+
+
+	@Override
+	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+	(int departmentId,int pageNo, int pageCount){
+
+		List<DepartmentCommunicationMessagesEntity> deptCommMesgeList = null;
+		int refNoCount = 0;
+		int expectedRowSize = 0;
+		try{
+			expectedRowSize = ((pageNo - 1) * pageCount);
+			refNoCount = expectedRowSize;
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			do{
+				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+				if(refNoCount < expectedRowSize){
+					int diff = expectedRowSize - refNoCount;
+					refNoCount = refNoCount + diff;
+				}
+				HashMap<String, DepartmentCommunicationMessagesEntity> map= new HashMap<String, DepartmentCommunicationMessagesEntity>();
+				cr.setFirstResult(refNoCount);
+				cr.setMaxResults(pageCount);
+				List<DepartmentCommunicationMessagesEntity> list = cr.list();
+				for(DepartmentCommunicationMessagesEntity dep: list){
+					map.put(dep.getReferenceNo(), dep);
+				}
+				int mapSize = map.size();
+				refNoCount = mapSize;
+				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
+			}while(expectedRowSize == refNoCount);
+			deptCommMesgeList = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentCommunicationMessagesByDeptId: "+e.getMessage());
+		}
+		return deptCommMesgeList;
+	}
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
+			int pageNo, int pageCount){
+		List<DepartmentGeneralMessageEntity> entities = null;
+		int refNoCount = 0;
+		int expectedRowSize = 0;
+		try{
+			expectedRowSize = ((pageNo - 1) * pageCount);
+			refNoCount = expectedRowSize;
+			//			int msgCount = getGeneralInboxMessageCountByDeptId(departmentId);
+			//System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,msgCount: "+msgCount);
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			do{
+				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+				if(refNoCount < expectedRowSize){
+					int diff = expectedRowSize - refNoCount;
+					refNoCount = refNoCount + diff;
+				}
+				HashMap<String, DepartmentGeneralMessageEntity> map= new HashMap<String, DepartmentGeneralMessageEntity>();
+				cr.setFirstResult(refNoCount);
+				cr.setMaxResults(pageCount);
+				List<DepartmentGeneralMessageEntity> list = cr.list();
+				for(DepartmentGeneralMessageEntity dep: list){
+					map.put(dep.getReferenceNo(), dep);
+				}
+				int mapSize = map.size();
+				refNoCount = mapSize;
+				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
+			}while(expectedRowSize == refNoCount);
+			entities = cr.list();
+			//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,expectedRowSize: "+expectedRowSize+
+			//						", refNoCount: "+refNoCount);
+			//			System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,size: "+entities.size());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListByDeptId: "+e.getMessage());
+		}
+		return entities;
+	}
+
+
+	@Override
+	public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
+			int pageNo, int pageCount){
+		List<GeneralMessageEntity> genEntities = null;
+		int refNoCount = 0;
+		int expectedRowSize = 0;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			do{
+				System.out.println("DAO,getGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+				if(refNoCount < expectedRowSize){
+					int diff = expectedRowSize - refNoCount;
+					refNoCount = refNoCount + diff;
+				}
+				HashMap<String, GeneralMessageEntity> map= new HashMap<String, GeneralMessageEntity>();
+				cr.setFirstResult(refNoCount);
+				cr.setMaxResults(pageCount);
+				List<GeneralMessageEntity> list = cr.list();
+				for(GeneralMessageEntity gen: list){
+					map.put(gen.getReferenceNo(), gen);
+				}
+				int mapSize = map.size();
+				refNoCount = mapSize;
+				System.out.println("DAO,getGeneralMessageListByDeptId,list,size: "+list.size());
+			}while(expectedRowSize == refNoCount);
+			genEntities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralMessageListByDeptId: "+e.getMessage());
+		}
+		return genEntities;
+	}
+
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptIdRefNo(int departmentId,
+			String referenceNo ){
+		List<DepartmentGeneralMessageEntity> entities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("departmentId", departmentId));
+			cr.add(Restrictions.eq("referenceNo", referenceNo));
+			entities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListByDeptIdRefNo: "+e.getMessage());
+		}
+		return entities;
+	}
 
 	@Override
 	public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment(
@@ -1569,6 +2021,34 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return attachmentEntity;
 	}
 
+	@Override
+	public void tempUpdateDepartmentGeneralMessageRefNo(){
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			List<DepartmentGeneralMessageEntity> list = cr.list();
+			for(DepartmentGeneralMessageEntity dept: list){
+				dept.setReferenceNo(dept.getGeneralMessageEntity().getReferenceNo());
+				sessionFactory.getCurrentSession().update(dept);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("tempUpdateDepartmentGeneralMessageRefNo: "+e.getMessage());
+		}
+	}
 
+	@Override
+	public void tempUpdateDepartmentCommunicationMessagesRefNo(){
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
+			List<DepartmentCommunicationMessagesEntity> list = cr.list();
+			for(DepartmentCommunicationMessagesEntity dept: list){
+				dept.setReferenceNo(dept.getInterOfficeCommunicationEntity().getReferenceNo());
+				sessionFactory.getCurrentSession().update(dept);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("tempUpdateDepartmentCommunicationMessagesRefNo: "+e.getMessage());
+		}
+	}
 
 }

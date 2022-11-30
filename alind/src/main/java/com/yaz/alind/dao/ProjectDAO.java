@@ -21,6 +21,8 @@ import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
 import com.yaz.alind.entity.WorkMessageAttachmentEntity;
+import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
 
 public interface ProjectDAO {
 
@@ -28,13 +30,6 @@ public interface ProjectDAO {
 	public List<ProjectInfoEntity> getAllProject(int departmentId);
 	public ProjectInfoEntity getProjectInfoById(int projectId);
 
-	//	public List<DocumentTypesEntity> getAllDocumentTypes();
-	//	public DocumentTypesEntity saveDocumentTypes(DocumentTypesEntity documentTypes);
-	//	public DocumentTypesEntity updateDocumentTypes(DocumentTypesEntity documentTypes);
-	//	public DocumentTypesEntity getDocumentTypeById(int documentTypeId);
-	//	public boolean isDrawingSeriesExists(String drawingSeries);
-
-	//	public List<ProjectDocument> getAllDocumentByProjectId(int projectId );
 	public ProjectDocumentEntity saveOrUpdateDocument(ProjectDocumentEntity document);
 	public ProjectDocumentEntity getProjectDocumentById(int documentId);
 	public List<ProjectDocumentEntity> getAllDocumentByProjectId(int projectId,int documentTypeId);
@@ -107,14 +102,24 @@ public interface ProjectDAO {
 	(DepartmentCommunicationMessagesEntity deptMessage);
 	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
 	(int departmentId);
+	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+	(int departmentId,int pageNo, int pageCount);
 	public DepartmentCommunicationMessagesEntity getDepartmentCommunicationMessagesById(int deptCommId);
 	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByOffCommId
 	(int officeCommunicationId);
 	public List<InterOfficeCommunicationEntity> searchInterDeptCommList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId);
+	
+	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount);
+	
 	public WorkMessageAttachmentEntity saveWorkMessageAttachment(WorkMessageAttachmentEntity entity);
 	public List<WorkMessageAttachmentEntity> getWorkMessageAttachmentByByOffCommId(int officeCommunicationId); 
-
+	public int getInterOfficeMessageCountByDeptId(int departmentId);
+	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+			int pageNo, int pageCount);
+	public int getInboxWorkMessagesCount(int departmentId);
+	
     public InterCommRefNoEntity updateInterCommRefNo(InterCommRefNoEntity comRefNo);
     public InterCommRefNoEntity getInterCommRefByDeptId(int departmentId);
     
@@ -122,6 +127,14 @@ public interface ProjectDAO {
     public GeneralMessageEntity updateGeneralMessage(GeneralMessageEntity entity);
     public GeneralMessageEntity getGeneralMessageById(int genMessageId);
     public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId);
+    public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
+    		int pageNo, int pageCount);
+    public int getGeneralInboxMessageCountByDeptId(int departmentId);
+    public int getGeneralMessageCountByDeptId(int departmentId);
+    public List<GeneralMessageEntity> searchGeneralMessageList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId);
+    public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount);
     
     public List<DepartmentGeneralMessageEntity> saveDepartmentGeneralMessageList
     (List<DepartmentGeneralMessageEntity> entities) ;
@@ -130,10 +143,17 @@ public interface ProjectDAO {
     public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId);
     public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
     (DepartmentGeneralMessageEntity entity);
+    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
+    		int pageNo, int pageCount);
+    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptIdRefNo(int departmentId,
+    		String referenceNo );
     
     public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment
     (List<GeneralMessageAttachmentEntity> entities);
     public List<GeneralMessageAttachmentEntity> getGeneralMessageAttachmentByGenMessageId(int genMessageId);
     public GeneralMessageAttachmentEntity getGeneralMessageAttachmentById(int genMsgAthId);
+    //Temp
+    public void tempUpdateDepartmentGeneralMessageRefNo();
+    public void tempUpdateDepartmentCommunicationMessagesRefNo();
 
 }

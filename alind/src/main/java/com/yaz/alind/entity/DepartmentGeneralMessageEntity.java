@@ -39,6 +39,13 @@ public class DepartmentGeneralMessageEntity {
 	// Message viewed or not, if its view then viewStatus = 1 otherwise viewStatus = 0
 	@Column(name = "view_status")
 	private int viewStatus;
+	
+	/**
+	 *  For grouping the messages, based on "referenceNo"
+	 *  Only for UI purpose
+	 */
+	@Column(name = "reference_no", nullable = true)
+	private String referenceNo;
 
 	@Column(name = "created_on")
 	private Timestamp createdOn;
@@ -108,6 +115,14 @@ public class DepartmentGeneralMessageEntity {
 
 	public void setUpdatedOn(Timestamp updatedOn) {
 		this.updatedOn = updatedOn;
+	}
+
+	public String getReferenceNo() {
+		return referenceNo;
+	}
+
+	public void setReferenceNo(String referenceNo) {
+		this.referenceNo = referenceNo;
 	}
 	
 	

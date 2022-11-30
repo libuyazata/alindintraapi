@@ -14,6 +14,12 @@ public class DepartmentGeneralMessageModel {
 
 	// Message viewed or not, if its view then viewStatus = 1 otherwise viewStatus = 0
 	private int viewStatus;
+	
+	/**
+	 *  For grouping the messages, based on "referenceNo"
+	 *  Only for UI purpose
+	 */
+	private String referenceNo;
 
 	private String createdOn;
 
@@ -74,7 +80,13 @@ public class DepartmentGeneralMessageModel {
 	public void setUpdatedOn(String updatedOn) {
 		this.updatedOn = updatedOn;
 	}
-	
-	
+
+	public String getReferenceNo() {
+		return referenceNo;
+	}
+
+	public void setReferenceNo(String referenceNo) {
+		this.referenceNo = referenceNo;
+	}
 
 }

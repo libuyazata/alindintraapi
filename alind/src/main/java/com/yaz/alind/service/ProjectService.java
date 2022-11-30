@@ -2,6 +2,7 @@ package com.yaz.alind.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.yaz.alind.entity.DepartmentEntity;
 import com.yaz.alind.entity.DocumentHistoryEntity;
 import com.yaz.alind.entity.DocumentUsersEntity;
+import com.yaz.alind.entity.GeneralMessageEntity;
 import com.yaz.alind.entity.ProjectDocumentEntity;
 import com.yaz.alind.entity.ProjectInfoEntity;
 import com.yaz.alind.model.ui.CommunicationMessageFormatModel;
@@ -18,7 +20,9 @@ import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
 import com.yaz.alind.model.ui.GeneralMessageFormatModel;
 import com.yaz.alind.model.ui.GeneralMessageModel;
+import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
 import com.yaz.alind.model.ui.InterOfficeCommunicationModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
 import com.yaz.alind.model.ui.WorkDocumentModel;
@@ -108,10 +112,22 @@ public interface ProjectService {
     public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(int subTaskId);
     public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(int workDetailsId);
     public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId );
+    public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId,
+    		int pageNo, int pageCount);
     public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId );
-    public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId );
+    public List<GeneralMessageFormatModel> searchGeneralMessageList(String searchKeyWord,
+    		String startDate, String endDate,int departmentId);
+    public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+    		String startDate, String endDate,int departmentId,int pageNo, int pageCount);
     
+    public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+    		String startDate, String endDate,int departmentId,int pageNo, int pageCount);
+    public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId );
+    public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId,
+    		int pageNo, int pageCount);
+    public int getSentWorkMessageCountByDeptId(int departmentId);
+    public int getInboxWorkMessagesCount(int departmentId);
     
     
     public DepartmentCommunicationMessagesModel viewUpdateDepartmentCommunicationMessage(int deptCommId,String token);
@@ -127,8 +143,19 @@ public interface ProjectService {
     		String contextPath,
     		List<Integer> toDeptList, String subject,String description, String referenceNo);
     public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId );
+    public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId,int pageNo, int pageCount);
+    public int getGeneralInboxMessageCountByDeptId(int departmentId);
+    public int getGeneralMessageCountByDeptId(int departmentId);
+    
     public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId );
+    public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId,
+    		int pageNo, int pageCount);
+//    public List<GeneralMessageFormatModel> searchGeneralMessageList(String searchKeyWord,
+//			String startDate, String endDate,int departmentId,int pageNo, int pageCount );
     public GeneralMessageModel getGeneralMessageById(int genMessageId);
     public List<GeneralMessageModel> getGeneralMessageListById(int genMessageId);
     public DepartmentGeneralMessageModel viewUpdateDepartmentGenMessage(int deptGeneralMsgId,String token);
+    //Temp
+    public void tempUpdateDepartmentGeneralMessageRefNo();
+    public void tempUpdateDepartmentCommunicationMessagesRefNo();
 }

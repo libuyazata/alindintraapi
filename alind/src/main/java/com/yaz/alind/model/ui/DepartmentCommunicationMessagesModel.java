@@ -19,6 +19,8 @@ public class DepartmentCommunicationMessagesModel {
 	private String createdOn;
 
 	private String updatedOn;
+	
+	private String referenceNo;
 
 	public int getDeptCommId() {
 		return deptCommId;
@@ -74,6 +76,14 @@ public class DepartmentCommunicationMessagesModel {
 
 	public void setDepartmentName(String departmentName) {
 		this.departmentName = departmentName;
+	}
+
+	public String getReferenceNo() {
+		return referenceNo;
+	}
+
+	public void setReferenceNo(String referenceNo) {
+		this.referenceNo = referenceNo;
 	}
 	
 }

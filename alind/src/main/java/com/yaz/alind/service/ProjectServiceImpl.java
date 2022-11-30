@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import java.util.TreeMap;
 
 import javax.transaction.Transactional;
 
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +73,9 @@ import com.yaz.alind.model.ui.GeneralMessageAttachmentModel;
 import com.yaz.alind.model.ui.GeneralMessageFormatModel;
 import com.yaz.alind.model.ui.GeneralMessageModel;
 import com.yaz.alind.model.ui.GeneralMessageRefNoDetailsModel;
+import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
 import com.yaz.alind.model.ui.InterOfficeCommunicationModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
 import com.yaz.alind.model.ui.WorkDocumentModel;
@@ -965,11 +967,16 @@ public class ProjectServiceImpl implements ProjectService {
 	public SubTaskModel saveSubTask(SubTaskModel model) {
 		SubTaskModel subModel = null;
 		try{
+			Timestamp today = utilService.getCurrentDateTimeStamp();
+			String strDate = utilService.timeStampToString(today);
+			model.setCreatedOn(strDate);
+			model.setUpdatedOn(strDate);
 			SubTaskEntity entity = createSubTaskEntity(model);
 			entity.setCreatedOn(utilService.getCurrentDateTimeStamp());
 			entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
 			entity.setStatus(1);
 			entity = projectDAO.saveSubTaskEntity(entity);
+			entity = projectDAO.getSubTaskEntityById(entity.getSubTaskId());
 			subModel = createSubTaskModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -985,6 +992,9 @@ public class ProjectServiceImpl implements ProjectService {
 			SubTaskEntity entity = createSubTaskEntity(model);
 			entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
 			entity = projectDAO.updateSubTaskEntity(entity);
+			entity = projectDAO.getSubTaskEntityById(entity.getSubTaskId());
+//			System.out.println("ProjectSerive,updateSubTask, EmpId: "+entity.getCreatedEmpId());
+//			System.out.println("ProjectSerive,updateSubTask,EmpCode: "+entity.getCreatedEmp().getEmpCode());
 			subModel = createSubTaskModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1216,6 +1226,7 @@ public class ProjectServiceImpl implements ProjectService {
 		SubTaskModel model = null;
 		try{
 			model = new SubTaskModel();
+		//	System.out.println("Bussiness, createSubTaskModel, EmpCode: "+entity.getCreatedEmp().getEmpCode());
 			model.setCreatedEmpCode(entity.getCreatedEmp().getEmpCode());
 			model.setCreatedEmpName(entity.getCreatedEmp().getFirstName()+ " "
 					+entity.getCreatedEmp().getLastName());
@@ -1224,8 +1235,8 @@ public class ProjectServiceImpl implements ProjectService {
 			model.setCreatedOn(utilService.timeStampToString(entity.getCreatedOn()));
 			model.setDescription(entity.getDescription());
 			//			model.setEndDate(utilService.dateToString(entity.getEndDate()));
-			model.setEndDate(utilService.timeStampToString(entity.getEndDate()));
-			model.setStartDate(utilService.timeStampToString(entity.getStartDate()));
+			model.setEndDate(utilService.dateToString(entity.getEndDate()));
+			model.setStartDate(utilService.dateToString(entity.getStartDate()));
 			model.setSubTaskId(entity.getSubTaskId());
 			model.setSubTaskName(entity.getSubTaskName());
 			model.setUpdatedOn(utilService.timeStampToString(entity.getUpdatedOn()));
@@ -1250,8 +1261,9 @@ public class ProjectServiceImpl implements ProjectService {
 				entity.setCreatedOn(utilService.stringToTimestamp(model.getCreatedOn()));
 			}
 			entity.setDescription(model.getDescription());
-			entity.setEndDate(utilService.stringToTimestamp(model.getEndDate()));
-			entity.setStartDate(utilService.stringToTimestamp(model.getStartDate()));
+//			entity.setEndDate(utilService.stringToTimestamp(model.getEndDate()));
+			entity.setEndDate(utilService.stringToDate(model.getEndDate()));
+			entity.setStartDate(utilService.stringToDate(model.getStartDate()));
 			entity.setSubTaskId(model.getSubTaskId());
 			entity.setSubTaskName(model.getSubTaskName());
 			if(model.getUpdatedOn() != null){
@@ -1788,7 +1800,8 @@ public class ProjectServiceImpl implements ProjectService {
 			for(int deptId: toDeptList){
 				DepartmentCommunicationMessagesModel model = new DepartmentCommunicationMessagesModel();
 				model.setDepartmentId(deptId);
-				System.out.println("Business, sendWorkMessage, deptId: "+deptId);
+				model.setReferenceNo(refNo);
+				//				System.out.println("Business, sendWorkMessage, deptId: "+deptId);
 				deptMesgList.add(model);
 			}
 
@@ -1876,56 +1889,6 @@ public class ProjectServiceImpl implements ProjectService {
 		return commModel;
 	}
 	/**
-	// Reply for the messages
-	@Override
-	public InterOfficeCommunicationModel replyInterOfficeCommunication
-	(InterOfficeCommunicationModel model,String token){
-		InterOfficeCommunicationModel commModel = null;
-		try{
-			EmployeeEntity employee = userService.getEmployeeByToken(token);
-			model.setEmployeeId(employee.getEmployeeId());
-			//String refNo = getInterCommRefNo(model.getDepartmentId());
-			//			System.out.println("Business, saveWorkIssuedDetails,Dept Id: "
-			//			+model.getDepartmentId()+",Description: "+model.getDescription());
-			//			Date today = utilService.getTodaysDate();
-			Timestamp timestamp = utilService.getCurrentDateTimeStamp();
-			//			model.setCreatedOn(utilService.dateToString(today));
-			//			model.setUpdatedOn(utilService.dateToString(today));
-			model.setCreatedOn(utilService.timeStampToString(timestamp));
-			model.setUpdatedOn(utilService.timeStampToString(timestamp));
-			model.setIsActive(1);
-			List<DepartmentCommunicationMessagesModel> deptMesgList = new ArrayList<DepartmentCommunicationMessagesModel>();
-			//			System.out.println("Business, saveWorkIssuedDetails,deptMessageList size: "+deptMessageList.size());
-			//			for(DepartmentCommunicationMessagesModel dept: deptMessageList){
-			//				System.out.println("Business, saveWorkIssuedDetails,deptId: "+dept.getDepartmentId());
-			//			}
-			InterOfficeCommunicationEntity entity = createInterOfficeCommunicationEntity(model);
-			entity = projectDAO.saveInterOfficeCommunicationEntity(entity);
-			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
-			//			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
-			//					+", Dept Id: "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
-			//			entity = projectDAO.getCommunicationEntityById(entity.getOfficeCommunicationId());
-			//			System.out.println("Business, replyInterOfficeCommunication,OfficeCommunicationId: "+entity.getOfficeCommunicationId()
-			//					+", "+entity.getDepartmentId()+",EmployeeId: "+entity.getEmployeeId());
-			List<DepartmentCommunicationMessagesEntity> departCommEntities = 
-					saveDepartmentCommunicationMessagesEntity(model.getDeptCommList(),entity.getOfficeCommunicationId());
-			departCommEntities = projectDAO.getDepartmentCommunicationMessagesByOffCommId(entity.getOfficeCommunicationId());
-
-			for(DepartmentCommunicationMessagesEntity dc: departCommEntities){
-				DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
-				deptMesgList.add(m);
-			}
-			commModel = createInterOfficeCommunicationModel(entity);
-			commModel.setDeptCommList(deptMesgList);
-
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("replyInterOfficeCommunication: "+e.getMessage());
-		}
-		return commModel;
-	}
-	 **/
-	/**
 	 * Searching for the InterOfficeCommunication messages
 	 * @param searchKeyWord
 	 * @param startDate
@@ -1933,6 +1896,59 @@ public class ProjectServiceImpl implements ProjectService {
 	 * @param departmentId
 	 * @return
 	 */
+
+	@Override
+	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+			String startDate, String endDate,int departmentId,int pageNo, int pageCount){
+
+		InterOfficeCommunicationSearchModel interOfficeCommunicationSearchModel = null;
+		List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
+		List<InterOfficeCommunicationModel> interOffComList = null;
+		Date stDate =null;
+		Date eDate = null;
+
+		try{
+			interOfficeCommunicationSearchModel = new InterOfficeCommunicationSearchModel();
+			interOffComList = new ArrayList<InterOfficeCommunicationModel>();
+			if(startDate != null){
+				stDate = utilService.getDateFromString(startDate);
+			}
+			if( endDate != null){
+				eDate = utilService.getDateFromString(endDate);
+			}
+			if( searchKeyWord == null){
+				searchKeyWord = "";
+			}
+//			List<InterOfficeCommunicationEntity> entityList = 
+//					projectDAO.searchInterDeptCommList(searchKeyWord, stDate, eDate, departmentId);
+			interOfficeCommunicationSearchModel = projectDAO.searchInterDeptCommList
+					(searchKeyWord, stDate, eDate, departmentId,pageNo, pageCount);
+			List<InterOfficeCommunicationEntity> entityList = interOfficeCommunicationSearchModel.getCommunicationEntities();
+			for(InterOfficeCommunicationEntity ie: entityList){
+				InterOfficeCommunicationModel model = createInterOfficeCommunicationModel(ie);
+				List<DepartmentCommunicationMessagesEntity> deptCommList = projectDAO.
+						getDepartmentCommunicationMessagesByDeptId(ie.getDepartmentId());
+				List<DepartmentCommunicationMessagesModel> depModel = new ArrayList<DepartmentCommunicationMessagesModel>();
+				for(DepartmentCommunicationMessagesEntity dc: deptCommList){
+					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
+					depModel.add(m);
+				}
+				model.setDeptCommList(depModel);
+				interOffComList.add(model);
+
+				commMsgList = getCommunicationMessageFormatModel(interOffComList);
+				interOfficeCommunicationSearchModel.setIntOffComFromatModList(commMsgList);
+			}
+			//			Collections.reverse(commMsgList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchInterDeptCommList: "+e.getMessage());
+		}
+		//		return interOffComList;
+		return interOfficeCommunicationSearchModel;
+	}
+
+
 	@Override
 	public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId ){
@@ -1977,6 +1993,96 @@ public class ProjectServiceImpl implements ProjectService {
 		return commMsgList;
 	}
 
+	@Override
+	public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+			String startDate, String endDate,int departmentId,int pageNo, int pageCount){
+		GeneralMessageSearchListModel genSearchModel = null;
+		List<GeneralMessageFormatModel> genMsgFormatList = null;
+		Date stDate =null;
+		Date eDate = null;
+		List<GeneralMessageModel> genMsgList = null;
+		try{
+			genMsgFormatList = new ArrayList<GeneralMessageFormatModel>();
+			genSearchModel = new GeneralMessageSearchListModel();
+			genMsgList = new ArrayList<GeneralMessageModel>();
+			if(startDate != null){
+				stDate = utilService.getDateFromString(startDate);
+			}
+			if( endDate != null){
+				eDate = utilService.getDateFromString(endDate);
+			}
+			if( searchKeyWord == null){
+				searchKeyWord = "";
+			}
+			//			System.out.println("Business,searchGeneralMessageList,stDate: "+stDate+" ,eDate: "+eDate);
+			GeneralMessageSearchListModel genSearchListModel = projectDAO.
+					searchGeneralMessageList(searchKeyWord, stDate, eDate, departmentId,pageNo,pageCount);
+			List<GeneralMessageEntity> genMsgEntityList = genSearchListModel.getGeneralMessageEntities();
+			for(GeneralMessageEntity ie: genMsgEntityList){
+				GeneralMessageModel model = createGeneralMessageModel(ie);
+				List<DepartmentGeneralMessageEntity> depGenMsgList = projectDAO.
+						getDepartmentGeneralMessageListByDeptId(ie.getDepartmentId());
+				List<DepartmentGeneralMessageModel> depModel = new ArrayList<DepartmentGeneralMessageModel>();
+				for(DepartmentGeneralMessageEntity dc: depGenMsgList){
+					DepartmentGeneralMessageModel m = createDepartmentGenMessageModel(dc);
+					depModel.add(m);
+				}
+				model.setDepartmentGeneralMessageModels(depModel);
+				genMsgList.add(model);
+				genMsgFormatList = getGeneralMessageFormatModel(genMsgList);
+			}
+			Collections.reverse(genMsgFormatList);
+			genSearchModel.setTotalCount(genSearchListModel.getTotalCount());
+			genSearchModel.setFormatModels(genMsgFormatList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchGeneralMessageList: "+e.getMessage());
+		}
+		return genSearchModel;
+	}
+
+	@Override
+	public List<GeneralMessageFormatModel> searchGeneralMessageList(String searchKeyWord,
+			String startDate, String endDate,int departmentId){
+		List<GeneralMessageFormatModel> genMsgFormatList = null;
+		Date stDate =null;
+		Date eDate = null;
+		List<GeneralMessageModel> genMsgList = null;
+		try{
+			genMsgFormatList = new ArrayList<GeneralMessageFormatModel>();
+			genMsgList = new ArrayList<GeneralMessageModel>();
+			if(startDate != null){
+				stDate = utilService.getDateFromString(startDate);
+			}
+			if( endDate != null){
+				eDate = utilService.getDateFromString(endDate);
+			}
+			if( searchKeyWord == null){
+				searchKeyWord = "";
+			}
+			//			System.out.println("Business,searchGeneralMessageList,stDate: "+stDate+" ,eDate: "+eDate);
+			List<GeneralMessageEntity> genMsgEntityList = projectDAO.
+					searchGeneralMessageList(searchKeyWord, stDate, eDate, departmentId);
+			for(GeneralMessageEntity ie: genMsgEntityList){
+				GeneralMessageModel model = createGeneralMessageModel(ie);
+				List<DepartmentGeneralMessageEntity> depGenMsgList = projectDAO.
+						getDepartmentGeneralMessageListByDeptId(ie.getDepartmentId());
+				List<DepartmentGeneralMessageModel> depModel = new ArrayList<DepartmentGeneralMessageModel>();
+				for(DepartmentGeneralMessageEntity dc: depGenMsgList){
+					DepartmentGeneralMessageModel m = createDepartmentGenMessageModel(dc);
+					depModel.add(m);
+				}
+				model.setDepartmentGeneralMessageModels(depModel);
+				genMsgList.add(model);
+				genMsgFormatList = getGeneralMessageFormatModel(genMsgList);
+			}
+			Collections.reverse(genMsgFormatList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchGeneralMessageList: "+e.getMessage());
+		}
+		return genMsgFormatList;
+	}
 
 	private List<DepartmentCommunicationMessagesEntity> saveDepartmentCommunicationMessagesEntity
 	(List<DepartmentCommunicationMessagesModel> deptMessageList,int officeCommunicationId){
@@ -2158,6 +2264,50 @@ public class ProjectServiceImpl implements ProjectService {
 	/**
 	 *  Inbox / Incoming messages
 	 */
+
+	@Override
+	public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId,
+			int pageNo, int pageCount){
+
+		List<CommunicationMessageFormatModel> messageList = null;
+
+		try{
+			messageList = new ArrayList<CommunicationMessageFormatModel>();
+			List<InterOfficeCommunicationModel> commList = null;
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+
+			List<DepartmentCommunicationMessagesEntity> deptMessageList = projectDAO.
+					getDepartmentCommunicationMessagesByDeptId(departmentId,pageNo,pageCount);
+
+			for(DepartmentCommunicationMessagesEntity deptCommMesg: deptMessageList){
+				InterOfficeCommunicationEntity entity = deptCommMesg.getInterOfficeCommunicationEntity();
+
+				InterOfficeCommunicationModel interOffCommModel = createInterOfficeCommunicationModel(entity);
+				List<DepartmentCommunicationMessagesEntity> deptMsgEnyList = 
+						projectDAO.getDepartmentCommunicationMessagesByOffCommId(interOffCommModel.getOfficeCommunicationId());
+				List<DepartmentCommunicationMessagesModel> deptMsgModelList = new ArrayList<DepartmentCommunicationMessagesModel>();
+				for(DepartmentCommunicationMessagesEntity e: deptMsgEnyList){
+					DepartmentCommunicationMessagesModel deptModel = createDepartmentCommunicationMessagesModel(e);
+					deptMsgModelList.add(deptModel);
+				}
+				interOffCommModel.setDeptCommList(deptMsgModelList);
+				commList.add(interOffCommModel);
+			}
+
+			messageList = getCommunicationMessageFormatModel(commList);
+			Collections.reverse(messageList);
+			//			System.out.println("Business, getInboxMessageByDeptId: ");
+			//			for(CommunicationMessageFormatModel model : messageList){
+			//				System.out.println("model, TitleDate: "+model.getTitleDate());
+			//			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getInboxMessageByDeptId: "+e.getMessage());
+		}
+		return messageList;
+
+	}
+
 	public List<CommunicationMessageFormatModel> getInboxMessageByDeptId(int departmentId ){
 		List<CommunicationMessageFormatModel> messageList = null;
 
@@ -2291,6 +2441,53 @@ public class ProjectServiceImpl implements ProjectService {
 	 * Sent message details to other departments
 	 */
 
+	public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId,
+			int pageNo, int pageCount){
+		List<CommunicationMessageFormatModel> messageList = null;
+		try{
+			messageList = new ArrayList<CommunicationMessageFormatModel>();
+			List<InterOfficeCommunicationModel> commList = new ArrayList<InterOfficeCommunicationModel>();
+			HashMap<String, List<InterOfficeCommunicationModel>> referenceNoMap = null;
+			commList = new ArrayList<InterOfficeCommunicationModel>();
+			referenceNoMap = new HashMap<String, List<InterOfficeCommunicationModel>>();
+			HashMap<String,HashMap<String, List<InterOfficeCommunicationModel>>> dateMap = 
+					new HashMap<String, HashMap<String,List<InterOfficeCommunicationModel>>>();
+			TreeMap<String, HashMap<String, List<InterOfficeCommunicationModel>>> sortedTreeSet = new TreeMap<>(Collections.reverseOrder());
+			int status = 1;
+			List<InterOfficeCommunicationEntity> entityList = projectDAO.getCommunicationEntityByDeptId
+					(departmentId,pageNo,pageCount);
+			for(InterOfficeCommunicationEntity e: entityList){
+				InterOfficeCommunicationModel intOffComMod = createInterOfficeCommunicationModel(e);
+				// Dept Message
+				List<DepartmentCommunicationMessagesEntity> depMesgList = projectDAO.getDepartmentCommunicationMessagesByOffCommId
+						(e.getOfficeCommunicationId());
+				if(depMesgList != null){
+					List<DepartmentCommunicationMessagesModel> deptComMsgList = new ArrayList<DepartmentCommunicationMessagesModel>();
+					for(DepartmentCommunicationMessagesEntity deptMsg: depMesgList){
+						DepartmentCommunicationMessagesModel departComMod = createDepartmentCommunicationMessagesModel(deptMsg);
+						deptComMsgList.add(departComMod);
+					}
+					intOffComMod.setDeptCommList(deptComMsgList);
+				}
+				commList.add(intOffComMod);
+				messageList = getCommunicationMessageFormatModel(commList);
+
+			}
+			Collections.reverse(messageList);
+			//			System.out.println("Business, getCommunicationListByDeptId: ");
+			//			for(CommunicationMessageFormatModel model : messageList){
+			//				System.out.println("model, TitleDate: "+model.getTitleDate());
+			//			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getCommunicationListByDeptId: "+e.getMessage());
+		}
+
+		return messageList;
+	}
+
+
 	@Override
 	public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId ){
 		List<CommunicationMessageFormatModel> messageList = null;
@@ -2350,6 +2547,7 @@ public class ProjectServiceImpl implements ProjectService {
 			//			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
 			model.setUpdatedOn(utilService.timeStampToString(entity.getCreatedOn()));
 			model.setViewStatus(entity.getViewStatus());
+			model.setReferenceNo(entity.getReferenceNo());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDepartmentCommunicationMessagesModel: "+e.getMessage());
@@ -2369,6 +2567,8 @@ public class ProjectServiceImpl implements ProjectService {
 			//			entity.setUpdatedOn(utilService.getDateFromString(model.getUpdatedOn()));
 			entity.setUpdatedOn(utilService.stringDateToTimestamp(model.getUpdatedOn()));
 			entity.setViewStatus(model.getViewStatus());
+			entity.setReferenceNo(model.getReferenceNo());
+
 			//			System.out.println("Business,createDepartmentCommunicationMessagesEntity, time stamp str: "+model.getCreatedOn()
 			//					+", Timestamp: "+entity.getCreatedOn());
 		}catch(Exception e){
@@ -2473,7 +2673,7 @@ public class ProjectServiceImpl implements ProjectService {
 			int roleId = emp.getEmpolyeeTypeId();
 			//			System.out.println("");
 			// Admin, HOD or Co-ordinator 
-			
+
 			switch (roleId) {
 			case 1:
 			case 2:
@@ -2507,7 +2707,7 @@ public class ProjectServiceImpl implements ProjectService {
 		DepartmentGeneralMessageModel model = null;
 		try{
 			DepartmentGeneralMessageEntity entity = projectDAO.getDepartmentGeneralMessageListById(deptGeneralMsgId);
-		//	System.out.println("Business, viewUpdateDepartmentGenMessage, deptGeneralMsgId: "+deptGeneralMsgId);
+			//	System.out.println("Business, viewUpdateDepartmentGenMessage, deptGeneralMsgId: "+deptGeneralMsgId);
 			EmployeeEntity emp = userService.getEmployeeByToken(token);
 			int roleId = emp.getEmpolyeeTypeId();
 			// Admin, HOD or Co-ordinator 
@@ -2678,6 +2878,7 @@ public class ProjectServiceImpl implements ProjectService {
 				deptMsg.setViewStatus(0);
 				deptMsg.setCreatedOn(timestamp);
 				deptMsg.setUpdatedOn(timestamp);
+				deptMsg.setReferenceNo(genMsgentity.getReferenceNo());
 				deptMsgEnyList.add(deptMsg);
 			}
 
@@ -2707,7 +2908,7 @@ public class ProjectServiceImpl implements ProjectService {
 			List<GeneralMessageAttachmentEntity> genAthList = projectDAO.
 					getGeneralMessageAttachmentByGenMessageId(genMsgentity.getGenMessageId());
 			List<GeneralMessageAttachmentModel> genModelList = new ArrayList<GeneralMessageAttachmentModel>();
-			
+
 			for(GeneralMessageAttachmentEntity e: genAthList){
 				GeneralMessageAttachmentModel m = createGeneralMessageAttachmentModel(e);
 				genModelList.add(m);
@@ -2777,17 +2978,17 @@ public class ProjectServiceImpl implements ProjectService {
 				genMsgentity = projectDAO.updateGeneralMessage(genMsgentity);
 			}
 			model = getGeneralMessageById(genMsgentity.getGenMessageId());
-			
+
 			List<GeneralMessageAttachmentEntity> genAthList = projectDAO.
 					getGeneralMessageAttachmentByGenMessageId(genMsgentity.getGenMessageId());
 			List<GeneralMessageAttachmentModel> genModelList = new ArrayList<GeneralMessageAttachmentModel>();
-			
+
 			for(GeneralMessageAttachmentEntity e: genAthList){
 				GeneralMessageAttachmentModel m = createGeneralMessageAttachmentModel(e);
 				genModelList.add(m);
 			}
 			model.setGeneralMessageAttachmentModels(genModelList);
-			
+
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("replyGeneralMessage: "+e.getMessage());
@@ -2803,6 +3004,37 @@ public class ProjectServiceImpl implements ProjectService {
 			generalMessageFormatModels = new ArrayList<GeneralMessageFormatModel>();
 			List<GeneralMessageModel> generalMessageModels = new ArrayList<GeneralMessageModel>();
 			List<GeneralMessageEntity> generalMessageEntities = projectDAO.getGeneralMessageListByDeptId(departmentId);
+			//			System.out.println("Business,getSentGeneralMessageListByDeptId,generalMessageEntities.size: "+generalMessageEntities.size());
+
+			for(GeneralMessageEntity entity: generalMessageEntities){
+				GeneralMessageModel model = createGeneralMessageModel(entity);
+				List<DepartmentGeneralMessageEntity> deptGenMsgList = projectDAO.getDepartmentGeneralMessageListByGenMsgId(entity.getGenMessageId());
+				List<DepartmentGeneralMessageModel> modelList = new ArrayList<DepartmentGeneralMessageModel>();
+				for(DepartmentGeneralMessageEntity dep: deptGenMsgList){
+					DepartmentGeneralMessageModel depModel = createDepartmentGenMessageModel(dep);
+					modelList.add(depModel);
+				}
+				model.setDepartmentGeneralMessageModels(modelList);
+				generalMessageModels.add(model);
+			}
+			generalMessageFormatModels = getGeneralMessageFormatModel(generalMessageModels);
+			Collections.reverse(generalMessageFormatModels);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getSentGeneralMessageListByDeptId: "+e.getMessage());
+		}
+		return generalMessageFormatModels;
+	}
+
+	@Override
+	public List<GeneralMessageFormatModel> getSentGeneralMessageListByDeptId(int departmentId,
+			int pageNo, int pageCount){
+
+		List<GeneralMessageFormatModel> generalMessageFormatModels = null;
+		try{
+			generalMessageFormatModels = new ArrayList<GeneralMessageFormatModel>();
+			List<GeneralMessageModel> generalMessageModels = new ArrayList<GeneralMessageModel>();
+			List<GeneralMessageEntity> generalMessageEntities = projectDAO.getGeneralMessageListByDeptId(departmentId,pageNo,pageCount);
 			//			System.out.println("Business,getSentGeneralMessageListByDeptId,generalMessageEntities.size: "+generalMessageEntities.size());
 
 			for(GeneralMessageEntity entity: generalMessageEntities){
@@ -2841,34 +3073,37 @@ public class ProjectServiceImpl implements ProjectService {
 			// Groping based on the reference number.
 			for(GeneralMessageModel cm: genMessageList){
 				if(referenceNoMap.containsKey(cm.getReferenceNo())){
-					List<GeneralMessageModel> list = referenceNoMap.get(cm.getReferenceNo());
-					list.add(cm);
-					referenceNoMap.put(cm.getReferenceNo(), list);
+					List<GeneralMessageModel> exisitnglist = referenceNoMap.get(cm.getReferenceNo());
+					exisitnglist.add(cm);
+					referenceNoMap.put(cm.getReferenceNo(), exisitnglist);
 				}else{
-					List<GeneralMessageModel> list = new ArrayList<GeneralMessageModel>();
-					list.add(cm);
-					referenceNoMap.put(cm.getReferenceNo(), list);
+					List<GeneralMessageModel> newList = new ArrayList<GeneralMessageModel>();
+					newList.add(cm);
+					referenceNoMap.put(cm.getReferenceNo(), newList);
 				}
 			}//for(InterOfficeCommunicationModel cm: commList)
 			//System.out.println("------referenceNoMap size: "+referenceNoMap.size());
-			HashMap<String, List<GeneralMessageModel>>  datMap = new HashMap<String, List<GeneralMessageModel>>();
+
 			for (Map.Entry<String, List<GeneralMessageModel>> map : referenceNoMap.entrySet()){
 				List<GeneralMessageModel> list = map.getValue();
+				//								System.out.println("Bussiness,getGeneralMessageFormatModel,Key: "+map.getKey()+", Size:" +list.size());
 				// Sorting , acending order
 				list.sort((e1, e2) -> e1.getGenMessageId()- e2.getGenMessageId());
 				Collections.reverse(list);
-				//				HashMap<String, List<GeneralMessageModel>>  datMap = new HashMap<String, List<GeneralMessageModel>>();
+				HashMap<String, List<GeneralMessageModel>>  datMap = new HashMap<String, List<GeneralMessageModel>>();
 				datMap.put(map.getKey(), list);
 				//				System.out.println("Bussiness,getGeneralMessageFormatModel,Key: "+map.getKey()+", size:"+list.size());
 				//				System.out.println("Bussiness,getGeneralMessageFormatModel,datMap size: "+datMap.size());
 				dateMap.put(list.get(0).getCreatedOn(), datMap);
+
 				//				System.out.println("Bussiness,getGeneralMessageFormatModel,Date: "+list.get(0).getCreatedOn()
-				//						+", Ref no: "+map.getKey());
+				//						+", Ref no: "+map.getKey()+", dateMap - size: "+dateMap.get(map.getKey()).size());
 			}
 
 			sortedTreeSet.putAll(dateMap);
 			sortedTreeSet.descendingKeySet();
 			//			System.out.println("------dateMap size: "+dateMap.size()+",sortedTreeSet size: "+sortedTreeSet.size());
+
 			for (Map.Entry<String, HashMap<String, List<GeneralMessageModel>>>
 			entry : sortedTreeSet.entrySet()){
 				GeneralMessageFormatModel msgFormat = new GeneralMessageFormatModel();
@@ -2886,13 +3121,11 @@ public class ProjectServiceImpl implements ProjectService {
 					comMsgRefList.add(model);
 				}
 				msgFormat.setGeneralMessageRefNoDetailsModel(comMsgRefList);
-				//				msgFormat.setComMsgRefList(comMsgRefList);
+				//				System.out.println("Title date: "+entry.getKey());
 				genMsgList.add(msgFormat);
 				//System.out.println("entry.getKey: "+entry.getKey()+", msgFormat, TitleDate: "+msgFormat.getTitleDate());
-			}//for (Map.Entry<String, HashMap<String, List<InterOfficeCommunicationModel>>>
+			}//for (Map.Entry<String, HashMap<String, List<GeneralMessageModel>>>
 
-			//			commList.sort((e1, e2) -> e1.getCreatedOn().compareTo(e2.getCreatedOn()));
-			//messageList.sort((e1, e2) -> e1.getTitleDate().compareTo(e2.getTitleDate()));
 			Collections.reverse(genMsgList);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -2946,6 +3179,7 @@ public class ProjectServiceImpl implements ProjectService {
 			model.setDeptGeneralMsgId(entity.getDeptGeneralMsgId());
 			model.setGenMessageId(entity.getGenMessageId());
 			model.setViewStatus(entity.getViewStatus());
+			model.setReferenceNo(entity.getReferenceNo());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDepartmentGenMessageModel: "+e.getMessage());
@@ -2976,6 +3210,81 @@ public class ProjectServiceImpl implements ProjectService {
 					deptMsgMap.put(entity.getGenMessageId(),newList);
 				}
 			}
+			//			System.out.println("Business,getGeneralInboxByDeptId, deptMsgMap, size: "+deptMsgMap.size());
+			for (Map.Entry<Integer, List<DepartmentGeneralMessageEntity>> entry : deptMsgMap.entrySet())  {
+				//				System.out.println("Business,getGeneralInboxByDeptId, MessageId: "+entry.getKey());
+				GeneralMessageEntity genMsg = projectDAO.getGeneralMessageById(entry.getKey());
+				List<GeneralMessageAttachmentEntity> athEnityList = projectDAO.
+						getGeneralMessageAttachmentByGenMessageId(entry.getKey());
+				List<GeneralMessageAttachmentModel> athModelList = new ArrayList<GeneralMessageAttachmentModel>();
+				if(athEnityList != null){
+					for(GeneralMessageAttachmentEntity athE: athEnityList){
+						GeneralMessageAttachmentModel m = createGeneralMessageAttachmentModel(athE);
+						athModelList.add(m);
+					}
+				}
+				GeneralMessageModel genMsgModel = createGeneralMessageModel(genMsg);
+				List<DepartmentGeneralMessageEntity> depGenList = entry.getValue();
+				List<DepartmentGeneralMessageModel> modList = new ArrayList<DepartmentGeneralMessageModel>();
+				for(DepartmentGeneralMessageEntity e: depGenList){
+					DepartmentGeneralMessageModel dModel = createDepartmentGenMessageModel(e);
+					modList.add(dModel);
+				}
+				genMsgModel.setGeneralMessageAttachmentModels(athModelList);
+				genMsgModel.setDepartmentGeneralMessageModels(modList);
+				genMsgModelList.add(genMsgModel);
+			} 
+
+			generalMessageFormatModels = getGeneralMessageFormatModel(genMsgModelList);
+			Collections.reverse(generalMessageFormatModels);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getGeneralInboxByDeptId: "+e.getMessage());
+		}
+		return generalMessageFormatModels;
+	}
+
+	@Override
+	public List<GeneralMessageFormatModel> getGeneralInboxByDeptId(int departmentId,
+			int pageNo, int pageCount){
+		List<GeneralMessageFormatModel> generalMessageFormatModels = null;
+		try{
+			List<GeneralMessageModel> genMsgModelList = new ArrayList<GeneralMessageModel>();
+			List<DepartmentGeneralMessageEntity> deptGenMsgList = projectDAO.getDepartmentGeneralMessageListByDeptId
+					(departmentId,pageNo,pageCount);
+
+			HashMap<Integer, DepartmentGeneralMessageEntity> deptTotalMsgMap = new HashMap<Integer, DepartmentGeneralMessageEntity>();
+			// Grouping based on Reference No
+			for(DepartmentGeneralMessageEntity depMsg : deptGenMsgList){
+				List<DepartmentGeneralMessageEntity> list = 
+						projectDAO.getDepartmentGeneralMessageListByDeptIdRefNo
+						(depMsg.getDepartmentId(),depMsg.getReferenceNo());
+				for(DepartmentGeneralMessageEntity d: list){
+					if(!deptTotalMsgMap.containsKey(d.getDeptGeneralMsgId())){
+						deptTotalMsgMap.put(d.getDeptGeneralMsgId(), d);
+					}
+				}
+			}
+			// HashMap converting to ArrayList
+			Collection<DepartmentGeneralMessageEntity> values = deptTotalMsgMap.values();
+			List<DepartmentGeneralMessageEntity>  totalDeptGenMsgList = 
+					new ArrayList<DepartmentGeneralMessageEntity>(values);
+
+			HashMap<Integer, List<DepartmentGeneralMessageEntity>> deptMsgMap = 
+					new HashMap<Integer, List<DepartmentGeneralMessageEntity>>();
+			for(DepartmentGeneralMessageEntity entity: totalDeptGenMsgList){
+				if(deptMsgMap.containsKey(entity.getGenMessageId())){
+					List<DepartmentGeneralMessageEntity> list = deptMsgMap.get(entity.getGenMessageId());
+					list.add(entity);
+					deptMsgMap.put(entity.getGenMessageId(), list);
+				}else{
+					List<DepartmentGeneralMessageEntity> newList = new ArrayList<DepartmentGeneralMessageEntity>();
+					newList.add(entity);
+					deptMsgMap.put(entity.getGenMessageId(),newList);
+				}
+			}
+
+
 			//			System.out.println("Business,getGeneralInboxByDeptId, deptMsgMap, size: "+deptMsgMap.size());
 			for (Map.Entry<Integer, List<DepartmentGeneralMessageEntity>> entry : deptMsgMap.entrySet())  {
 				//				System.out.println("Business,getGeneralInboxByDeptId, MessageId: "+entry.getKey());
@@ -3075,5 +3384,34 @@ public class ProjectServiceImpl implements ProjectService {
 		return model;
 	}
 
+	@Override
+	public void tempUpdateDepartmentGeneralMessageRefNo(){
+		projectDAO.tempUpdateDepartmentGeneralMessageRefNo();
+	}
+
+	@Override
+	public int getGeneralInboxMessageCountByDeptId(int departmentId) {
+		return projectDAO.getGeneralInboxMessageCountByDeptId(departmentId);
+	}
+
+	@Override
+	public int getGeneralMessageCountByDeptId(int departmentId){
+		return projectDAO.getGeneralMessageCountByDeptId(departmentId);
+	}
+
+	@Override
+	public void tempUpdateDepartmentCommunicationMessagesRefNo(){
+		projectDAO.tempUpdateDepartmentCommunicationMessagesRefNo();
+	}
+
+	@Override
+	public int getSentWorkMessageCountByDeptId(int departmentId){
+		return projectDAO.getInterOfficeMessageCountByDeptId(departmentId);
+	}
+
+	@Override
+	public int getInboxWorkMessagesCount(int departmentId){
+		return projectDAO.getInterOfficeMessageCountByDeptId(departmentId);
+	}
 
 }

@@ -35,11 +35,12 @@ public class SubTaskEntity {
 	private String description;
 
 	@Column(name = "start_date")
-	private Timestamp startDate;
+//	private Timestamp startDate;
+	private Date startDate;
 
 	@Column(name = "end_date")
-//	private Date endDate;
-	private Timestamp endDate;
+	private Date endDate;
+//	private Timestamp endDate;
 
 	//On going,Short closed,Completed
 	@Column(name = "work_status_id")
@@ -197,19 +198,19 @@ public class SubTaskEntity {
 		this.createdEmpId = createdEmpId;
 	}
 
-	public Timestamp getStartDate() {
+	public Date getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Timestamp startDate) {
+	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
 
-	public Timestamp getEndDate() {
+	public Date getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Timestamp endDate) {
+	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
 

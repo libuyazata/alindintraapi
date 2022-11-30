@@ -53,6 +53,17 @@ public class DepartmentCommunicationMessagesEntity {
 
 	@Column(name = "updated_on")
 	private Timestamp updatedOn;
+	
+	@Column(name = "reference_no", nullable = false)
+	private String referenceNo;
+
+	public String getReferenceNo() {
+		return referenceNo;
+	}
+
+	public void setReferenceNo(String referenceNo) {
+		this.referenceNo = referenceNo;
+	}
 
 	public int getDeptCommId() {
 		return deptCommId;
