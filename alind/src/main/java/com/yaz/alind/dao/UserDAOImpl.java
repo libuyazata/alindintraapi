@@ -38,7 +38,7 @@ public class UserDAOImpl implements UserDAO {
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel) {
 		try{
 			TokenEntity tModel = getTokenModelByUserId(tokenModel.getUserId());
-//			System.out.println("DAO,saveOrUpdateToken,tModel: "+tModel);
+			//			System.out.println("DAO,saveOrUpdateToken,tModel: "+tModel);
 			if(tModel != null){
 				this.sessionFactory.getCurrentSession().merge(tokenModel);
 			}else{
@@ -71,7 +71,7 @@ public class UserDAOImpl implements UserDAO {
 		return tokenModel;
 	}
 
-/**
+	/**
 	@Override
 	@Transactional
 	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee) {
@@ -87,15 +87,15 @@ public class UserDAOImpl implements UserDAO {
 		}
 		return emp;
 	}
-	**/
+	 **/
 	@Override
 	public EmployeeEntity saveEmployee(EmployeeEntity employee){
 		EmployeeEntity emp = null;
 		try{
 			this.sessionFactory.getCurrentSession().save(employee);
-			System.out.println("DAO, saveEmployee, EmployeeId: "+employee.getEmployeeId());
+			//System.out.println("DAO, saveEmployee, EmployeeId: "+employee.getEmployeeId());
 			emp = employee;
-			System.out.println("DAO, saveEmployee, lastname: "+emp.getLastName());
+			//System.out.println("DAO, saveEmployee, lastname: "+emp.getLastName());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("saveEmployee: "+e.getMessage());
@@ -108,7 +108,7 @@ public class UserDAOImpl implements UserDAO {
 		EmployeeEntity emp = null;
 		try{
 			this.sessionFactory.getCurrentSession().update(employee);
-//			this.sessionFactory.getSessionFactory().getCurrentSession().update(employee);
+			//			this.sessionFactory.getSessionFactory().getCurrentSession().update(employee);
 			System.out.println("DAO, updateEmployee, EmployeeId: "+employee.getEmployeeId());
 			emp = employee;
 			System.out.println("DAO, updateEmployee, lastname: "+emp.getLastName());
@@ -128,7 +128,7 @@ public class UserDAOImpl implements UserDAO {
 			cr.add(Restrictions.eq("userName", userName));
 			cr.add(Restrictions.eq("password", password));
 			List<EmployeeEntity> list = cr.list();
-//			System.out.println("DAO,getAuthentication, user size: "+list.size());
+			//			System.out.println("DAO,getAuthentication, user size: "+list.size());
 			if(list.size() > 0){
 				employee = list.get(0);
 			}
@@ -145,7 +145,7 @@ public class UserDAOImpl implements UserDAO {
 	public TokenEntity getTokenModelByToken(String token) {
 		TokenEntity tokenModel = null;
 		try{
-//			System.out.println("DAO,getTokenModelByToken, token: "+token);
+			//			System.out.println("DAO,getTokenModelByToken, token: "+token);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(TokenEntity.class);
 			cr.add(Restrictions.eq("token", token));
 			List<TokenEntity> list = cr.list();
@@ -226,7 +226,7 @@ public class UserDAOImpl implements UserDAO {
 		}
 		return employees;
 	}
-	
+
 	@Override
 	@Transactional
 	public List<EmployeeEntity> searchEmployee(String searchKeyWord, int departmentId){
@@ -269,22 +269,51 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	@Transactional
-	public DepartmentEntity saveOrUpdateDepartment(DepartmentEntity department) {
+	public DepartmentEntity saveDepartment(DepartmentEntity department) {
 		DepartmentEntity dept = null;
 		try{
-			this.sessionFactory.getCurrentSession().saveOrUpdate(department);
+			this.sessionFactory.getCurrentSession().save(department);
 			dept = department;
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("saveOrUpdateDepartment: "+e.getMessage());
+			logger.error("saveDepartment: "+e.getMessage());
 		}
 		return dept;
 	}
 
+	@Override
+	@Transactional
+	public DepartmentEntity updateDepartment(DepartmentEntity department) {
+		DepartmentEntity dept = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(department);
+			dept = department;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDepartment: "+e.getMessage());
+		}
+		return dept;
+	}
+
+	/**
+	 **/
+	@Override
+	@Transactional
+	public List<DepartmentEntity> getAllDepartments() {
+		List<DepartmentEntity> departments = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentEntity.class);
+			departments = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllDepartments: "+e.getMessage());
+		}
+		return departments;
+	} 
 
 	@Override
 	@Transactional
-	public List<DepartmentEntity> getAllDepartment() {
+	public List<DepartmentEntity> getAllActiveDepartments() {
 		List<DepartmentEntity> departments = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentEntity.class);
@@ -292,10 +321,11 @@ public class UserDAOImpl implements UserDAO {
 			departments = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("getAllDepartment: "+e.getMessage());
+			logger.error("getAllActiveDepartments: "+e.getMessage());
 		}
 		return departments;
 	}
+
 
 
 	@Override
@@ -421,7 +451,7 @@ public class UserDAOImpl implements UserDAO {
 			e.printStackTrace();
 			logger.error("getDeputationById: "+e.getMessage());
 		}
-		
+
 		return entity;
 	}
 
@@ -447,7 +477,10 @@ public class UserDAOImpl implements UserDAO {
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(AuthorizationEntity.class);
 			cr.add(Restrictions.eq("userRoleId",userRoleId));
-			entity = (AuthorizationEntity) cr.list().get(0);
+			List<AuthorizationEntity> list = cr.list();
+			if(list.size() > 0){
+				entity = list.get(0);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAuthorizationByUserRole: "+e.getMessage());

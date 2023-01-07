@@ -229,6 +229,7 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 	public DocumentCategoryEntity getDocumentCategoryById(int documentCategoryId) {
 		DocumentCategoryEntity docTypes = null;
 		try{
+			System.out.println("DAO,getDocumentCategoryById, documentCategoryId: "+documentCategoryId);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentCategoryEntity.class);
 			cr.add(Restrictions.eq("documentCategoryId", documentCategoryId));
 			docTypes = (DocumentCategoryEntity) cr.list().get(0);

@@ -273,8 +273,8 @@ public class UtilServiceImpl implements UtilService{
 			String lastDocumentNo) {
 		String newNo = null;
 		try{
-			System.out.println("Utill Business,createDocumentNumber,drawingSeries:"+drawingSeries
-					+", lastDocumentNo: "+lastDocumentNo);
+//			System.out.println("Utill Business,createDocumentNumber,drawingSeries:"+drawingSeries
+//					+", lastDocumentNo: "+lastDocumentNo);
 			Date today = Calendar.getInstance().getTime();
 			String currentYear = Integer.toString(getYearByDate(today));
 			String year = null;
@@ -386,9 +386,9 @@ public class UtilServiceImpl implements UtilService{
 			if(strArr.length > 2){
 				lastStr = strArr[2];
 				String incrementCharSequence = incrementCharSequence(lastStr);
-				System.out.println("Util, Business,updatedDocumentNumber, incrementCharSequence: "+incrementCharSequence);
+//				System.out.println("Util, Business,updatedDocumentNumber, incrementCharSequence: "+incrementCharSequence);
 				updateSeries = strArr[0]+" "+strArr[1]+" "+incrementCharSequence;
-				System.out.println("Util, Business,updatedDocumentNumber, updateSeries: "+updateSeries);
+//				System.out.println("Util, Business,updatedDocumentNumber, updateSeries: "+updateSeries);
 			}else{
 				String incrementCharSequence = incrementCharSequence("");
 				updateSeries = strArr[0]+" "+strArr[1]+" "+incrementCharSequence;

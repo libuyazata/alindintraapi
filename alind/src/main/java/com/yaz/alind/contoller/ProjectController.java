@@ -692,7 +692,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getWorkDetailsById,token: "+token);
+//			System.out.println("getWorkDetailsById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				WorkDetailsModel model = projectService.getWorkDetailsById(workDetailsId);
@@ -1041,8 +1041,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			//			System.out.println("uploadEmployeeDocuments,token: "+token+", projectDocumentId: "+projectDocumentId);
-			System.out.println("saveWorkDocument,token: "+token+", file size: "+file.getSize());
+//			System.out.println("saveWorkDocument,token: "+token+", file size: "+file.getSize()+", documentCategoryId: "+documentCategoryId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				String contextPath = context.getRealPath(""); 
@@ -1074,7 +1073,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getWorkDocumentBySubTaskId,token: "+token);
+//			System.out.println("getWorkDocumentBySubTaskId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 
 			if(tokenStatus){
@@ -1743,7 +1742,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-
+/**
 	@RequestMapping(value="/project/communicationListByDeptId/{departmentId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  communicationListByDeptId(@RequestHeader("token") String token
 			,@PathVariable("departmentId") int departmentId) throws Exception{
@@ -1769,10 +1768,19 @@ public class ProjectController {
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-	
-	@RequestMapping(value="/project/communicationListByDeptId/{departmentId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  communicationListByDeptId(@RequestHeader("token") String token
+	}**/
+	/**
+	 *  Sent work message details to other departments
+	 * @param token
+	 * @param departmentId
+	 * @param pageNo
+	 * @param pageCount
+	 * @return
+	 * @throws Exception
+	 */
+	//@RequestMapping(value="/project/communicationListByDeptId/{departmentId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	@RequestMapping(value="/project/sentWorkMessageListByDeptId/{departmentId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  sentWorkMessageListByDeptId(@RequestHeader("token") String token
 			,@PathVariable("departmentId") int departmentId,
 			@PathVariable("pageNo") int pageNo,
 			@PathVariable("pageCount") int pageCount) throws Exception{
@@ -1784,7 +1792,7 @@ public class ProjectController {
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<CommunicationMessageFormatModel> communicationList = projectService.
-						getCommunicationListByDeptId(departmentId,pageNo,pageCount);
+						sentWorkMessageListByDeptId(departmentId,pageNo,pageCount);
 				resultMap.put("communicationList", communicationList);
 				resultMap.put("status", "success");
 			}else{
@@ -1795,7 +1803,7 @@ public class ProjectController {
 		}catch(Exception e){
 			e.printStackTrace();
 			resultMap.put("status", "failed");
-			logger.error("communicationListByDeptId, "+e.getMessage());
+			logger.error("sentWorkMessageListByDeptId, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
@@ -1807,7 +1815,7 @@ public class ProjectController {
 	 * @param departmentId
 	 * @return
 	 * @throws Exception
-	 */
+	 
 	@RequestMapping(value="/project/getSentMessageListByDeptId/{departmentId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getSentMessageListByDeptId(@RequestHeader("token") String token
 			,@PathVariable("departmentId") int departmentId) throws Exception{
@@ -1833,7 +1841,7 @@ public class ProjectController {
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
+	}*/
 
 	/**
 	 * Inbox messages. The message from other departments
@@ -1841,7 +1849,7 @@ public class ProjectController {
 	 * @param departmentId
 	 * @return
 	 * @throws Exception
-	 */
+	
 	@RequestMapping(value="/project/getInboxMessageByDeptId/{departmentId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getInboxMessageByDeptId(@RequestHeader("token") String token
 			,@PathVariable("departmentId") int departmentId) throws Exception{
@@ -1867,7 +1875,7 @@ public class ProjectController {
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
+	} */
 	
 	@RequestMapping(value="/project/getInboxMessageByDeptId/{departmentId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getInboxMessageByDeptId(@RequestHeader("token") String token
@@ -2226,6 +2234,34 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	/*
+	@RequestMapping(value="/project/sentAllGeneralMessage/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  sentAllGeneralMessage(@RequestHeader("token") String token,
+			@PathVariable("pageNo") int pageNo,
+			@PathVariable("pageCount") int pageCount) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("sentAllGeneralMessage,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<GeneralMessageFormatModel> generalMessageFormatModels = projectService.getSentGeneralMessageListByDeptId(0);
+				resultMap.put("models", generalMessageFormatModels);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("sentAllGeneralMessage, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}**/
 
 	@RequestMapping(value="/project/sentGeneralMessageListByDeptId/{deptId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  sentGeneralMessageListByDeptId(@RequestHeader("token") String token
@@ -2372,13 +2408,10 @@ public class ProjectController {
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
-//			@RequestParam(value = "files", required = false) MultipartFile[] files,
 			resultMap = new HashMap<String,Object>();
 			//System.out.println("searchInterDeptCommList,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-//				List<GeneralMessageFormatModel> list = projectService.searchGeneralMessageList
-//						(searchKeyWord,startDate,endDate,departmentId,pageNo,pageCount);
 				GeneralMessageSearchListModel list = projectService.searchGeneralMessageList
 						(searchKeyWord,startDate,endDate,departmentId,pageNo,pageCount);
 				resultMap.put("genMsgModelList", list.getFormatModels());
@@ -2397,6 +2430,37 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	/**
+	@RequestMapping(value="/project/getAllGeneralInboxMessage/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getAllGeneralInboxMessage(@RequestHeader("token") String token
+			,@PathVariable("pageNo") int pageNo,
+			@PathVariable("pageCount") int pageCount) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("getGeneralInboxByDeptId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<GeneralMessageFormatModel> generalMessageFormatModels = 
+						projectService.getGeneralInboxByDeptId(0,pageNo,pageCount);
+//				System.out.println("getGeneralInboxByDeptId,size: "+generalMessageFormatModels.size());
+				resultMap.put("models", generalMessageFormatModels);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("getAllGeneralInboxMessage, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	**/
 
 
 	@RequestMapping(value="/project/getGeneralInboxByDeptId/{deptId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
@@ -2412,7 +2476,7 @@ public class ProjectController {
 			if(tokenStatus){
 				List<GeneralMessageFormatModel> generalMessageFormatModels = 
 						projectService.getGeneralInboxByDeptId(deptId,pageNo,pageCount);
-				System.out.println("getGeneralInboxByDeptId,size: "+generalMessageFormatModels.size());
+//				System.out.println("getGeneralInboxByDeptId,size: "+generalMessageFormatModels.size());
 				resultMap.put("models", generalMessageFormatModels);
 				resultMap.put("status", "success");
 			}else{
@@ -2532,7 +2596,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	/** **/
+	/** 
 		@RequestMapping(value="/project/test", method = RequestMethod.GET)
 		public ResponseEntity<Map<String,Object>>  test() throws Exception{
 			Map<String,Object> resultMap = null;
@@ -2548,6 +2612,6 @@ public class ProjectController {
 			}
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 		}
-
+**/
 
 }

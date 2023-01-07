@@ -34,6 +34,9 @@ public class EmployeeEntity implements Serializable {
 	@Column(name="created_at")
 	private Timestamp createdAt;
 //	private Date createdAt;
+	
+	@Column(name="date_of_join")
+	private Timestamp dateOfJoin;
 
 	@Column(name="email_id")
 	private String emailId;
@@ -437,5 +440,15 @@ public class EmployeeEntity implements Serializable {
 	public void setOrginalProfilePicName(String orginalProfilePicName) {
 		this.orginalProfilePicName = orginalProfilePicName;
 	}
+
+	public Timestamp getDateOfJoin() {
+		return dateOfJoin;
+	}
+
+	public void setDateOfJoin(Timestamp dateOfJoin) {
+		this.dateOfJoin = dateOfJoin;
+	}
+	
+	
 
 }

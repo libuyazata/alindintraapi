@@ -123,7 +123,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("saveEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
+//			System.out.println("saveEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				EmployeeModel emp= userService.saveEmployee(employee);
@@ -276,16 +276,17 @@ public class UserController {
 	}
 
 
-	@RequestMapping(value="/user/saveOrUpdateDepartment", method = RequestMethod.POST)
-	public ResponseEntity<Map<String,Object>>  saveOrUpdateDepartment(@RequestHeader("token") String token,@RequestBody DepartmentEntity department) throws Exception{
+//	@RequestMapping(value="/user/saveOrUpdateDepartment", method = RequestMethod.POST)
+	@RequestMapping(value="/user/updateDepartment", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>>  updateDepartment(@RequestHeader("token") String token,@RequestBody DepartmentEntity department) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("saveOrUpdateDepartment,token: "+token);
+//			System.out.println("saveOrUpdateDepartment,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				DepartmentEntity dept= userService.saveOrUpdateDepartment(department);
+				DepartmentEntity dept= userService.updateDepartment(department);
 				resultMap.put("department", dept);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -293,7 +294,30 @@ public class UserController {
 
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("saveOrUpdateDepartment, "+e.getMessage());
+			logger.error("updateDepartment, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/user/saveDepartment", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>>  saveDepartment(@RequestHeader("token") String token,@RequestBody DepartmentEntity department) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("saveOrUpdateDepartment,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DepartmentEntity dept= userService.saveDepartment(department);
+				resultMap.put("department", dept);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDepartment, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
@@ -331,7 +355,7 @@ public class UserController {
 			//			System.out.println("getAllEmployeeTypes,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<DepartmentEntity> departments= userService.getAllDepartment();
+				List<DepartmentEntity> departments= userService.getAllDepartments();
 				resultMap.put("departments", departments);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -345,6 +369,28 @@ public class UserController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 	
+	@RequestMapping(value="/user/getActiveDepartments", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getActiveDepartments(@RequestHeader("token") String token) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("getAllEmployeeTypes,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<DepartmentEntity> departments= userService.getAllActiveDepartments();
+				resultMap.put("departments", departments);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getActiveDepartments, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
 
 
 	@RequestMapping(value="/user/getEmployeeById", method = RequestMethod.GET)
@@ -586,7 +632,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("userRoleId,token: "+token);
+			System.out.println("UserController, getAuthorization, userRoleId,token: "+token+", userRoleId: "+userRoleId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				AuthorizationEntity authorization= userService.getAuthorizationByUserRole(userRoleId);
@@ -638,6 +684,26 @@ public class UserController {
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	/**
+	 *  Temporary purpose, reading data from Excel
+	 * @return
+	 */
+	@RequestMapping(value="/user/saveExcellSheet", method = RequestMethod.POST)
+	public Map<String,Object> saveExcellSheet(){
+		Map<String,Object> resultMap = new HashMap<String,Object>();
+		try{
+			System.out.println("UserController,saveExcellSheet: ");
+			userService.getExcellReader();
+			resultMap.put("status", "success");
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAuthentication, "+e.getMessage());
+			resultMap.put("status", "failed");
+		}
+		return resultMap;
 	}
 
 

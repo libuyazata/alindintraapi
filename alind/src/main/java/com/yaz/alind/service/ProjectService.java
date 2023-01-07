@@ -112,7 +112,7 @@ public interface ProjectService {
     public List<InterOfficeCommunicationModel> getCommunicationListBySubTaskId(int subTaskId);
     public List<InterOfficeCommunicationModel> getCommunicationListByWorkId(int workDetailsId);
     public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId );
-    public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId,
+    public List<CommunicationMessageFormatModel> sentWorkMessageListByDeptId(int departmentId,
     		int pageNo, int pageCount);
     public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId );

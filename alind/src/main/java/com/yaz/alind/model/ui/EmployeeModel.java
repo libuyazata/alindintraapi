@@ -84,6 +84,8 @@ public class EmployeeModel {
 	
 	private String orginalProfilePicName;
 	
+	private String dateOfJoin;
+	
 	private String token;
 
 	public int getEmployeeId() {
@@ -389,5 +391,14 @@ public class EmployeeModel {
 	public void setEmpFullNameWithEmpCode(String empFullNameWithEmpCode) {
 		this.empFullNameWithEmpCode = empFullNameWithEmpCode;
 	}
+
+	public String getDateOfJoin() {
+		return dateOfJoin;
+	}
+
+	public void setDateOfJoin(String dateOfJoin) {
+		this.dateOfJoin = dateOfJoin;
+	}
+	
 
 }

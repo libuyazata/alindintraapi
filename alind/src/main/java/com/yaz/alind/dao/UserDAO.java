@@ -18,7 +18,6 @@ public interface UserDAO {
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel);
 	public TokenEntity getTokenModelByUserId(int userId);
 	public TokenEntity getTokenModelByToken(String token);
-	//public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee);
 	public EmployeeEntity saveEmployee(EmployeeEntity employee);
 	public EmployeeEntity updateEmployee(EmployeeEntity employee);
 	public EmployeeEntity getAuthentication(String userName,String password);
@@ -29,11 +28,12 @@ public interface UserDAO {
 	public List<UserRolesEntity> getAllUserRoles();
 	public List<EmployeeTypesEntity> getAllEmployeeTypes();
 
-	
-	public List<DepartmentEntity> getAllDepartment();
+	public List<DepartmentEntity> getAllDepartments();
+	public List<DepartmentEntity> getAllActiveDepartments();
 	public UserRolesEntity getUserRoleById(int userRoleId);
-	public DepartmentEntity saveOrUpdateDepartment(DepartmentEntity department);
+	public DepartmentEntity saveDepartment(DepartmentEntity department);
 	public DepartmentEntity getDepartmentById(int departmentId );
+	public DepartmentEntity updateDepartment(DepartmentEntity department);
 	public EmployeeEntity getLastEmployeeDetails();
 	public EmployeeEntity getEmployeeById(int employeeId);
 	

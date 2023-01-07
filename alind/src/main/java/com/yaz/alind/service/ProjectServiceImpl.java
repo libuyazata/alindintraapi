@@ -406,7 +406,10 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			WorkDocumentEntity entity = new WorkDocumentEntity();
 			EmployeeEntity employee = userService.getEmployeeByToken(token);
-			DocumentCategoryEntity documentTypes = masterTableDAO.getDocumentCategoryById(documentTypeId);
+//			System.out.println("Business, saveWorkDocument, documentCategoryId: "+documentCategoryId);
+			DocumentCategoryEntity documentTypes = masterTableDAO.getDocumentCategoryById(documentCategoryId);
+//			System.out.println("Business, saveWorkDocument,DrawingSeries: "+documentTypes.getDrawingSeries()
+//					+", type: "+documentTypes.getType()+", DocumentCategoryId: "+documentTypes.getDocumentCategoryId());
 			// Getting the latest Work Document for taking the drawing series number.
 			WorkDocumentModel latestWorkDocumentModel = getLatestWorkDocument(subTaskId, documentCategoryId, contextPath);
 			DocumentNumberSeriesEntity documentNumberSeries = projectDAO.getDocumentNumberSeriesByDocumentTypeId(documentTypeId);
@@ -416,6 +419,7 @@ public class ProjectServiceImpl implements ProjectService {
 			if(latestWorkDocumentModel == null){
 				documentnumber = utilService.createDocumentNumber(documentTypes.getDrawingSeries(),
 						documentnumber);
+//				System.out.println("Business, saveWorkDocument,latestWorkDocumentModel == null, documentnumber: "+documentnumber);
 				documentNumberSeries = documentNumberSeriesFactory.createDocumentNumberSeries();
 				documentNumberSeries.setDocumentTypeId(documentTypeId);
 				documentNumberSeries.setLastDocumentNumber(documentnumber);
@@ -425,7 +429,7 @@ public class ProjectServiceImpl implements ProjectService {
 				//						documentNumberSeries.getLastDocumentNumber());
 				String latestDocumentnumber = latestWorkDocumentModel.getDocumentnumber();
 				documentnumber = utilService.updatedDocumentNumber(latestDocumentnumber);
-
+//				System.out.println("Business, saveWorkDocument,else, documentnumber: "+documentnumber);
 			}
 			//			documentNumberSeries.setLastDocumentNumber(documentnumber);
 			//			documentNumberSeries = projectDAO.saveOrUpdateDocumentNumberSeries(documentNumberSeries);
@@ -443,6 +447,7 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setDocumentName(documentName);
 			entity.setDocumentnumber(documentnumber);
 			entity.setDocumentTypeId(documentTypeId);
+//			System.out.println("Business, saveWorkDocument, documentCategoryId: "+documentCategoryId);
 			entity.setDocumentCategoryId(documentCategoryId);
 			entity.setEmployeeId(employee.getEmployeeId());
 			entity.setFileSize(file.getSize());
@@ -455,6 +460,7 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setVerificationStatus(0);
 
 			entity.setFileName(fileName);
+			
 			entity = projectDAO.saveWorkDocument(entity);
 			entity = projectDAO.getWorkDocumentById(entity.getWorkDocumentId());
 			documentModel = createWorkDocumentModel(entity,contextPath);
@@ -993,8 +999,8 @@ public class ProjectServiceImpl implements ProjectService {
 			entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
 			entity = projectDAO.updateSubTaskEntity(entity);
 			entity = projectDAO.getSubTaskEntityById(entity.getSubTaskId());
-//			System.out.println("ProjectSerive,updateSubTask, EmpId: "+entity.getCreatedEmpId());
-//			System.out.println("ProjectSerive,updateSubTask,EmpCode: "+entity.getCreatedEmp().getEmpCode());
+			//			System.out.println("ProjectSerive,updateSubTask, EmpId: "+entity.getCreatedEmpId());
+			//			System.out.println("ProjectSerive,updateSubTask,EmpCode: "+entity.getCreatedEmp().getEmpCode());
 			subModel = createSubTaskModel(entity);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1103,7 +1109,7 @@ public class ProjectServiceImpl implements ProjectService {
 		try{
 			models = new ArrayList<WorkDocumentModel>();
 			List<WorkDocumentEntity> entities = projectDAO.getWorkDocumentBySubTaskId(subTaskId);
-			System.out.println("Business,getWorkDocumentBySubTaskId, size: "+entities.size()+", subTaskId: "+subTaskId);
+//			System.out.println("Business,getWorkDocumentBySubTaskId, size: "+entities.size()+", subTaskId: "+subTaskId);
 			for(WorkDocumentEntity entity: entities){
 				WorkDocumentModel model = createWorkDocumentModel(entity,contextPath);
 				models.add(model);
@@ -1226,7 +1232,7 @@ public class ProjectServiceImpl implements ProjectService {
 		SubTaskModel model = null;
 		try{
 			model = new SubTaskModel();
-		//	System.out.println("Bussiness, createSubTaskModel, EmpCode: "+entity.getCreatedEmp().getEmpCode());
+			//	System.out.println("Bussiness, createSubTaskModel, EmpCode: "+entity.getCreatedEmp().getEmpCode());
 			model.setCreatedEmpCode(entity.getCreatedEmp().getEmpCode());
 			model.setCreatedEmpName(entity.getCreatedEmp().getFirstName()+ " "
 					+entity.getCreatedEmp().getLastName());
@@ -1261,7 +1267,7 @@ public class ProjectServiceImpl implements ProjectService {
 				entity.setCreatedOn(utilService.stringToTimestamp(model.getCreatedOn()));
 			}
 			entity.setDescription(model.getDescription());
-//			entity.setEndDate(utilService.stringToTimestamp(model.getEndDate()));
+			//			entity.setEndDate(utilService.stringToTimestamp(model.getEndDate()));
 			entity.setEndDate(utilService.stringToDate(model.getEndDate()));
 			entity.setStartDate(utilService.stringToDate(model.getStartDate()));
 			entity.setSubTaskId(model.getSubTaskId());
@@ -1901,15 +1907,17 @@ public class ProjectServiceImpl implements ProjectService {
 	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
 			String startDate, String endDate,int departmentId,int pageNo, int pageCount){
 
-		InterOfficeCommunicationSearchModel interOfficeCommunicationSearchModel = null;
-		List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
-		List<InterOfficeCommunicationModel> interOffComList = null;
+		InterOfficeCommunicationSearchModel interOffSearchModel = null;
+		//List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
+//		List<InterOfficeCommunicationModel> interOffComList = null;
 		Date stDate =null;
 		Date eDate = null;
 
 		try{
-			interOfficeCommunicationSearchModel = new InterOfficeCommunicationSearchModel();
-			interOffComList = new ArrayList<InterOfficeCommunicationModel>();
+			List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
+			InterOfficeCommunicationSearchModel interOfficeCommunicationSearchModelTemp = new InterOfficeCommunicationSearchModel();
+			interOffSearchModel = new InterOfficeCommunicationSearchModel();
+			List<InterOfficeCommunicationModel> interOffComList = new ArrayList<InterOfficeCommunicationModel>();
 			if(startDate != null){
 				stDate = utilService.getDateFromString(startDate);
 			}
@@ -1919,78 +1927,52 @@ public class ProjectServiceImpl implements ProjectService {
 			if( searchKeyWord == null){
 				searchKeyWord = "";
 			}
-//			List<InterOfficeCommunicationEntity> entityList = 
-//					projectDAO.searchInterDeptCommList(searchKeyWord, stDate, eDate, departmentId);
-			interOfficeCommunicationSearchModel = projectDAO.searchInterDeptCommList
+			//			List<InterOfficeCommunicationEntity> entityList = 
+			//					projectDAO.searchInterDeptCommList(searchKeyWord, stDate, eDate, departmentId);
+			interOfficeCommunicationSearchModelTemp = projectDAO.searchInterDeptCommList
 					(searchKeyWord, stDate, eDate, departmentId,pageNo, pageCount);
-			List<InterOfficeCommunicationEntity> entityList = interOfficeCommunicationSearchModel.getCommunicationEntities();
+			List<InterOfficeCommunicationEntity> entityList = interOfficeCommunicationSearchModelTemp.getCommunicationEntities();
 			for(InterOfficeCommunicationEntity ie: entityList){
 				InterOfficeCommunicationModel model = createInterOfficeCommunicationModel(ie);
-				List<DepartmentCommunicationMessagesEntity> deptCommList = projectDAO.
+				List<DepartmentCommunicationMessagesEntity> depGenMsgList = projectDAO.
 						getDepartmentCommunicationMessagesByDeptId(ie.getDepartmentId());
 				List<DepartmentCommunicationMessagesModel> depModel = new ArrayList<DepartmentCommunicationMessagesModel>();
-				for(DepartmentCommunicationMessagesEntity dc: deptCommList){
+				for(DepartmentCommunicationMessagesEntity dc: depGenMsgList){
 					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
 					depModel.add(m);
 				}
 				model.setDeptCommList(depModel);
 				interOffComList.add(model);
-
-				commMsgList = getCommunicationMessageFormatModel(interOffComList);
-				interOfficeCommunicationSearchModel.setIntOffComFromatModList(commMsgList);
 			}
-			//			Collections.reverse(commMsgList);
+			commMsgList = getCommunicationMessageFormatModel(interOffComList);
+			System.out.println("Business,searchInterDeptCommList, commMsgList, size: "+commMsgList.size());
+			Collections.reverse(commMsgList);
+			interOffSearchModel.setTotalCount(interOfficeCommunicationSearchModelTemp.getTotalCount());
+			interOffSearchModel.setIntOffComFromatModList(commMsgList);
+			
+			//			for(InterOfficeCommunicationEntity ie: entityList){
+//				System.out.println("Business,searchInterDeptCommList, OfficeCommunicationId: "+ie.getOfficeCommunicationId());
+//				InterOfficeCommunicationModel model = createInterOfficeCommunicationModel(ie);
+//				List<DepartmentCommunicationMessagesEntity> deptCommList = projectDAO.
+//						getDepartmentCommunicationMessagesByDeptId(ie.getDepartmentId());
+//				List<DepartmentCommunicationMessagesModel> commModel = new ArrayList<DepartmentCommunicationMessagesModel>();
+//				for(DepartmentCommunicationMessagesEntity dc: deptCommList){
+//					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
+//					commModel.add(m);
+//				}
+//				model.setDeptCommList(commModel);
+//				interOffComList.add(model);
+//			}
+//			Collections.reverse(commMsgList);
+//			commMsgList = getCommunicationMessageFormatModel(interOffComList);
+//			interOffSearchModel.setIntOffComFromatModList(commMsgList);
+//			interOffSearchModel.setTotalCount(interOfficeCommunicationSearchModelTemp.getTotalCount());
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("searchInterDeptCommList: "+e.getMessage());
 		}
-		//		return interOffComList;
-		return interOfficeCommunicationSearchModel;
-	}
-
-
-	@Override
-	public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
-			String startDate, String endDate,int departmentId ){
-		List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
-		List<InterOfficeCommunicationModel> interOffComList = null;
-		Date stDate =null;
-		Date eDate = null;
-
-		try{
-			interOffComList = new ArrayList<InterOfficeCommunicationModel>();
-			if(startDate != null){
-				stDate = utilService.getDateFromString(startDate);
-			}
-			if( endDate != null){
-				eDate = utilService.getDateFromString(endDate);
-			}
-			if( searchKeyWord == null){
-				searchKeyWord = "";
-			}
-			List<InterOfficeCommunicationEntity> entityList = 
-					projectDAO.searchInterDeptCommList(searchKeyWord, stDate, eDate, departmentId);
-			for(InterOfficeCommunicationEntity ie: entityList){
-				InterOfficeCommunicationModel model = createInterOfficeCommunicationModel(ie);
-				List<DepartmentCommunicationMessagesEntity> deptCommList = projectDAO.
-						getDepartmentCommunicationMessagesByDeptId(ie.getDepartmentId());
-				List<DepartmentCommunicationMessagesModel> depModel = new ArrayList<DepartmentCommunicationMessagesModel>();
-				for(DepartmentCommunicationMessagesEntity dc: deptCommList){
-					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
-					depModel.add(m);
-				}
-				model.setDeptCommList(depModel);
-				interOffComList.add(model);
-
-				commMsgList = getCommunicationMessageFormatModel(interOffComList);
-			}
-			//			Collections.reverse(commMsgList);
-		}catch(Exception e){
-			e.printStackTrace();
-			logger.error("searchInterDeptCommList: "+e.getMessage());
-		}
-		//		return interOffComList;
-		return commMsgList;
+		return interOffSearchModel;
 	}
 
 	@Override
@@ -2040,6 +2022,52 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 		return genSearchModel;
 	}
+
+	@Override
+	public List<CommunicationMessageFormatModel> searchInterDeptCommList(String searchKeyWord,
+			String startDate, String endDate,int departmentId ){
+		List<CommunicationMessageFormatModel> commMsgList = new ArrayList<CommunicationMessageFormatModel>();
+		List<InterOfficeCommunicationModel> interOffComList = null;
+		Date stDate =null;
+		Date eDate = null;
+
+		try{
+			interOffComList = new ArrayList<InterOfficeCommunicationModel>();
+			if(startDate != null){
+				stDate = utilService.getDateFromString(startDate);
+			}
+			if( endDate != null){
+				eDate = utilService.getDateFromString(endDate);
+			}
+			if( searchKeyWord == null){
+				searchKeyWord = "";
+			}
+			List<InterOfficeCommunicationEntity> entityList = 
+					projectDAO.searchInterDeptCommList(searchKeyWord, stDate, eDate, departmentId);
+			for(InterOfficeCommunicationEntity ie: entityList){
+				InterOfficeCommunicationModel model = createInterOfficeCommunicationModel(ie);
+				List<DepartmentCommunicationMessagesEntity> deptCommList = projectDAO.
+						getDepartmentCommunicationMessagesByDeptId(ie.getDepartmentId());
+				List<DepartmentCommunicationMessagesModel> depModel = new ArrayList<DepartmentCommunicationMessagesModel>();
+				for(DepartmentCommunicationMessagesEntity dc: deptCommList){
+					DepartmentCommunicationMessagesModel m = createDepartmentCommunicationMessagesModel(dc);
+					depModel.add(m);
+				}
+				model.setDeptCommList(depModel);
+				interOffComList.add(model);
+
+				commMsgList = getCommunicationMessageFormatModel(interOffComList);
+			}
+			//			Collections.reverse(commMsgList);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchInterDeptCommList: "+e.getMessage());
+		}
+		//		return interOffComList;
+		return commMsgList;
+	}
+
+
 
 	@Override
 	public List<GeneralMessageFormatModel> searchGeneralMessageList(String searchKeyWord,
@@ -2438,10 +2466,10 @@ public class ProjectServiceImpl implements ProjectService {
 
 
 	/**
-	 * Sent message details to other departments
+	 * Sent work message details to other departments
 	 */
 
-	public List<CommunicationMessageFormatModel> getCommunicationListByDeptId(int departmentId,
+	public List<CommunicationMessageFormatModel> sentWorkMessageListByDeptId(int departmentId,
 			int pageNo, int pageCount){
 		List<CommunicationMessageFormatModel> messageList = null;
 		try{
@@ -2481,7 +2509,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("getCommunicationListByDeptId: "+e.getMessage());
+			logger.error("sentWorkMessageListByDeptId: "+e.getMessage());
 		}
 
 		return messageList;

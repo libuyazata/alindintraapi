@@ -20,14 +20,14 @@ public class WorkDocumentEntity {
 	private int workDocumentId;
 	
 	
-	@Column(name = "document_category_id")
+	@Column(name = "document_category_id",nullable = false)
 	private int documentCategoryId;
 	
 	@ManyToOne
 	@JoinColumn(name="document_category_id",insertable = false, updatable = false)
 	private DocumentCategoryEntity documentCategory;
 	
-	@Column(name = "document_type_id")
+	@Column(name = "document_type_id",nullable = false)
 	private int documentTypeId;
 	
 	@ManyToOne

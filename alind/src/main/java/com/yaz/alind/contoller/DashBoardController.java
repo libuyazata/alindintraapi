@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -48,6 +49,30 @@ public class DashBoardController {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAdminDashBoard, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/dashBoard/getDashBoardByDepartId/{deptId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getDashBoardByDepartId(@RequestHeader("token") String token
+			,@PathVariable("deptId") int deptId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("getDashBoardByDepartId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				AdminDashBoardModel dashBoard = dashBoardService.getDashBoardByDepartId(deptId);
+				resultMap.put("deptDashBoard", dashBoard);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDashBoardByDepartId, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);

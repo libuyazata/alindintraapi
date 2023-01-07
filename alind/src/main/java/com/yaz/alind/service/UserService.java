@@ -17,22 +17,20 @@ public interface UserService {
 
 	public TokenEntity saveOrUpdateToken(TokenEntity tokenModel);
 	public TokenEntity getTokenModelByUserId(int userId);
-//	public EmployeeEntity saveOrUpdateEmployee(EmployeeEntity employee);
-//	public EmployeeModel saveOrUpdateEmployee(EmployeeModel employee);
 	
 	public EmployeeModel saveEmployee(EmployeeModel employee);
 	public EmployeeModel updateEmployee(EmployeeModel employee);
 	
-//	public EmployeeEntity getAuthentication(String userName,String password);
 	public EmployeeModel getAuthentication(String userName,String password);
 	public int deleteEmployeeEntity(int employeeId);
 	public TokenEntity getTokenModelByToken(String token);
 	public List<UserRolesEntity> getAllUserRoles();
 	public UserRolesEntity getUserRoleById(int userRoleId);
-	//public List<EmployeeEntity> getAllEmployees(String token);
 	public List<EmployeeModel> getAllEmployees(String token);
-	public List<DepartmentEntity> getAllDepartment();
-	public DepartmentEntity saveOrUpdateDepartment(DepartmentEntity department);
+	public List<DepartmentEntity> getAllActiveDepartments();
+	public List<DepartmentEntity> getAllDepartments();
+	public DepartmentEntity updateDepartment(DepartmentEntity department);
+	public DepartmentEntity saveDepartment(DepartmentEntity department);
 	public int deleteDepartmentEntity(int departmentId);
 	public List<EmployeeTypesEntity> getAllEmployeeTypes();
 	public EmployeeModel getEmployeeById(int employeeId);
@@ -53,4 +51,6 @@ public interface UserService {
 	public AuthorizationEntity updateAuthorization(AuthorizationEntity entity);
 	
 	public int uploadEmployeeProfilePic(MultipartFile profilePic,int employeeId,String contextPath);
+	// Temp
+	public void getExcellReader();
 }

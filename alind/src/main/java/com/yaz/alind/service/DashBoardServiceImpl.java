@@ -57,10 +57,11 @@ public class DashBoardServiceImpl implements DashBoardService {
 			adminDashBoardModel = adminDashBoardFactory.createAdminDashBoardModel();
 			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
 			EmployeeEntity employee = userDAO.getEmployeeById(tokenModel.getUserId());
+			System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
 			// Admin
 			if(employee.getUserRoleId() == 1){
 				employees=userDAO.getAllEmployeesByDept(-1);
-				departments = userDAO.getAllDepartment();
+				departments = userDAO.getAllActiveDepartments();
 				for(int i=0;i<departments.size();i++){
 					List<EmployeeEntity> emp = userDAO.getAllEmployeesByDept(departments.get(i).getDepartmentId());
 					empBasedOnDept.put(departments.get(i).getDepartmentName(), emp.size());
@@ -109,7 +110,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 			}
 			// HOD or Department coordinator
 			if(employee.getUserRoleId() == 2 || employee.getUserRoleId() == 4){
-//				System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
+				System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
 				employees = userDAO.getAllEmployeesByDept(employee.getDepartmentId());
 				adminDashBoardModel.setNoOfEmpoyees(employees.size());
 
@@ -142,6 +143,60 @@ public class DashBoardServiceImpl implements DashBoardService {
 			logger.error("getAdminDashBoardModel, "+e.getMessage());
 		}
 		return adminDashBoardModel;
+	}
+
+	@Override
+	public AdminDashBoardModel getDashBoardByDepartId(int deptId){
+		AdminDashBoardModel adminDashBoardModel = null;
+		try{
+
+			adminDashBoardModel = new AdminDashBoardModel();
+			List<EmployeeEntity> employees =  userDAO.getAllEmployeesByDept(deptId);
+			adminDashBoardModel.setNoOfEmpoyees(employees.size());
+
+			Map<String,Integer> workDetails = getWorkDetailsByDeptId(deptId);
+
+			adminDashBoardModel.setWorkDetails(workDetails);
+
+			//			adminDashBoardModel.setDocAgaistDept(docAgainstDeptMap);
+			//Authorization 
+			AuthorizationEntity authEntity = userDAO.getAuthorizationByUserRole(2);
+			adminDashBoardModel.setAuthorizationEntity(authEntity);
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDashBoardByDepartId, "+e.getMessage());
+		}
+		return adminDashBoardModel;
+	}
+
+	private Map<String,Integer> getWorkDetailsByDeptId(int deptId){
+		Map<String,Integer> workDetailsMap = null;
+		try{
+			workDetailsMap = new HashMap<String, Integer>();
+			List<WorkDetailsEntity> workDetailsEntities = projectDAO.getWorkDetailsEntitiesByDeptId(deptId,1 );
+			List<SubTaskEntity> subTaskList = projectDAO.getSubTaskEntitiesByWorkId(deptId, 1);
+			List<WorkDocumentEntity> workDocs = projectDAO.getAllWorkDocumentByDepartMentId(deptId);
+
+			List<Integer> pendingVerificationList = workDocs.stream().
+					filter(work -> work.getVerificationStatus() == 0)
+					.map(w -> w.getVerificationStatus())
+					.collect(Collectors.toList());
+
+			List<Integer> pendingApprovalList = workDocs.stream().
+					filter(workApp -> workApp.getApprovalStatus() == 0)
+					.map(wApp -> wApp.getApprovalStatus())
+					.collect(Collectors.toList());
+
+			workDetailsMap.put("noOfWork", workDetailsEntities.size());
+			workDetailsMap.put("noOfSubTasks", subTaskList.size());
+			workDetailsMap.put("pendingVerification", pendingVerificationList.size());
+			workDetailsMap.put("pendingApproval", pendingApprovalList.size());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDetailsByDeptId, "+e.getMessage());
+		}
+		return workDetailsMap;
 	}
 
 	private Map<String,Integer> getWorkDetails(String token){

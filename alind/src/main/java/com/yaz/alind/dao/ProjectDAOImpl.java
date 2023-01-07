@@ -845,10 +845,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 			cr.add(Restrictions.eq("subTaskId", subTaskId));
 			cr.add(Restrictions.eq("documentCategoryId", documentCategoryId));
 			List<WorkDocumentEntity> list = cr.list();
-			//			System.out.println("getLatestWorkDocument, size: "+list.size()+", subTaskId: "+subTaskId
-
-			//					+" ,documentCategoryId: "+documentCategoryId);
-			if(list != null){
+//			System.out.println("getLatestWorkDocument, size: "+list.size()+", subTaskId: "+subTaskId
+//					+" ,documentCategoryId: "+documentCategoryId);
+			if(list.size() > 0){
 				workDocument = list.get(0);
 			}
 			//			System.out.println("getLatestWorkDocument, WorkDocumentId: " +workDocument.getWorkDocumentId());
@@ -1420,16 +1419,16 @@ public class ProjectDAOImpl implements ProjectDAO {
 			List<InterOfficeCommunicationEntity> comList = intOffCr.list();
 			Map<String,InterOfficeCommunicationEntity> map = new HashMap<String,InterOfficeCommunicationEntity>();
 			for (InterOfficeCommunicationEntity i : comList) map.put(i.getReferenceNo(),i);
-			//			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
+			System.out.println("DAO, searchInterDeptCommList, size: "+comList.size());
 			// Based on pagenation
 			intOffCr.setFirstResult(expectedRowSize);
 			intOffCr.setMaxResults(pageCount);			
 			List<InterOfficeCommunicationEntity> pageNationMsgList = intOffCr.list(); 
 			interOfficeCommunicationSearchModel.setCommunicationEntities(pageNationMsgList);
 			interOfficeCommunicationSearchModel.setTotalCount(map.size());
-			
-//			System.out.println("DAO,searchGeneralMessageList, comList, size: "+comList.size()
-//					+", pageNationMsgList, size: "+pageNationMsgList.size());
+
+			System.out.println("DAO,searchGeneralMessageList, comList, size: "+comList.size()
+					+", pageNationMsgList, size: "+pageNationMsgList.size());
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1637,7 +1636,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 		List<GeneralMessageEntity> genEntities = null;
 		try{
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
-			cr.add(Restrictions.eq("departmentId", departmentId));
+			if(departmentId != 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
 			genEntities = cr.list();
 		}catch(Exception e){
 			e.printStackTrace();
@@ -1850,7 +1851,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 			expectedRowSize = ((pageNo - 1) * pageCount);
 			refNoCount = expectedRowSize;
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
-			cr.add(Restrictions.eq("departmentId", departmentId));
+			if(departmentId != 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
 			do{
 				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
 				if(refNoCount < expectedRowSize){
@@ -1888,7 +1891,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 			//			int msgCount = getGeneralInboxMessageCountByDeptId(departmentId);
 			//System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,msgCount: "+msgCount);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
-			cr.add(Restrictions.eq("departmentId", departmentId));
+			if(departmentId != 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
 			do{
 				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
 				if(refNoCount < expectedRowSize){

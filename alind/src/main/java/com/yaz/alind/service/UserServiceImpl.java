@@ -1,8 +1,16 @@
 package com.yaz.alind.service;
 
+import java.io.File;
+import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import jxl.Sheet;
+import jxl.Workbook;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +129,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return empModel;
 	}
-	
+
 	@Override
 	public EmployeeModel updateEmployee(EmployeeModel employee){
 		EmployeeModel empModel = null;
@@ -160,7 +168,7 @@ public class UserServiceImpl implements UserService {
 				employee.setUpdatedAt(utilService.dateToTimestamp(today));
 				employee.setProfilePicPath(fileName);
 				employee.setOrginalProfilePicName(originalFileName);
-//				employee = userDAO.saveOrUpdateEmployee(employee);
+				//				employee = userDAO.saveOrUpdateEmployee(employee);
 				employee = userDAO.updateEmployee(employee);
 			}
 
@@ -223,21 +231,41 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<DepartmentEntity> getAllDepartment() {
-		return userDAO.getAllDepartment();
+	public List<DepartmentEntity> getAllActiveDepartments() {
+		return userDAO.getAllActiveDepartments();
 	}
 
 	@Override
-	public DepartmentEntity saveOrUpdateDepartment(DepartmentEntity department) {
+	public List<DepartmentEntity> getAllDepartments(){
+		return userDAO.getAllDepartments();
+	}
+
+	@Override
+	public DepartmentEntity updateDepartment(DepartmentEntity department) {
 		DepartmentEntity dept = null;
 		try{
 			department.setCreatedOn(utilService.getTodaysDate());
-			System.out.println("Business,getAllEmployees, created on: "+department.getCreatedOn());
-			department.setIsActive(1);
-			dept = userDAO.saveOrUpdateDepartment(department);
+			//			System.out.println("Business,getAllEmployees, created on: "+department.getCreatedOn());
+			//			department.setIsActive(1);
+			dept = userDAO.updateDepartment(department);
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("getAllEmployees: "+e.getMessage());
+			logger.error("updateDepartment: "+e.getMessage());
+		}
+		return dept;
+	}
+
+	@Override
+	public DepartmentEntity saveDepartment(DepartmentEntity department) {
+		DepartmentEntity dept = null;
+		try{
+			department.setCreatedOn(utilService.getTodaysDate());
+			//			System.out.println("Business,getAllEmployees, created on: "+department.getCreatedOn());
+			department.setIsActive(1);
+			dept = userDAO.saveDepartment(department);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDepartment: "+e.getMessage());
 		}
 		return dept;
 	}
@@ -261,7 +289,7 @@ public class UserServiceImpl implements UserService {
 		return empModel;
 		//return employee;
 	}
-	
+
 	/***
 	 * Only for UI purpose
 	 * @param employeeId
@@ -301,7 +329,7 @@ public class UserServiceImpl implements UserService {
 		try{
 			EmployeeEntity emplEntity = userDAO.getEmployeeById(employeeId);
 			emplEntity.setIsActive(-1);
-//			emplEntity = userDAO.saveOrUpdateEmployee(emplEntity);
+			//			emplEntity = userDAO.saveOrUpdateEmployee(emplEntity);
 			emplEntity = userDAO.updateEmployee(emplEntity);
 			if(emplEntity.getIsActive() == -1){
 				status = 1;
@@ -319,7 +347,7 @@ public class UserServiceImpl implements UserService {
 		try{
 			DepartmentEntity departmentEntity = userDAO.getDepartmentById(departmentId);
 			departmentEntity.setIsActive(-1);
-			departmentEntity = userDAO.saveOrUpdateDepartment(departmentEntity);
+			departmentEntity = userDAO.updateDepartment(departmentEntity);
 			if(departmentEntity.getIsActive() == -1){
 				status = 1;
 			}
@@ -526,6 +554,9 @@ public class UserServiceImpl implements UserService {
 			if(enity.getLastWorkingDay() != null){
 				enity.setLastWorkingDay(utilService.stringDateToTimestamp(model.getLastWorkingDay()));
 			}
+			if(model.getDateOfJoin() != null){
+				enity.setDateOfJoin(utilService.stringDateToTimestamp(model.getDateOfJoin()));
+			}
 			enity.setNationality(model.getNationality());
 			enity.setNativeAddress(model.getNativeAddress());
 			enity.setOrginalProfilePicName(model.getOrginalProfilePicName());
@@ -538,9 +569,9 @@ public class UserServiceImpl implements UserService {
 			enity.setSecondaryEmailId(model.getSecondaryEmailId());
 			enity.setSecondaryMobileNo(model.getSecondaryMobileNo());
 			enity.setToken(model.getToken());
-//			if(enity.getUpdatedAt() != null){
-//			enity.setUpdatedAt(utilService.stringDateToTimestamp(model.getUpdatedAt()));
-//			}
+			//			if(enity.getUpdatedAt() != null){
+			//			enity.setUpdatedAt(utilService.stringDateToTimestamp(model.getUpdatedAt()));
+			//			}
 			enity.setUploadId(model.getUploadId());
 			enity.setUserName(model.getUserName());
 			enity.setUserRoleId(model.getUserRoleId());
@@ -559,7 +590,7 @@ public class UserServiceImpl implements UserService {
 			String profImageLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+entity.getEmployeeId();
 			model.setAccommodationLocation(entity.getAccommodationLocation());
 			if(entity.getCreatedAt() != null){
-			model.setCreatedAt(utilService.dateToString(utilService.dateToTimestamp(entity.getCreatedAt())));
+				model.setCreatedAt(utilService.dateToString(utilService.dateToTimestamp(entity.getCreatedAt())));
 			}
 			model.setDepartmentId(entity.getDepartmentId());
 			model.setDepartmentName(entity.getDepartment().getDepartmentName());
@@ -584,6 +615,9 @@ public class UserServiceImpl implements UserService {
 			model.setLastName(entity.getLastName());
 			if(entity.getLastWorkingDay() != null){
 				model.setLastWorkingDay(utilService.dateToString(entity.getLastWorkingDay()));
+			}
+			if(entity.getDateOfJoin() != null){
+				model.setDateOfJoin(utilService.dateToString(entity.getDateOfJoin()));
 			}
 			model.setNationality(entity.getNationality());
 			model.setNativeAddress(entity.getNativeAddress());
@@ -670,5 +704,62 @@ public class UserServiceImpl implements UserService {
 		return authorizationEntity;
 	}
 
+	@Override
+	public void getExcellReader() {
+		String inputFile = "F:/Yazata/Project/Alind_Intra/Docs/Alind_Employee.xls";
+		File inputWorkbook = new File(inputFile);
+		Workbook w;
+		try {
+			ArrayList<EmployeeEntity> empList = new ArrayList<EmployeeEntity>();
+			w = Workbook.getWorkbook(inputWorkbook);
+			//			// Get the first sheet
+			Sheet sheet = w.getSheet(0);
+			//			for (int i = 1; i < 66; i++) {
+			//			for (int i = 1; i < 10; i++) {
+			for (int i = 1; i < 66; i++) {
+				EmployeeEntity emp = new EmployeeEntity();
+				//				emp.setCreatedAt(createdAt);
+				//				emp.setEmpCode(empCode);(Integer.parseInt(jSonEscape(sheet.getCell(0,i).getContents())));
+				emp.setEmpCode(jSonEscape(sheet.getCell(0,i).getContents()));
+				emp.setUserName(emp.getEmpCode());
+				emp.setPassword(emp.getEmpCode());
+				emp.setFirstName(jSonEscape(sheet.getCell(1,i).getContents()));
+				emp.setUserRoleId(Integer.parseInt(jSonEscape(sheet.getCell(3,i).getContents())));
+				emp.setDepartmentId(Integer.parseInt(jSonEscape(sheet.getCell(5,i).getContents())));
+				Date date1=new SimpleDateFormat("dd/MM/yyyy").parse(sheet.getCell(6,i).getContents());
+				//				String dojStr = sheet.getCell(6,i).getContents();
+				emp.setGender(jSonEscape(sheet.getCell(7,i).getContents()));
+				SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+				//				Date date1=new SimpleDateFormat("yyyy-MM-dd").parse(sheet.getCell(6,i).getContents());
+				emp.setIsActive(1);
+				emp.setCreatedAt(utilService.getCurrentDateTimeStamp());
+				emp.setUpdatedAt(utilService.getCurrentDateTimeStamp());
+				emp.setUploadId(0);
+				emp.setEmpolyeeTypeId(1);
+				//				utilService.stringDateToTimestamp(dojStr);
+
+				emp.setDateOfJoin(utilService.dateToTimestamp(date1));
+				//				System.out.println(" New Format : "+simpleDateFormat.format(date1));
+				//				System.out.println("Emp code: "+emp.getEmpCode()+", count: "+i);
+
+				empList.add(emp);
+			}
+			empList.sort((e1, e2) ->Integer.parseInt(e1.getEmpCode())- Integer.parseInt(e2.getEmpCode()));
+			for(EmployeeEntity e: empList){
+				//				System.out.println("Emp code: "+e.getEmpCode());
+				userDAO.saveEmployee(e);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getExcellReader: "+e.getMessage());
+		}
+	}
+
+	private String jSonEscape(String str){
+
+		return Normalizer
+				.normalize(str, Normalizer.Form.NFD)
+				.replaceAll("[^\\p{ASCII}]", "");
+	}
 
 }
