@@ -11,26 +11,6 @@ public class GeneralMessageAttachmentModel {
 	private String orginalFileName;
 	
 	private String fileLocation;
-	
-	private String createdOn;
-
-	private String updatedOn;
-
-	public String getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(String createdOn) {
-		this.createdOn = createdOn;
-	}
-
-	public String getUpdatedOn() {
-		return updatedOn;
-	}
-
-	public void setUpdatedOn(String updatedOn) {
-		this.updatedOn = updatedOn;
-	}
 
 	public int getGenMsgAthId() {
 		return genMsgAthId;

@@ -2,13 +2,21 @@ package com.yaz.alind.model.ui;
 
 import java.util.List;
 
+import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
 import com.yaz.alind.entity.InterOfficeCommunicationEntity;
 
-public class InterOfficeCommunicationSearchModel {
+/**
+ *  Only for UI Purpose
+ * @author Libu Mathew
+ *
+ */
+public class InterOfficeCommunicationListModel {
 	
 	private List<InterOfficeCommunicationEntity> communicationEntities;
 	private List<CommunicationMessageFormatModel> intOffComFromatModList ;
+	List<DepartmentCommunicationMessagesEntity> deptCommMesgeList;
 	private int totalCount ;
+	
 	public List<InterOfficeCommunicationEntity> getCommunicationEntities() {
 		return communicationEntities;
 	}
@@ -29,5 +37,11 @@ public class InterOfficeCommunicationSearchModel {
 			List<CommunicationMessageFormatModel> intOffComFromatModList) {
 		this.intOffComFromatModList = intOffComFromatModList;
 	}
-
+	public List<DepartmentCommunicationMessagesEntity> getDeptCommMesgeList() {
+		return deptCommMesgeList;
+	}
+	public void setDeptCommMesgeList(
+			List<DepartmentCommunicationMessagesEntity> deptCommMesgeList) {
+		this.deptCommMesgeList = deptCommMesgeList;
+	}
 }

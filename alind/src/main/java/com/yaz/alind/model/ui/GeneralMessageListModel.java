@@ -2,10 +2,12 @@ package com.yaz.alind.model.ui;
 
 import java.util.List;
 
+import com.yaz.alind.entity.DepartmentGeneralMessageEntity;
 import com.yaz.alind.entity.GeneralMessageEntity;
 
-public class GeneralMessageSearchListModel {
+public class GeneralMessageListModel {
 	
+	private List<DepartmentGeneralMessageEntity> deptGenMsgEnity;
     private List<GeneralMessageEntity> generalMessageEntities;
     private List<GeneralMessageFormatModel> formatModels;
     private int totalCount ;
@@ -29,6 +31,12 @@ public class GeneralMessageSearchListModel {
 	public void setFormatModels(List<GeneralMessageFormatModel> formatModels) {
 		this.formatModels = formatModels;
 	}
-    
+	public List<DepartmentGeneralMessageEntity> getDeptGenMsgEnity() {
+		return deptGenMsgEnity;
+	}
+	public void setDeptGenMsgEnity(
+			List<DepartmentGeneralMessageEntity> deptGenMsgEnity) {
+		this.deptGenMsgEnity = deptGenMsgEnity;
+	}
     
 }

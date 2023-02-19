@@ -6,12 +6,23 @@ public class DocumentTypeModel {
 	private int documentTypeId;
 
 	private String type;
+	
+	private String desc;
 
 	private String createdOn;
 
 	private String updatedOn;
 
 	private int status;
+	
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
 
 	public int getDocumentTypeId() {
 		return documentTypeId;

@@ -86,6 +86,12 @@ public class EmployeeModel {
 	
 	private String dateOfJoin;
 	
+	private String profPicBase64;
+	
+	private byte[] bytprofPic;
+	
+	private String fileType;
+	
 	private String token;
 
 	public int getEmployeeId() {
@@ -399,6 +405,29 @@ public class EmployeeModel {
 	public void setDateOfJoin(String dateOfJoin) {
 		this.dateOfJoin = dateOfJoin;
 	}
-	
+
+	public String getProfPicBase64() {
+		return profPicBase64;
+	}
+
+	public void setProfPicBase64(String profPicBase64) {
+		this.profPicBase64 = profPicBase64;
+	}
+
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
+
+	public byte[] getBytprofPic() {
+		return bytprofPic;
+	}
+
+	public void setBytprofPic(byte[] bytprofPic) {
+		this.bytprofPic = bytprofPic;
+	}
 
 }

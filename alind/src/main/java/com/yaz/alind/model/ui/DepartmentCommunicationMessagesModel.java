@@ -10,7 +10,7 @@ public class DepartmentCommunicationMessagesModel {
 
 	//To
 	private int departmentId;
-	
+
 	private String departmentName;
 
 	// Message viewed or not, if its view then viewStatus = 1 otherwise viewStatus = 0
@@ -19,8 +19,12 @@ public class DepartmentCommunicationMessagesModel {
 	private String createdOn;
 
 	private String updatedOn;
-	
+
 	private String referenceNo;
+
+	private int senderDeptId;
+	
+	private String senderDeptName;
 
 	public int getDeptCommId() {
 		return deptCommId;
@@ -85,5 +89,21 @@ public class DepartmentCommunicationMessagesModel {
 	public void setReferenceNo(String referenceNo) {
 		this.referenceNo = referenceNo;
 	}
-	
+
+	public int getSenderDeptId() {
+		return senderDeptId;
+	}
+
+	public void setSenderDeptId(int senderDeptId) {
+		this.senderDeptId = senderDeptId;
+	}
+
+	public String getSenderDeptName() {
+		return senderDeptName;
+	}
+
+	public void setSenderDeptName(String senderDeptName) {
+		this.senderDeptName = senderDeptName;
+	}
+
 }
