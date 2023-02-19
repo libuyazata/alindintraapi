@@ -23,6 +23,7 @@ public interface UserDAO {
 	public EmployeeEntity getAuthentication(String userName,String password);
 	public List<EmployeeEntity> getAllEmployees();
 	public List<EmployeeEntity> getAllEmployeesByDept(int departmentId);
+	public List<EmployeeEntity> getEmployeeListByDept(int departmentId, int isActive);
 	public List<EmployeeEntity> searchEmployee(String searchKeyWord, int departmentId);
 	
 	public List<UserRolesEntity> getAllUserRoles();

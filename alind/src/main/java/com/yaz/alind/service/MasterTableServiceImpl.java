@@ -184,9 +184,10 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	public WorkTypeModel saveWorkType(WorkTypeModel workTypeModel) {
 		WorkTypeModel model = null;
 		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDateTime());
+			workTypeModel.setCreatedOn(dateStr);
+			workTypeModel.setUpdatedOn(dateStr);
 			WorkTypeEntity entity = createWorkTypeEntity(workTypeModel);
-			entity.setCreatedOn(utilService.getCurrentDate());
-			entity.setUpdatedOn(utilService.getCurrentDate());
 			entity = masterTableDAO.saveWorkTypeEntity(entity);
 			entity.setStatus(1);
 			model = createWorkTypeModel(entity);
@@ -202,8 +203,9 @@ public  class MasterTableServiceImpl implements MasterTableService {
 	public WorkTypeModel updateWorkType(WorkTypeModel workTypeModel) {
 		WorkTypeModel model = null;
 		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDateTime());
+			workTypeModel.setUpdatedOn(dateStr);
 			WorkTypeEntity entity = createWorkTypeEntity(workTypeModel);
-			entity.setUpdatedOn(utilService.getCurrentDate());
 			entity = masterTableDAO.updateWorkTypeEntity(entity);
 			model = createWorkTypeModel(entity);
 		}catch(Exception e){
@@ -212,6 +214,41 @@ public  class MasterTableServiceImpl implements MasterTableService {
 		}
 		return model;
 	}
+	
+	@Override
+	public int deleteDocumentType(int documentTypeId){
+		int status = 1;
+		try{
+			DocumentTypeEntity entity = masterTableDAO.getDocumentTypeById(documentTypeId);
+			entity.setStatus(-1);
+			entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
+			entity = masterTableDAO.updateDocumentType(entity);
+			status = entity.getStatus();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteDocumentType: "+e.getMessage());
+		}
+		return status;
+	}
+	/**
+	@Override
+	public int deleteWorkTypeById(int workTypeId){
+		int status = 0;
+		try{
+			WorkTypeEntity entity = masterTableDAO.getWorkTypeEntityById(workTypeId);
+			entity.setStatus(-1);
+			entity.setUpdatedOn(utilService.getCurrentDateTimeStamp());
+			entity = masterTableDAO.updateWorkTypeEntity(entity);
+			if(entity.getStatus() == -1){
+				status = -1;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("deleteWorkTypeById: "+e.getMessage());
+		}
+		return status;
+	}
+	**/
 
 
 	@Override
@@ -470,7 +507,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 			
 		}catch(Exception e){
 			e.printStackTrace();
-			logger.error("createDocumentTypeModel: "+e.getMessage());
+			logger.error("getAllDocumentType: "+e.getMessage());
 		}
 		return documentTypeModels;
 	}
@@ -484,6 +521,7 @@ public  class MasterTableServiceImpl implements MasterTableService {
 			model.setDocumentTypeId(entity.getDocumentTypeId());
 			model.setStatus(entity.getStatus());
 			model.setType(entity.getType());
+			model.setDesc(entity.getDesc());
 			model.setUpdatedOn(utilService.dateToString(entity.getUpdatedOn()));
 		}catch(Exception e){
 			e.printStackTrace();
@@ -500,12 +538,65 @@ public  class MasterTableServiceImpl implements MasterTableService {
 			entity.setDocumentTypeId(model.getDocumentTypeId());
 			entity.setStatus(model.getStatus());
 			entity.setType(model.getType());
+			entity.setDesc(model.getDesc());
 			entity.setUpdatedOn(utilService.stringToDate(model.getUpdatedOn()));
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createDocumentTypeEntity: "+e.getMessage());
 		}
 		return entity;
+	}
+
+
+	@Override
+	public DocumentTypeModel saveDocumentType(DocumentTypeModel docType) {
+		DocumentTypeModel model = null;
+		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDateTimeStamp());
+			docType.setCreatedOn(dateStr);
+			docType.setUpdatedOn(dateStr);
+			DocumentTypeEntity entity = createDocumentTypeEntity(docType);
+			entity.setStatus(1);
+			entity = masterTableDAO.saveDocumentType(entity);
+			model = createDocumentTypeModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDocumentType: "+e.getMessage());
+		}
+		return model;
+	}
+
+
+	@Override
+	public DocumentTypeModel updateDocumentType(DocumentTypeModel docType) {
+		DocumentTypeModel model = null;
+		try{
+			String dateStr = utilService.dateToString(utilService.getCurrentDateTimeStamp());
+			docType.setCreatedOn(dateStr);
+			docType.setUpdatedOn(dateStr);
+			DocumentTypeEntity entity = createDocumentTypeEntity(docType);
+			entity.setStatus(1);
+			entity = masterTableDAO.updateDocumentType(entity);
+			model = createDocumentTypeModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDocumentType: "+e.getMessage());
+		}
+		return model;
+	}
+
+
+	@Override
+	public DocumentTypeModel getDocumentTypeById(int documentTypeId) {
+		DocumentTypeModel model = null;
+		try{
+			DocumentTypeEntity entity = masterTableDAO.getDocumentTypeById(documentTypeId);
+			model = createDocumentTypeModel(entity);
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById: "+e.getMessage());
+		}
+		return model;
 	}
 
 

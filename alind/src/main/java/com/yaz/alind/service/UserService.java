@@ -27,6 +27,7 @@ public interface UserService {
 	public List<UserRolesEntity> getAllUserRoles();
 	public UserRolesEntity getUserRoleById(int userRoleId);
 	public List<EmployeeModel> getAllEmployees(String token);
+	public List<EmployeeModel> getEmployeeListByDept(int departmentId, int isActive);
 	public List<DepartmentEntity> getAllActiveDepartments();
 	public List<DepartmentEntity> getAllDepartments();
 	public DepartmentEntity updateDepartment(DepartmentEntity department);

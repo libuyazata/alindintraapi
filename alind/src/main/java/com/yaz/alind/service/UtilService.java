@@ -36,6 +36,7 @@ public interface UtilService {
 	public Timestamp stringToTimestamp(String strDate);
 	public Timestamp getCurrentDateTimeStamp();
 	public String timeStampToString(Timestamp timestamp);
+	public String getBase64Format(byte[] data );
 //	public String interComRefNo(InterCommRefNoEntity refNo);
 	
 //	public Document getWaterMarkPDF(String fileName,Employee employee);

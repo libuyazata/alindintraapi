@@ -142,6 +142,9 @@ public class UserServiceImpl implements UserService {
 			empEntity.setIsActive(1);
 			empEntity.setPassword(emp.getPassword());
 			empEntity.setUserName(emp.getUserName());
+			empEntity.setProfPicBase64(emp.getProfPicBase64());
+			empEntity.setFileType(emp.getFileType());
+			empEntity.setOrginalProfilePicName(emp.getOrginalProfilePicName());
 			emp = userDAO.updateEmployee(empEntity);
 			emp = userDAO.getEmployeeById(emp.getEmployeeId());
 			empModel = createEmployeeModel(emp);
@@ -158,19 +161,26 @@ public class UserServiceImpl implements UserService {
 		try{
 			String originalFileName = profilePic.getOriginalFilename();
 			String fileName = utilService.createFileName(profilePic.getOriginalFilename());
-			String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+employeeId;
-			System.out.println("Business,uploadEmployeeProfilePic, fileLocation: "+fileLocation
-					+", fileName: "+fileName+", employeeId: "+employeeId);
-			status = utilService.saveFile(profilePic, contextPath, fileLocation);
-			if(status > 0){
-				EmployeeEntity employee = userDAO.getEmployeeById(employeeId);
-				Date today = utilService.getTodaysDate();
-				employee.setUpdatedAt(utilService.dateToTimestamp(today));
-				employee.setProfilePicPath(fileName);
-				employee.setOrginalProfilePicName(originalFileName);
-				//				employee = userDAO.saveOrUpdateEmployee(employee);
-				employee = userDAO.updateEmployee(employee);
-			}
+			//			String fileType = profilePic.getContentType();
+			//			String fileLocation = Iconstants.EMPLOYEE_PROFILE_PIC_LOCATION+employeeId;
+			//			System.out.println("Business,uploadEmployeeProfilePic, fileLocation: "+fileLocation
+			//					+", fileName: "+fileName+", employeeId: "+employeeId);
+			//			status = utilService.saveFile(profilePic, contextPath, fileLocation);
+			byte[] profilePicByte = profilePic.getBytes();
+			String imgBase64 = utilService.getBase64Format(profilePicByte);
+			//			System.out.println("Business,uploadEmployeeProfilePic, imgBase64: "+imgBase64);
+			//			if(status > 0){
+			EmployeeEntity employee = userDAO.getEmployeeById(employeeId);
+			Date today = utilService.getTodaysDate();
+			employee.setUpdatedAt(utilService.dateToTimestamp(today));
+			employee.setProfilePicPath(fileName);
+			employee.setOrginalProfilePicName(originalFileName);
+			employee.setProfPicBase64(imgBase64);
+			employee.setUploadId(1);
+			employee.setFileType(profilePic.getContentType());
+			//				employee = userDAO.saveOrUpdateEmployee(employee);
+			employee = userDAO.updateEmployee(employee);
+			//			}
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -227,7 +237,25 @@ public class UserServiceImpl implements UserService {
 			logger.error("getAllEmployees: "+e.getMessage());
 		}
 		return empModelList;
-		//return employees;
+	}
+
+	@Override
+	public List<EmployeeModel> getEmployeeListByDept(int departmentId, int isActive){
+		List<EmployeeModel> empModelList = null;
+		try{
+			empModelList = new ArrayList<EmployeeModel>();
+			List<EmployeeEntity> employees = userDAO.getEmployeeListByDept(departmentId,isActive);
+
+			for(EmployeeEntity e: employees){
+				EmployeeModel m = createEmployeeModel(e);
+				empModelList.add(m);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getEmployeeListByDept: "+e.getMessage());
+		}
+		return empModelList;
 	}
 
 	@Override
@@ -282,6 +310,11 @@ public class UserServiceImpl implements UserService {
 		try{
 			EmployeeEntity	employee = userDAO.getEmployeeById(employeeId);
 			empModel = createEmployeeModel(employee);
+			if(employee.getProfPicBase64() != null ){
+				empModel.setProfPicBase64(employee.getProfPicBase64());
+				empModel.setFileType(employee.getFileType());
+			}
+
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getEmployeeById: "+e.getMessage());
@@ -302,6 +335,8 @@ public class UserServiceImpl implements UserService {
 			empModelList = new ArrayList<EmployeeModel>();
 			EmployeeEntity	employee = userDAO.getEmployeeById(employeeId);
 			EmployeeModel empModel = createEmployeeModel(employee);
+			empModel.setProfPicBase64(employee.getProfPicBase64());
+			empModel.setFileType(employee.getFileType());
 			empModelList.add(empModel);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -575,7 +610,14 @@ public class UserServiceImpl implements UserService {
 			enity.setUploadId(model.getUploadId());
 			enity.setUserName(model.getUserName());
 			enity.setUserRoleId(model.getUserRoleId());
+			//if( model.getProfPicBase64() != null ||  !model.getProfPicBase64().isEmpty()){
 
+			if(model.getProfPicBase64() == null){
+			}else{
+				byte[] byt = model.getProfPicBase64().getBytes();
+				enity.setProfPicBase64(model.getProfPicBase64());
+			}
+			enity.setFileType(model.getFileType());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("createEmployeeModel: "+e.getMessage());
@@ -643,6 +685,10 @@ public class UserServiceImpl implements UserService {
 			model.setUploadId(entity.getUploadId());
 			model.setUserName(entity.getUserName());
 			model.setUserRoleId(entity.getUserRoleId());
+			//			if(entity.getProfPicBase64() != null ){
+			//				model.setProfPicBase64(entity.getProfPicBase64());
+			//			}
+			//			model.setFileType(entity.getFileType());
 
 		}catch(Exception e){
 			e.printStackTrace();
@@ -685,6 +731,7 @@ public class UserServiceImpl implements UserService {
 		AuthorizationEntity entity = null;
 		try{
 			entity = userDAO.getAuthorizationByUserRole(userRoleId);
+			//			System.out.println("UserService,getAuthorizationByUserRole, UserRoleId: "+entity.getUserRoleId());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAuthorizationByUserRole: "+e.getMessage());

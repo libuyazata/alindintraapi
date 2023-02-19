@@ -149,7 +149,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("updateEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
+			//System.out.println("updateEmployee,token: "+token+", User ID: "+employee.getEmployeeId());
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				EmployeeModel emp= userService.updateEmployee(employee);
@@ -169,11 +169,7 @@ public class UserController {
 
 
 	@RequestMapping(value="/user/uploadEmployeeProfilePic/{employeeId}", method = RequestMethod.POST,
-			consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}) //consumes = { "application/json", "multipart/form-data" }
-//	public ResponseEntity<Map<String,Object>>  saveAndUploadEmployeeTest(
-//			@RequestPart("profilePic") MultipartFile profilePic,
-//						@RequestHeader("token") String token) throws Exception{
-	
+			consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}) 
 	public ResponseEntity<Map<String,Object>>  uploadEmployeeProfilePic(
 			@RequestParam("profilePic") MultipartFile profilePic,
 			@PathVariable("employeeId") int employeeId,
@@ -182,15 +178,13 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("saveOrUpdateUser,token: "+token+", User ID: "+employeeId);
+//			System.out.println("saveOrUpdateUser,token: "+token+", User ID: "+employeeId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				String contextPath = context.getRealPath(""); 
-				String fileExtension = FilenameUtils.getExtension(profilePic.getOriginalFilename());
-				System.out.println("saveAndUploadEmployeeTest,token: "+fileExtension);
+//				String fileExtension = FilenameUtils.getExtension(profilePic.getOriginalFilename());
+//				System.out.println("saveAndUploadEmployeeTest,token: "+fileExtension);
 				int status = userService.uploadEmployeeProfilePic(profilePic, employeeId, contextPath);
-				//				EmployeeEntity emp= userService.saveOrUpdateEmployee(employee,profilePic,contextPath);
-				//				resultMap.put("user", emp);
 				resultMap.put("status", status);
 			}else{
 				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
@@ -211,7 +205,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getAllUserRoles,token: "+token);
+//			System.out.println("getAllUserRoles,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<UserRolesEntity> userRoles= userService.getAllUserRoles();
@@ -270,6 +264,30 @@ public class UserController {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getAllEmployees, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/user/getEmployeeListByDept/{deptId}/{isActive}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getEmployeeListByDept(@RequestHeader("token") String token,
+			@PathVariable("deptId") int deptId,
+			@PathVariable("isActive") int isActive) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				List<EmployeeModel> employees= userService.getEmployeeListByDept(deptId,isActive);
+				resultMap.put("employees", employees);
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getEmployeeListByDept, "+e.getMessage());
 			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
@@ -400,11 +418,9 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getEmployeeById,token: "+token);
+		//	System.out.println("getEmployeeById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-//				EmployeeModel employee= userService.getEmployeeById(Integer.parseInt(employeeId));
-				//	resultMap.put("employee", employee);
 				List<EmployeeModel> employeeList = userService.getEmployeeListTypeById(Integer.parseInt(employeeId));
 				resultMap.put("employeeList", employeeList);
 			}else{
@@ -427,7 +443,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("searchEmployee,token: "+token);
+			//System.out.println("searchEmployee,token: "+token+", departmentId: "+departmentId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<EmployeeModel> empModels= userService.searchEmployee(searchKeyWord,departmentId);
@@ -632,7 +648,7 @@ public class UserController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("UserController, getAuthorization, userRoleId,token: "+token+", userRoleId: "+userRoleId);
+//			System.out.println("UserController, getAuthorization, userRoleId,token: "+token+", userRoleId: "+userRoleId);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				AuthorizationEntity authorization= userService.getAuthorizationByUserRole(userRoleId);

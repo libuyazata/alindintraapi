@@ -37,7 +37,7 @@ public class DashBoardController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getAdminDashBoard,token: "+token);
+//			System.out.println("getAdminDashBoard,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				AdminDashBoardModel dashBoard = dashBoardService.getAdminDashBoardModel(token);

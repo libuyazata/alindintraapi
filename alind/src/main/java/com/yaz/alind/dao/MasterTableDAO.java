@@ -29,4 +29,8 @@ public interface MasterTableDAO {
 	public boolean isDrawingSeriesExists(String drawingSeries);
 	
 	public List<DocumentTypeEntity> getAllDocumentType(int status);
+	public DocumentTypeEntity saveDocumentType(DocumentTypeEntity docType);
+	public DocumentTypeEntity updateDocumentType(DocumentTypeEntity docType); 
+	public DocumentTypeEntity getDocumentTypeById(int documentTypeId);
+	
 }

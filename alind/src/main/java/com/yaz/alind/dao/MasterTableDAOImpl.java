@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import springfox.documentation.spi.DocumentationType;
-
-import com.yaz.alind.entity.DocumentNumberSeriesEntity;
 import com.yaz.alind.entity.DocumentCategoryEntity;
 import com.yaz.alind.entity.DocumentTypeEntity;
 import com.yaz.alind.entity.WorkStatusEntity;
@@ -229,7 +226,7 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 	public DocumentCategoryEntity getDocumentCategoryById(int documentCategoryId) {
 		DocumentCategoryEntity docTypes = null;
 		try{
-			System.out.println("DAO,getDocumentCategoryById, documentCategoryId: "+documentCategoryId);
+//			System.out.println("DAO,getDocumentCategoryById, documentCategoryId: "+documentCategoryId);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentCategoryEntity.class);
 			cr.add(Restrictions.eq("documentCategoryId", documentCategoryId));
 			docTypes = (DocumentCategoryEntity) cr.list().get(0);
@@ -254,6 +251,49 @@ public class MasterTableDAOImpl implements MasterTableDAO {
 			logger.error("getAllDocumentType: "+e.getMessage());
 		}
 		return documentationTypes;
+	}
+
+	@Override
+	public DocumentTypeEntity saveDocumentType(DocumentTypeEntity docType) {
+		DocumentTypeEntity docTy = null;
+		try{
+			this.sessionFactory.getCurrentSession().save(docType);
+			docTy = docType;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("saveDocumentType: "+e.getMessage());
+		}
+		return docTy;
+	}
+
+	@Override
+	public DocumentTypeEntity updateDocumentType(DocumentTypeEntity docType) {
+		DocumentTypeEntity docTy = null;
+		try{
+			this.sessionFactory.getCurrentSession().update(docType);
+			docTy = docType;
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("updateDocumentType: "+e.getMessage());
+		}
+		return docTy;
+	}
+
+	@Override
+	public DocumentTypeEntity getDocumentTypeById(int documentTypeId) {
+		DocumentTypeEntity docTy = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DocumentTypeEntity.class);
+			cr.add(Restrictions.eq("documentTypeId", documentTypeId));
+			List<DocumentTypeEntity> list = cr.list();
+			if(list.size()>0){
+				docTy = list.get(0);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById: "+e.getMessage());
+		}
+		return docTy;
 	}
 
 }

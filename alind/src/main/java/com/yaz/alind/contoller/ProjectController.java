@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
@@ -59,11 +60,12 @@ import com.yaz.alind.model.ui.EmployeeModel;
 import com.yaz.alind.model.ui.EmployeeTaskAllocationModel;
 import com.yaz.alind.model.ui.GeneralMessageFormatModel;
 import com.yaz.alind.model.ui.GeneralMessageModel;
-import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
+import com.yaz.alind.model.ui.GeneralMessageListModel;
 import com.yaz.alind.model.ui.InterOfficeCommunicationModel;
-import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationListModel;
 import com.yaz.alind.model.ui.SubTaskModel;
 import com.yaz.alind.model.ui.WorkDetailsModel;
+import com.yaz.alind.model.ui.WorkDetailsModelList;
 import com.yaz.alind.model.ui.WorkDocumentModel;
 import com.yaz.alind.model.ui.WorkIssuedModel;
 import com.yaz.alind.service.ProjectService;
@@ -730,7 +732,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getWorkDetailsListById,token: "+token);
+//			System.out.println("getWorkDetailsListById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<WorkDetailsModel> listModel = projectService.getWorkDetailsListById(workDetailsId);
@@ -754,8 +756,44 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-
-	@RequestMapping(value="/project/getWorkDetailsBySearch", method = RequestMethod.GET)
+	//int pageNo,	int pageCount
+	
+	@RequestMapping(value="/project/searchWorkDetails", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  searchWorkDetails(@RequestHeader("token") String token
+			,@RequestParam String searchKeyWord,
+			@RequestParam int workTypeId,@RequestParam String startDate,@RequestParam String endDate,
+			@RequestParam int pageNo,	@RequestParam int pageCount) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("searchWorkDetails,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				WorkDetailsModelList models = projectService.searchWorkDetails(token,searchKeyWord, 
+						workTypeId, startDate, endDate, pageNo, pageCount);
+				if(models != null){
+					resultMap.put("models", models);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("searchWorkDetails, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+	
+	/**
+	 * @RequestMapping(value="/project/getWorkDetailsBySearch", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsBySearch(@RequestHeader("token") String token
 			,@RequestParam String searchKeyWord,
 			@RequestParam int workTypeId,@RequestParam String startDate,@RequestParam String endDate) throws Exception{
@@ -787,6 +825,13 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	 * @param token
+	 * @param startDate
+	 * @param endDate
+	 * @param departmentId
+	 * @return
+	 * @throws Exception
+	 */
 
 	@RequestMapping(value="/project/getWorkDetailsByDate/{startDate}/{endDate}/{departmentId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsByDate(@RequestHeader("token") String token
@@ -852,6 +897,47 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
+	/**
+	 *  Work / Project details by Department Id
+	 * @param token
+	 * @param departmentId
+	 * @param status
+	 * @return
+	 * @throws Exception
+	 */
+	
+	@RequestMapping(value="/project/getWorkDetailsByDeptId/{deptId}/{status}/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getWorkDetailsByDeptId(@RequestHeader("token") String token,
+			@PathVariable("deptId") int deptId,@PathVariable("status") int status,
+			@PathVariable("pageNo") int pageNo,
+			@PathVariable("pageCount") int pageCount) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("ProjectController,getWorkDetailsByDeptId,departmentId: "+deptId);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+//				List<WorkDetailsModel> models = projectService.getWorkDetailsByDeptId(token,deptId,status,pageNo,pageCount);
+				WorkDetailsModelList models = projectService.getWorkDetailsByDeptId(token,deptId,status,pageNo,pageCount);
+				if(models != null){
+					resultMap.put("models", models);
+				}else{
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.BAD_REQUEST);
+				}
+			}else{
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDetailsByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	
+	
 	@RequestMapping(value="/project/getWorkDetailsByDeptId", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkDetailsByDeptId(@RequestHeader("token") String token
 			,@RequestParam int departmentId, int status) throws Exception{
@@ -940,7 +1026,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getSubTaskById,token: "+token);
+//			System.out.println("getSubTaskById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				SubTaskModel model = projectService.getSubTaskById(subTaskId);
@@ -971,7 +1057,7 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("getSubTaskById,token: "+token);
+//			System.out.println("getSubTaskById,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<SubTaskModel> models = projectService.getSubTaskByWorkId(workDetailsId,status);
@@ -1791,7 +1877,9 @@ public class ProjectController {
 			//			System.out.println("communicationListByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<CommunicationMessageFormatModel> communicationList = projectService.
+//				List<CommunicationMessageFormatModel> communicationList = projectService.
+//						sentWorkMessageListByDeptId(departmentId,pageNo,pageCount);
+				InterOfficeCommunicationListModel communicationList = projectService.
 						sentWorkMessageListByDeptId(departmentId,pageNo,pageCount);
 				resultMap.put("communicationList", communicationList);
 				resultMap.put("status", "success");
@@ -1889,7 +1977,9 @@ public class ProjectController {
 //			System.out.println("getInboxMessageByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<CommunicationMessageFormatModel> communicationList = projectService.getInboxMessageByDeptId
+//				List<CommunicationMessageFormatModel> communicationList = projectService.getInboxMessageByDeptId
+//						(departmentId,pageNo,pageCount);
+				InterOfficeCommunicationListModel communicationList = projectService.getInboxMessageByDeptId
 						(departmentId,pageNo,pageCount);
 				resultMap.put("inboxMessages", communicationList);
 				resultMap.put("status", "success");
@@ -1949,7 +2039,7 @@ public class ProjectController {
 			if(tokenStatus){
 //				List<CommunicationMessageFormatModel> list = projectService.searchInterDeptCommList
 //						(searchKeyWord,startDate,endDate,departmentId,pageNo,pageCount);
-				InterOfficeCommunicationSearchModel list = projectService.searchInterDeptCommList
+				InterOfficeCommunicationListModel list = projectService.searchInterDeptCommList
 						(searchKeyWord,startDate,endDate,departmentId,pageNo,pageCount);
 				resultMap.put("communicationModelList", list.getIntOffComFromatModList());
 				resultMap.put("totalCount", list.getTotalCount());
@@ -2185,7 +2275,7 @@ public class ProjectController {
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
-			//System.out.println("sendToGeneralMessage, files: "+files);
+			//System.out.println("sendToGeneralMessage, referenceNo: "+referenceNo);
 			//System.out.println("sendToGeneralMessage, files size: "+files.length);
 			String contextPath = context.getRealPath(""); 
 			resultMap = new HashMap<String,Object>();
@@ -2215,11 +2305,40 @@ public class ProjectController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("sentGeneralMessageListByDeptId,token: "+token);
+			//System.out.println("sentGeneralMessageListByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				List<GeneralMessageFormatModel> generalMessageFormatModels = projectService.getSentGeneralMessageListByDeptId(deptId);
 				resultMap.put("models", generalMessageFormatModels);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("sentGeneralMessageListByDeptId, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/project/sentGeneralMessageListByDeptId/{deptId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  sentGeneralMessageListByDeptId(@RequestHeader("token") String token
+			,@PathVariable("deptId") int deptId,@PathVariable("pageNo") int pageNo,
+			@PathVariable("pageCount") int pageCount) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+		//	System.out.println("sentGeneralMessageListByDeptId,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+//				List<GeneralMessageFormatModel> generalMessageFormatModels = projectService.getSentGeneralMessageListByDeptId(deptId,pageNo,pageCount);
+				GeneralMessageListModel generalMessageModels = projectService.getSentGeneralMessageListByDeptId(deptId,pageNo,pageCount);
+				resultMap.put("models", generalMessageModels);
 				resultMap.put("status", "success");
 			}else{
 				resultMap.put("status", "failed");
@@ -2235,62 +2354,6 @@ public class ProjectController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 	/*
-	@RequestMapping(value="/project/sentAllGeneralMessage/{pageNo}/{pageCount}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  sentAllGeneralMessage(@RequestHeader("token") String token,
-			@PathVariable("pageNo") int pageNo,
-			@PathVariable("pageCount") int pageCount) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-//			System.out.println("sentAllGeneralMessage,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				List<GeneralMessageFormatModel> generalMessageFormatModels = projectService.getSentGeneralMessageListByDeptId(0);
-				resultMap.put("models", generalMessageFormatModels);
-				resultMap.put("status", "success");
-			}else{
-				resultMap.put("status", "failed");
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			resultMap.put("status", "failed");
-			logger.error("sentAllGeneralMessage, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}**/
-
-	@RequestMapping(value="/project/sentGeneralMessageListByDeptId/{deptId}/{pageNo}/{pageCount}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>>  sentGeneralMessageListByDeptId(@RequestHeader("token") String token
-			,@PathVariable("deptId") int deptId,@PathVariable("pageNo") int pageNo,
-			@PathVariable("pageCount") int pageCount) throws Exception{
-		Map<String,Object> resultMap = null;
-		boolean tokenStatus = false;
-		try{
-			resultMap = new HashMap<String,Object>();
-			System.out.println("sentGeneralMessageListByDeptId,token: "+token);
-			tokenStatus = utilService.evaluateToken(token);
-			if(tokenStatus){
-				List<GeneralMessageFormatModel> generalMessageFormatModels = projectService.getSentGeneralMessageListByDeptId(deptId);
-				resultMap.put("models", generalMessageFormatModels);
-				resultMap.put("status", "success");
-			}else{
-				resultMap.put("status", "failed");
-				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-			}
-
-		}catch(Exception e){
-			e.printStackTrace();
-			resultMap.put("status", "failed");
-			logger.error("sentGeneralMessageListByDeptId, "+e.getMessage());
-			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-		}
-		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-	}
-	
 	@RequestMapping(value="/project/getGeneralInboxByDeptId/{deptId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getGeneralInboxByDeptId(@RequestHeader("token") String token
 			,@PathVariable("deptId") int deptId) throws Exception{
@@ -2317,6 +2380,7 @@ public class ProjectController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
+	**/
 
 	@RequestMapping(value="/project/getGeneralMessageById/{genMessageId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getGeneralMessageById(@RequestHeader("token") String token
@@ -2412,7 +2476,7 @@ public class ProjectController {
 			//System.out.println("searchInterDeptCommList,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				GeneralMessageSearchListModel list = projectService.searchGeneralMessageList
+				GeneralMessageListModel list = projectService.searchGeneralMessageList
 						(searchKeyWord,startDate,endDate,departmentId,pageNo,pageCount);
 				resultMap.put("genMsgModelList", list.getFormatModels());
 				resultMap.put("totalCount", list.getTotalCount());
@@ -2474,10 +2538,12 @@ public class ProjectController {
 //			System.out.println("getGeneralInboxByDeptId,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
-				List<GeneralMessageFormatModel> generalMessageFormatModels = 
+//				List<GeneralMessageFormatModel> generalMessageFormatModels = 
+//						projectService.getGeneralInboxByDeptId(deptId,pageNo,pageCount);
+				GeneralMessageListModel generalMessageModels = 
 						projectService.getGeneralInboxByDeptId(deptId,pageNo,pageCount);
 //				System.out.println("getGeneralInboxByDeptId,size: "+generalMessageFormatModels.size());
-				resultMap.put("models", generalMessageFormatModels);
+				resultMap.put("models", generalMessageModels);
 				resultMap.put("status", "success");
 			}else{
 				resultMap.put("status", "failed");

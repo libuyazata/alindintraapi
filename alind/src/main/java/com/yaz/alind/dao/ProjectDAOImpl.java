@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.yaz.alind.entity.DepartmentCommunicationMessagesEntity;
 import com.yaz.alind.entity.DepartmentGeneralMessageEntity;
@@ -40,8 +41,9 @@ import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
 import com.yaz.alind.entity.WorkMessageAttachmentEntity;
-import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
-import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
+import com.yaz.alind.model.ui.GeneralMessageListModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationListModel;
+import com.yaz.alind.model.ui.WorkDetailsModelList;
 
 @Repository
 @Transactional
@@ -567,6 +569,43 @@ public class ProjectDAOImpl implements ProjectDAO {
 
 	@Override
 	@Transactional
+	//	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId,int status,
+	//			int pageNo,int pageCount) {
+	public WorkDetailsModelList getWorkDetailsEntitiesByDeptId(int departmentId,int status,
+			int pageNo,int pageCount) {
+		WorkDetailsModelList workList = null;
+		try{
+			workList = new WorkDetailsModelList();
+			Criteria cr=this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class);
+//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId: "+departmentId+
+//					",pageNo: "+pageNo+", pageCount: "+pageCount);
+			if(departmentId != 0){
+				//System.out.println("DAO, getWorkDetailsEntitiesByDeptId,departmentId != 0: ");
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			cr.addOrder(Order.desc("createdOn"));
+			cr.add(Restrictions.eq("status", status));
+			List<WorkDetailsEntity> list = cr.list();
+			workList.setTotalCount(list.size());
+//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,total count: "+list.size());
+//			for(WorkDetailsEntity w: list){
+//				System.out.println("DAO, getWorkDetailsEntitiesByDeptId,WorkDetailsId: "+w.getWorkDetailsId()+
+//						", WorkName: "+w.getWorkName());
+//			}
+			cr.setFirstResult((pageNo - 1) * pageCount);
+			cr.setMaxResults(pageCount);
+			List<WorkDetailsEntity>  workDetailsEntities = cr.list();
+			workList.setWorkEntityList(workDetailsEntities);
+//			System.out.println("DAO, getWorkDetailsEntitiesByDeptId,after pagenation , size: "+workDetailsEntities.size());
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getWorkDetailsEntitiesByDeptId: "+e.getMessage());
+		}
+		return workList;
+	}
+
+	@Override
+	@Transactional
 	public SubTaskEntity saveSubTaskEntity(SubTaskEntity subTaskEntity) {
 		SubTaskEntity entity = null;
 		try{
@@ -632,6 +671,86 @@ public class ProjectDAOImpl implements ProjectDAO {
 		return entities;
 	}
 
+	@Override
+	@Transactional
+	public WorkDetailsModelList searchWorkDetails(String searchKeyWord, int workTypeId,String deptmentName,
+			Date startDate,Date endDate,int pageNo,	int pageCount) {
+		WorkDetailsModelList workDetailsModelList =  null;
+		int expectedRowSize = 0;
+		try{
+			workDetailsModelList = new WorkDetailsModelList();
+			expectedRowSize = ((pageNo - 1) * pageCount);
+//			System.out.println("DAO, searchWorkDetails,searchKeyWord: "+searchKeyWord+", deptmentName: "+deptmentName
+//					+", startDate: "+startDate+", endDate: "+endDate);
+			List<WorkDetailsEntity> workDetailsEntities = new ArrayList<WorkDetailsEntity>();
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(WorkDetailsEntity.class,"workDetails");
+			cr.createAlias("departmentEntity", "departmentEntity"); 
+			cr.createAlias("projectCoOrdinatorEmp", "projectCoOrdinatorEmp");
+			cr.createAlias("createdEmp", "createdEmp");
+			cr.createAlias("workStatusEntity", "workStatusEntity");
+			//			if(departmentName != null){
+			//				cr.add(Restrictions.eq("departmentId", departmentId) );
+			//			}
+			cr.add(Restrictions.eq("status", 1));
+			cr.addOrder(Order.desc("createdOn"));
+
+			if(workTypeId != 0){
+				cr.add(Restrictions.eq("workTypeId", workTypeId));
+			}
+			if(startDate != null){
+				cr.add(Restrictions.ge("startDate", startDate) );
+			}
+			if(endDate != null){
+				cr.add(Restrictions.lt("endDate", endDate) );
+			}
+
+			if(!searchKeyWord.isEmpty()){
+				//				System.out.println("DAO, getWorkDetailsBySearch,searchKeyWord: "+searchKeyWord);
+				Criterion description = Restrictions.ilike("workDetails.description", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion workName = Restrictions.ilike("workDetails.workName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion departmentName = null;
+				if(deptmentName == null){
+					departmentName = Restrictions.ilike("departmentEntity.departmentName", searchKeyWord, MatchMode.ANYWHERE);
+				}else{
+					departmentName = Restrictions.ilike("departmentEntity.departmentName", deptmentName, MatchMode.ANYWHERE);
+				}
+				Criterion pjtCoEmpCode = Restrictions.ilike("projectCoOrdinatorEmp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion pjtCoFirstName = Restrictions.ilike("projectCoOrdinatorEmp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion pjtCoLastName = Restrictions.ilike("projectCoOrdinatorEmp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion workStatusName = Restrictions.ilike("workStatusEntity.workStatusName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion createEmpCode = Restrictions.ilike("createdEmp.empCode", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion createFirstName = Restrictions.ilike("createdEmp.firstName", searchKeyWord, MatchMode.ANYWHERE);
+				Criterion createLastName = Restrictions.ilike("createdEmp.lastName", searchKeyWord, MatchMode.ANYWHERE);
+
+				Disjunction disjunction = Restrictions.disjunction();
+				disjunction.add(description);
+				disjunction.add(workName);
+				disjunction.add(departmentName);
+				disjunction.add(pjtCoEmpCode);
+				disjunction.add(pjtCoFirstName);
+				disjunction.add(pjtCoLastName);
+				disjunction.add(workStatusName);
+				disjunction.add(createEmpCode);
+				disjunction.add(createFirstName);
+				disjunction.add(createLastName);
+
+				cr.add(disjunction);
+			}
+			workDetailsEntities = cr.list();
+			workDetailsModelList.setTotalCount(workDetailsEntities.size());
+
+			// Based on pagination
+			cr.setFirstResult(expectedRowSize);
+			cr.setMaxResults(pageCount);			
+			List<WorkDetailsEntity> pageNationWorkList = cr.list(); 
+			workDetailsModelList.setWorkEntityList(pageNationWorkList);
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("searchWorkDetails: "+e.getMessage());
+		}
+		return workDetailsModelList;
+	}
 
 	@Override
 	@Transactional
@@ -726,7 +845,7 @@ public class ProjectDAOImpl implements ProjectDAO {
 			cr.addOrder(Order.desc("updatedOn"));
 			cr.add(Restrictions.eq("status", 1));
 			workDetailsEntities = cr.list();
-			System.out.println("ProjectDAO, getWorkDetailsByDate,size: "+workDetailsEntities.size());
+			//			System.out.println("ProjectDAO, getWorkDetailsByDate,size: "+workDetailsEntities.size());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getWorkDetailsByDate: "+e.getMessage());
@@ -845,8 +964,8 @@ public class ProjectDAOImpl implements ProjectDAO {
 			cr.add(Restrictions.eq("subTaskId", subTaskId));
 			cr.add(Restrictions.eq("documentCategoryId", documentCategoryId));
 			List<WorkDocumentEntity> list = cr.list();
-//			System.out.println("getLatestWorkDocument, size: "+list.size()+", subTaskId: "+subTaskId
-//					+" ,documentCategoryId: "+documentCategoryId);
+			//			System.out.println("getLatestWorkDocument, size: "+list.size()+", subTaskId: "+subTaskId
+			//					+" ,documentCategoryId: "+documentCategoryId);
 			if(list.size() > 0){
 				workDocument = list.get(0);
 			}
@@ -1264,9 +1383,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 				Criterion referenceNo = Restrictions.ilike("genMsg.referenceNo", searchKeyWord, MatchMode.ANYWHERE);
 				Criterion description = Restrictions.ilike("genMsg.description", searchKeyWord, MatchMode.ANYWHERE);
 
-				//				Criterion workName = Restrictions.ilike("gen.workName", searchKeyWord, MatchMode.ANYWHERE);
-				//				Criterion workDescription = Restrictions.ilike("gen.description", searchKeyWord, MatchMode.ANYWHERE);
-
 				Criterion departmentName = Restrictions.ilike("dept.departmentName", searchKeyWord, MatchMode.ANYWHERE);
 
 				Disjunction disj = Restrictions.disjunction();
@@ -1291,19 +1407,18 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 	@Override
-	public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+	public GeneralMessageListModel searchGeneralMessageList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount){
-		GeneralMessageSearchListModel genMsgModel = null;
+		GeneralMessageListModel genMsgModel = null;
 		int expectedRowSize = 0;
 		try{
 			expectedRowSize = ((pageNo - 1) * pageCount);
-			genMsgModel = new GeneralMessageSearchListModel();
+			genMsgModel = new GeneralMessageListModel();
 
 			Criteria genMsg = this.sessionFactory.getCurrentSession().
 					createCriteria(GeneralMessageEntity.class,"genMsg");
 			genMsg.createAlias("employee", "emp"); 
 			genMsg.createAlias("department", "dept");
-
 
 			if(startDate != null){
 				genMsg.add(Restrictions.ge("genMsg.createdOn", startDate) );
@@ -1340,7 +1455,9 @@ public class ProjectDAOImpl implements ProjectDAO {
 			List<GeneralMessageEntity> totalGenMessageEntities = genMsg.list(); 
 
 			Map<String,GeneralMessageEntity> map = new HashMap<String,GeneralMessageEntity>();
-			for (GeneralMessageEntity i : totalGenMessageEntities) map.put(i.getReferenceNo(),i);
+			for (GeneralMessageEntity i : totalGenMessageEntities) {
+				map.put(i.getReferenceNo(),i);
+			}
 
 			genMsgModel.setTotalCount(map.size());
 
@@ -1349,8 +1466,6 @@ public class ProjectDAOImpl implements ProjectDAO {
 			genMsg.setMaxResults(pageCount);			
 			List<GeneralMessageEntity> pageNationGenMsgList = genMsg.list(); 
 			genMsgModel.setGeneralMessageEntities(pageNationGenMsgList);
-			System.out.println("DAO,searchGeneralMessageList, generalMessageEntities, size: "+totalGenMessageEntities.size()
-					+", genMsgCountList, size: "+pageNationGenMsgList.size());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("searchGeneralMessageList: "+e.getMessage());
@@ -1359,15 +1474,15 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 	@Override
-	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+	public InterOfficeCommunicationListModel searchInterDeptCommList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount){
 
-		InterOfficeCommunicationSearchModel interOfficeCommunicationSearchModel = null;
+		InterOfficeCommunicationListModel interOfficeCommunicationSearchModel = null;
 		//		List<InterOfficeCommunicationEntity> comList = null;
 		int expectedRowSize = 0;
 		try{
 			//			List<InterOfficeCommunicationEntity> comList  = new ArrayList<InterOfficeCommunicationEntity>();
-			interOfficeCommunicationSearchModel = new InterOfficeCommunicationSearchModel();
+			interOfficeCommunicationSearchModel = new InterOfficeCommunicationListModel();
 			expectedRowSize = ((pageNo - 1) * pageCount);
 
 			Criteria intOffCr = this.sessionFactory.getCurrentSession().
@@ -1800,118 +1915,145 @@ public class ProjectDAOImpl implements ProjectDAO {
 	}
 
 	@Override
-	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+	//	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+	//			int pageNo, int pageCount){
+	public InterOfficeCommunicationListModel getCommunicationEntityByDeptId(int departmentId,
 			int pageNo, int pageCount){
-
+		InterOfficeCommunicationListModel intOffComList = null;
 		List<InterOfficeCommunicationEntity> commEntity = null;
 		int refNoCount = 0;
 		int expectedRowSize = 0;
 		try{
+			intOffComList = new InterOfficeCommunicationListModel();
 			expectedRowSize = ((pageNo - 1) * pageCount);
 			refNoCount = expectedRowSize;
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(InterOfficeCommunicationEntity.class);
 			cr.addOrder(Order.desc("updatedOn"));
-			do{
-				if(departmentId != 0){
-					cr.add(Restrictions.eq("departmentId", departmentId));
-				}
-				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
-				if(refNoCount < expectedRowSize){
-					int diff = expectedRowSize - refNoCount;
-					refNoCount = refNoCount + diff;
-				}
-				HashMap<String, InterOfficeCommunicationEntity> map= new HashMap<String, InterOfficeCommunicationEntity>();
-				cr.setFirstResult(refNoCount);
-				cr.setMaxResults(pageCount);
-				List<InterOfficeCommunicationEntity> list = cr.list();
-				for(InterOfficeCommunicationEntity off: list){
-					map.put(off.getReferenceNo(), off);
-				}
-				int mapSize = map.size();
-				refNoCount = mapSize;
-				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
-			}while(expectedRowSize == refNoCount);
+			if(departmentId != 0){
+				cr.add(Restrictions.eq("departmentId", departmentId));
+			}
+			List commList = cr.list();
+			intOffComList.setTotalCount(commList.size());
+			if(commList.size() > 0){
+				do{
+					//				if(departmentId != 0){
+					//					cr.add(Restrictions.eq("departmentId", departmentId));
+					//				}
+					if(refNoCount < expectedRowSize){
+						int diff = expectedRowSize - refNoCount;
+						refNoCount = refNoCount + diff;
+					}
+					HashMap<String, InterOfficeCommunicationEntity> map= new HashMap<String, InterOfficeCommunicationEntity>();
+					cr.setFirstResult(refNoCount);
+					cr.setMaxResults(pageCount);
+					List<InterOfficeCommunicationEntity> list = cr.list();
+					for(InterOfficeCommunicationEntity off: list){
+						map.put(off.getReferenceNo(), off);
+					}
+					int mapSize = map.size();
+					refNoCount = mapSize;
+				}while(expectedRowSize == refNoCount);
+			}
 			commEntity = cr.list();
+			intOffComList.setCommunicationEntities(commEntity);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getCommunicationEntityByDeptId: "+e.getMessage());
 		}
-		return commEntity;
+		return intOffComList;
 	}
 
 
 	@Override
-	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+	//	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+	//	(int departmentId,int pageNo, int pageCount){
+	public InterOfficeCommunicationListModel getDepartmentCommunicationMessagesByDeptId
 	(int departmentId,int pageNo, int pageCount){
 
+		InterOfficeCommunicationListModel intComModelList = null;
 		List<DepartmentCommunicationMessagesEntity> deptCommMesgeList = null;
 		int refNoCount = 0;
 		int expectedRowSize = 0;
 		try{
+			intComModelList = new InterOfficeCommunicationListModel();
 			expectedRowSize = ((pageNo - 1) * pageCount);
 			refNoCount = expectedRowSize;
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentCommunicationMessagesEntity.class);
 			if(departmentId != 0){
 				cr.add(Restrictions.eq("departmentId", departmentId));
 			}
-			do{
-				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
-				if(refNoCount < expectedRowSize){
-					int diff = expectedRowSize - refNoCount;
-					refNoCount = refNoCount + diff;
-				}
-				HashMap<String, DepartmentCommunicationMessagesEntity> map= new HashMap<String, DepartmentCommunicationMessagesEntity>();
-				cr.setFirstResult(refNoCount);
-				cr.setMaxResults(pageCount);
-				List<DepartmentCommunicationMessagesEntity> list = cr.list();
-				for(DepartmentCommunicationMessagesEntity dep: list){
-					map.put(dep.getReferenceNo(), dep);
-				}
-				int mapSize = map.size();
-				refNoCount = mapSize;
-				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
-			}while(expectedRowSize == refNoCount);
-			deptCommMesgeList = cr.list();
+			List list = cr.list();
+			intComModelList.setTotalCount(list.size());
+			if(list.size() > 0){
+				do{
+					//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+					if(refNoCount < expectedRowSize){
+						int diff = expectedRowSize - refNoCount;
+						refNoCount = refNoCount + diff;
+					}
+					HashMap<String, DepartmentCommunicationMessagesEntity> map= new HashMap<String, DepartmentCommunicationMessagesEntity>();
+					cr.setFirstResult(refNoCount);
+					cr.setMaxResults(pageCount);
+					List<DepartmentCommunicationMessagesEntity> deptlist = cr.list();
+					for(DepartmentCommunicationMessagesEntity dep: deptlist){
+						map.put(dep.getReferenceNo(), dep);
+					}
+					int mapSize = map.size();
+					refNoCount = mapSize;
+					//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
+				}while(expectedRowSize == refNoCount);
+				deptCommMesgeList = cr.list();
+				intComModelList.setDeptCommMesgeList(deptCommMesgeList);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getDepartmentCommunicationMessagesByDeptId: "+e.getMessage());
 		}
-		return deptCommMesgeList;
+		return intComModelList;
 	}
 
 	@Override
-	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
+	//	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
+	//			int pageNo, int pageCount){
+	public GeneralMessageListModel getDepartmentGeneralMessageListByDeptId(int departmentId,
 			int pageNo, int pageCount){
+		GeneralMessageListModel listModel = null;
+		int totalCount = 0;
 		List<DepartmentGeneralMessageEntity> entities = null;
 		int refNoCount = 0;
 		int expectedRowSize = 0;
 		try{
+			listModel = new GeneralMessageListModel();
 			expectedRowSize = ((pageNo - 1) * pageCount);
 			refNoCount = expectedRowSize;
-			//			int msgCount = getGeneralInboxMessageCountByDeptId(departmentId);
-			//System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,msgCount: "+msgCount);
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
 			if(departmentId != 0){
 				cr.add(Restrictions.eq("departmentId", departmentId));
 			}
-			do{
-				//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
-				if(refNoCount < expectedRowSize){
-					int diff = expectedRowSize - refNoCount;
-					refNoCount = refNoCount + diff;
-				}
-				HashMap<String, DepartmentGeneralMessageEntity> map= new HashMap<String, DepartmentGeneralMessageEntity>();
-				cr.setFirstResult(refNoCount);
-				cr.setMaxResults(pageCount);
-				List<DepartmentGeneralMessageEntity> list = cr.list();
-				for(DepartmentGeneralMessageEntity dep: list){
-					map.put(dep.getReferenceNo(), dep);
-				}
-				int mapSize = map.size();
-				refNoCount = mapSize;
-				//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
-			}while(expectedRowSize == refNoCount);
+			List totalMessages = cr.list();
+			totalCount = totalMessages.size();
+			listModel.setTotalCount(totalCount);
+			if(totalCount > 0){
+				do{
+					//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+					if(refNoCount < expectedRowSize){
+						int diff = expectedRowSize - refNoCount;
+						refNoCount = refNoCount + diff;
+					}
+					HashMap<String, DepartmentGeneralMessageEntity> map= new HashMap<String, DepartmentGeneralMessageEntity>();
+					cr.setFirstResult(refNoCount);
+					cr.setMaxResults(pageCount);
+					List<DepartmentGeneralMessageEntity> list = cr.list();
+					for(DepartmentGeneralMessageEntity dep: list){
+						map.put(dep.getReferenceNo(), dep);
+					}
+					int mapSize = map.size();
+					refNoCount = mapSize;
+					//	System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,list,size: "+list.size());
+				}while(expectedRowSize == refNoCount);
+			}//if(totalCount > 0)
 			entities = cr.list();
+			listModel.setDeptGenMsgEnity(entities);
 			//				System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,expectedRowSize: "+expectedRowSize+
 			//						", refNoCount: "+refNoCount);
 			//			System.out.println("DAO,getDepartmentGeneralMessageListByDeptId,size: "+entities.size());
@@ -1919,42 +2061,53 @@ public class ProjectDAOImpl implements ProjectDAO {
 			e.printStackTrace();
 			logger.error("getDepartmentGeneralMessageListByDeptId: "+e.getMessage());
 		}
-		return entities;
+		return listModel;
 	}
 
 
 	@Override
-	public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
+	//	public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
+	//			int pageNo, int pageCount){
+	public GeneralMessageListModel getGeneralMessageListByDeptId(int departmentId,
 			int pageNo, int pageCount){
+		GeneralMessageListModel listModel = null;
 		List<GeneralMessageEntity> genEntities = null;
 		int refNoCount = 0;
 		int expectedRowSize = 0;
 		try{
+			listModel = new GeneralMessageListModel();
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(GeneralMessageEntity.class);
 			cr.add(Restrictions.eq("departmentId", departmentId));
-			do{
-				System.out.println("DAO,getGeneralMessageListByDeptId,refNoCount: "+refNoCount);
-				if(refNoCount < expectedRowSize){
-					int diff = expectedRowSize - refNoCount;
-					refNoCount = refNoCount + diff;
-				}
-				HashMap<String, GeneralMessageEntity> map= new HashMap<String, GeneralMessageEntity>();
-				cr.setFirstResult(refNoCount);
-				cr.setMaxResults(pageCount);
-				List<GeneralMessageEntity> list = cr.list();
-				for(GeneralMessageEntity gen: list){
-					map.put(gen.getReferenceNo(), gen);
-				}
-				int mapSize = map.size();
-				refNoCount = mapSize;
-				System.out.println("DAO,getGeneralMessageListByDeptId,list,size: "+list.size());
-			}while(expectedRowSize == refNoCount);
+			List totalMessages = cr.list();
+			listModel.setTotalCount(totalMessages.size());
+			//			System.out.println("DAO,getGeneralMessageListByDeptId,TotalCount: "+listModel.getTotalCount());
+			if(totalMessages.size() > 0){
+				do{
+					//				System.out.println("DAO,getGeneralMessageListByDeptId,refNoCount: "+refNoCount);
+					if(refNoCount < expectedRowSize){
+						int diff = expectedRowSize - refNoCount;
+						refNoCount = refNoCount + diff;
+					}
+					HashMap<String, GeneralMessageEntity> map= new HashMap<String, GeneralMessageEntity>();
+					cr.setFirstResult(refNoCount);
+					cr.setMaxResults(pageCount);
+					List<GeneralMessageEntity> list = cr.list();
+					for(GeneralMessageEntity gen: list){
+						map.put(gen.getReferenceNo(), gen);
+					}
+					int mapSize = map.size();
+					refNoCount = mapSize;
+					//				System.out.println("DAO,getGeneralMessageListByDeptId,list,size: "+list.size());
+					//					System.out.println("DAO,getGeneralMessageListByDeptId,refNoCount: "+refNoCount+", expectedRowSize: "+expectedRowSize);
+				}while(expectedRowSize == refNoCount);
+			}
 			genEntities = cr.list();
+			listModel.setGeneralMessageEntities(genEntities);
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getGeneralMessageListByDeptId: "+e.getMessage());
 		}
-		return genEntities;
+		return listModel;
 	}
 
 
@@ -1970,6 +2123,22 @@ public class ProjectDAOImpl implements ProjectDAO {
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getDepartmentGeneralMessageListByDeptIdRefNo: "+e.getMessage());
+		}
+		return entities;
+	}
+
+	@Override
+	public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByGenIdRefNo(int genMessageId,
+			String referenceNo ){
+		List<DepartmentGeneralMessageEntity> entities = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(DepartmentGeneralMessageEntity.class);
+			cr.add(Restrictions.eq("genMessageId", genMessageId));
+			cr.add(Restrictions.eq("referenceNo", referenceNo));
+			entities = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDepartmentGeneralMessageListByGenIdRefNo: "+e.getMessage());
 		}
 		return entities;
 	}

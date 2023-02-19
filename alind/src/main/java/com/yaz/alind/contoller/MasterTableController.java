@@ -230,9 +230,9 @@ public class MasterTableController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
-	@RequestMapping(value="/masterTable/getWorkTypeById", method = RequestMethod.GET)
+	@RequestMapping(value="/masterTable/getWorkTypeById/{workTypeId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getWorkTypeById(@RequestHeader("token") String token,
-			@RequestParam int workTypeId) throws Exception{
+			@PathVariable("workTypeId") int workTypeId) throws Exception{
 		Map<String,Object> resultMap = null;
 		boolean tokenStatus = false;
 		try{
@@ -310,37 +310,92 @@ public class MasterTableController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
-//	@RequestMapping(value="/masterTable/updateDocumentTypes", method = RequestMethod.POST)
-//	public ResponseEntity<Map<String,Object>>  updateDocumentTypes(@RequestHeader("token") String token
-//			,@RequestBody DocumentCategoryModel documentTypes ) throws Exception{
-//		Map<String,Object> resultMap = null;
-//		boolean tokenStatus = false;
-//		try{
-//			resultMap = new HashMap<String,Object>();
-//			//			System.out.println("saveOrUpdateDocumentTypes,token: "+token);
-//			tokenStatus = utilService.evaluateToken(token);
-//			if(tokenStatus){
-//				DocumentCategoryModel model= masterTableService.updateDocumentCategory(documentTypes);
-//				if(model != null){
-//					resultMap.put("model", model);
-//					resultMap.put("status", "success");
-//				}else{
-//					resultMap.put("status", "failed");
-//					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//				}
-//			}else{
-//				resultMap.put("status", "failed");
-//				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//			}
-//
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			resultMap.put("status", "failed");
-//			logger.error("updateDocumentTypes, "+e.getMessage());
-//			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-//		}
-//		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-//	}
+	@RequestMapping(value="/masterTable/saveDocumentType", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> saveDocumentType(@RequestHeader("token") String token,
+			@RequestBody DocumentTypeModel docType) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			//			System.out.println("saveOrUpdateProject,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypeModel model = masterTableService.saveDocumentType(docType);
+				resultMap.put("docType", model);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("saveDocumentType, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+	@RequestMapping(value="/masterTable/deleteDocumentType/{documentTypeId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>> deleteDocumentType(@RequestHeader("token") String token,
+			@PathVariable("documentTypeId") int documentTypeId) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			tokenStatus = utilService.evaluateToken(token);
+			//			System.out.println("Master, deleteDocumentType, documentTypeId: "+documentTypeId);
+			if(tokenStatus){
+				int status = masterTableService.deleteDocumentType(documentTypeId);
+				if(status == -1){
+					resultMap.put("status", status);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("deleteDocumentType, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
+
+
+	@RequestMapping(value="/masterTable/updateDocumentType", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> updateDocumentType(@RequestHeader("token") String token,
+			@RequestBody DocumentTypeModel docType) throws Exception {
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+//			System.out.println("Master, updateDocumentType,token: "+token);
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypeModel model = masterTableService.updateDocumentType(docType);
+				resultMap.put("docType", model);
+				resultMap.put("status", "success");
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			resultMap.put("status", "failed");
+			logger.error("updateDocumentType, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
 
 	@RequestMapping(value="/masterTable/updateDocumentCategory", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>>  updateDocumentCategory(@RequestHeader("token") String token
@@ -373,39 +428,7 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
-//	@RequestMapping(value="/masterTable/saveDocumentTypes", method = RequestMethod.POST)
-//	public ResponseEntity<Map<String,Object>>  saveDocumentTypes(@RequestHeader("token") String token
-//			,@RequestBody DocumentCategoryModel documentTypes ) throws Exception{
-//		Map<String,Object> resultMap = null;
-//		boolean tokenStatus = false;
-//		try{
-//			resultMap = new HashMap<String,Object>();
-//			System.out.println("MasterTableController,saveDocumentTypes,token: "+token);
-//			tokenStatus = utilService.evaluateToken(token);
-//			if(tokenStatus){
-//				DocumentCategoryModel model= masterTableService.saveDocumentCategory(documentTypes);
-//				if(model != null){
-//					resultMap.put("model", model);
-//					resultMap.put("status", "success");
-//				}else{
-//					resultMap.put("message", "Drawing series exists");
-//					resultMap.put("status", "failed");
-//					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//				}
-//			}else{
-//				resultMap.put("status", "failed");
-//				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//			}
-//
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			resultMap.put("status", "failed");
-//			logger.error("updateDocumentTypes, "+e.getMessage());
-//			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-//		}
-//		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-//	}
+
 
 	@RequestMapping(value="/masterTable/saveDocumentCategory", method = RequestMethod.POST)
 	public ResponseEntity<Map<String,Object>>  saveDocumentCategory(@RequestHeader("token") String token
@@ -414,7 +437,7 @@ public class MasterTableController {
 		boolean tokenStatus = false;
 		try{
 			resultMap = new HashMap<String,Object>();
-			System.out.println("MasterTableController,saveDocumentTypes,token: "+token);
+//			System.out.println("MasterTableController,saveDocumentTypes,token: "+token);
 			tokenStatus = utilService.evaluateToken(token);
 			if(tokenStatus){
 				DocumentCategoryModel model= masterTableService.saveDocumentCategory(documentCategoryModel);
@@ -439,7 +462,7 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value="/masterTable/getAllDocumentTypes/{status}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getAllDocumentTypes(@RequestHeader("token") String token,
 			@PathVariable("status") int status) throws Exception{
@@ -470,7 +493,37 @@ public class MasterTableController {
 		}
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
-	
+
+	@RequestMapping(value="/masterTable/getDocumentTypeById/{documentTypeId}", method = RequestMethod.GET)
+	public ResponseEntity<Map<String,Object>>  getDocumentTypeById(@RequestHeader("token") String token,
+			@PathVariable("documentTypeId") int documentTypeId) throws Exception{
+		Map<String,Object> resultMap = null;
+		boolean tokenStatus = false;
+		try{
+			resultMap = new HashMap<String,Object>();
+			tokenStatus = utilService.evaluateToken(token);
+			if(tokenStatus){
+				DocumentTypeModel docType= masterTableService.getDocumentTypeById(documentTypeId);
+				if(docType != null){
+					resultMap.put("docType", docType);
+					resultMap.put("status", "success");
+				}else{
+					resultMap.put("status", "failed");
+					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+				}
+			}else{
+				resultMap.put("status", "failed");
+				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
+			}
+
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getDocumentTypeById, "+e.getMessage());
+			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
+	}
+
 	@RequestMapping(value="/masterTable/getAllDocumentCategory/{status}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getAllDocumentCategory(@RequestHeader("token") String token,
 			@PathVariable("status") int status) throws Exception{
@@ -502,35 +555,6 @@ public class MasterTableController {
 		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
 	}
 
-//	@RequestMapping(value="/masterTable/deleteDocumentTypes/{documentTypeId}", method = RequestMethod.GET)
-//	public ResponseEntity<Map<String,Object>>  deleteDocumentTypes(@RequestHeader("token") String token,
-//			@PathVariable("documentTypeId") int documentTypeId) throws Exception{
-//		Map<String,Object> resultMap = null;
-//		boolean tokenStatus = false;
-//		try{
-//			resultMap = new HashMap<String,Object>();
-//			//			System.out.println("getAllWorkStatus,token: "+token);
-//			tokenStatus = utilService.evaluateToken(token);
-//			if(tokenStatus){
-//				int status = masterTableService.deleteDocumentCategoryById(documentTypeId);
-//				if(status == 1){
-//					resultMap.put("status", "success");
-//				}else{
-//					resultMap.put("status", "failed");
-//					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//				}
-//			}else{
-//				resultMap.put("status", "failed");
-//				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//			}
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("deleteDocumentTypes, "+e.getMessage());
-//			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-//		}
-//		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-//	}
-	
 	@RequestMapping(value="/masterTable/deleteDocumentCategoryById/{documentCategoryId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  deleteDocumentCategoryById(@RequestHeader("token") String token,
 			@PathVariable("documentCategoryId") int documentCategoryId) throws Exception{
@@ -561,36 +585,6 @@ public class MasterTableController {
 	}
 
 
-//	@RequestMapping(value="/masterTable/getDocumentTypeById/{documentCategoryId}", method = RequestMethod.GET)
-//	public ResponseEntity<Map<String,Object>>  getDocumentTypeById(@RequestHeader("token") String token,
-//			@PathVariable("documentCategoryId") int documentCategoryId) throws Exception{
-//		Map<String,Object> resultMap = null;
-//		boolean tokenStatus = false;
-//		try{
-//			resultMap = new HashMap<String,Object>();
-//			//			System.out.println("getAllWorkStatus,token: "+token);
-//			tokenStatus = utilService.evaluateToken(token);
-//			if(tokenStatus){
-//				DocumentCategoryModel model = masterTableService.getDocumentCategoryById(documentCategoryId);
-//				if(model != null){
-//					resultMap.put("model", model);
-//					resultMap.put("status", "success");
-//				}else{
-//					resultMap.put("status", "failed");
-//					return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//				}
-//			}else{
-//				resultMap.put("status", "failed");
-//				return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.UNAUTHORIZED);
-//			}
-//		}catch(Exception e){
-//			e.printStackTrace();
-//			logger.error("getDocumentTypeById, "+e.getMessage());
-//			return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.NOT_FOUND);
-//		}
-//		return  new ResponseEntity<Map<String,Object>>(resultMap,HttpStatus.OK);
-//	}
-	
 	@RequestMapping(value="/masterTable/getDocumentCategoryById/{documentCategoryId}", method = RequestMethod.GET)
 	public ResponseEntity<Map<String,Object>>  getDocumentCategoryById(@RequestHeader("token") String token,
 			@PathVariable("documentCategoryId") int documentCategoryId) throws Exception{

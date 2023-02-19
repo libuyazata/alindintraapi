@@ -24,7 +24,7 @@ import javax.persistence.Transient;
 @Table(name="alind_t_employees")
 @NamedQuery(name="EmployeeEntity.findAll", query="SELECT e FROM EmployeeEntity e")
 public class EmployeeEntity implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
@@ -67,7 +67,6 @@ public class EmployeeEntity implements Serializable {
 
 	@Column(name="updated_at")
 	private Timestamp updatedAt;
-//	private Date updatedAt;
 
 	@Column(name="user_name")
 	private String userName;
@@ -136,6 +135,13 @@ public class EmployeeEntity implements Serializable {
 	private String profilePicPath;
 	@Column(name="orginal_profile_pic_name")
 	private String orginalProfilePicName;
+	
+	@Column(name="profile_pic_base64")
+	private String profPicBase64;
+	
+	// File type : jpg/pdf/bmp etc
+	@Column(name="file_type")
+	private String fileType;
 	
 	@Transient
 	private String token;
@@ -448,7 +454,29 @@ public class EmployeeEntity implements Serializable {
 	public void setDateOfJoin(Timestamp dateOfJoin) {
 		this.dateOfJoin = dateOfJoin;
 	}
-	
-	
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public static void setSerialversionuid(long serialversionuid) {
+		serialVersionUID = serialversionuid;
+	}
+
+	public String getProfPicBase64() {
+		return profPicBase64;
+	}
+
+	public void setProfPicBase64(String profPicBase64) {
+		this.profPicBase64 = profPicBase64;
+	}
+
+	public String getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(String fileType) {
+		this.fileType = fileType;
+	}
 
 }

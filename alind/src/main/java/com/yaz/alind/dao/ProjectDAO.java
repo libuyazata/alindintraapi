@@ -21,8 +21,9 @@ import com.yaz.alind.entity.WorkDetailsEntity;
 import com.yaz.alind.entity.WorkDocumentEntity;
 import com.yaz.alind.entity.WorkIssuedDetailsEntity;
 import com.yaz.alind.entity.WorkMessageAttachmentEntity;
-import com.yaz.alind.model.ui.GeneralMessageSearchListModel;
-import com.yaz.alind.model.ui.InterOfficeCommunicationSearchModel;
+import com.yaz.alind.model.ui.GeneralMessageListModel;
+import com.yaz.alind.model.ui.InterOfficeCommunicationListModel;
+import com.yaz.alind.model.ui.WorkDetailsModelList;
 
 public interface ProjectDAO {
 
@@ -56,8 +57,14 @@ public interface ProjectDAO {
 	public WorkDetailsEntity updateWorkDetails(WorkDetailsEntity workDetailsEntity);
 	public WorkDetailsEntity getWorkDetailsEntityById(int workDetailsId);
 	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId,int status);
+//	public List<WorkDetailsEntity> getWorkDetailsEntitiesByDeptId(int departmentId,int status,
+//			int pageNo,int pageCount);
+	public WorkDetailsModelList getWorkDetailsEntitiesByDeptId(int departmentId,int status,
+			int pageNo,int pageCount);
 	public List<WorkDetailsEntity> getWorkDetailsBySearch(String searchKeyWord, int workTypeId,String departmentName,
 			Date startDate,Date endDate);
+	public WorkDetailsModelList searchWorkDetails(String searchKeyWord, int workTypeId,String deptmentName,
+			Date startDate,Date endDate,int pageNo,	int pageCount);
 	public List<WorkDetailsEntity> getWorkDetailsByDate(Date startDate,Date endDate,int departmentId);
 
 	public SubTaskEntity saveSubTaskEntity(SubTaskEntity subTaskEntity);
@@ -102,21 +109,26 @@ public interface ProjectDAO {
 	(DepartmentCommunicationMessagesEntity deptMessage);
 	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
 	(int departmentId);
-	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+//	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByDeptId
+//	(int departmentId,int pageNo, int pageCount);
+	public InterOfficeCommunicationListModel getDepartmentCommunicationMessagesByDeptId
 	(int departmentId,int pageNo, int pageCount);
+	
 	public DepartmentCommunicationMessagesEntity getDepartmentCommunicationMessagesById(int deptCommId);
 	public List<DepartmentCommunicationMessagesEntity> getDepartmentCommunicationMessagesByOffCommId
 	(int officeCommunicationId);
 	public List<InterOfficeCommunicationEntity> searchInterDeptCommList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId);
 	
-	public InterOfficeCommunicationSearchModel searchInterDeptCommList(String searchKeyWord,
+	public InterOfficeCommunicationListModel searchInterDeptCommList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount);
 	
 	public WorkMessageAttachmentEntity saveWorkMessageAttachment(WorkMessageAttachmentEntity entity);
 	public List<WorkMessageAttachmentEntity> getWorkMessageAttachmentByByOffCommId(int officeCommunicationId); 
 	public int getInterOfficeMessageCountByDeptId(int departmentId);
-	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+//	public List<InterOfficeCommunicationEntity> getCommunicationEntityByDeptId(int departmentId,
+//			int pageNo, int pageCount);
+	public InterOfficeCommunicationListModel getCommunicationEntityByDeptId(int departmentId,
 			int pageNo, int pageCount);
 	public int getInboxWorkMessagesCount(int departmentId);
 	
@@ -127,13 +139,15 @@ public interface ProjectDAO {
     public GeneralMessageEntity updateGeneralMessage(GeneralMessageEntity entity);
     public GeneralMessageEntity getGeneralMessageById(int genMessageId);
     public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId);
-    public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
-    		int pageNo, int pageCount);
+//    public List<GeneralMessageEntity> getGeneralMessageListByDeptId(int departmentId,
+//    		int pageNo, int pageCount);
+    public GeneralMessageListModel getGeneralMessageListByDeptId(int departmentId,
+			int pageNo, int pageCount);
     public int getGeneralInboxMessageCountByDeptId(int departmentId);
     public int getGeneralMessageCountByDeptId(int departmentId);
     public List<GeneralMessageEntity> searchGeneralMessageList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId);
-    public GeneralMessageSearchListModel searchGeneralMessageList(String searchKeyWord,
+    public GeneralMessageListModel searchGeneralMessageList(String searchKeyWord,
 			Date startDate, Date endDate,int departmentId,int pageNo, int pageCount);
     
     public List<DepartmentGeneralMessageEntity> saveDepartmentGeneralMessageList
@@ -143,10 +157,14 @@ public interface ProjectDAO {
     public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId);
     public DepartmentGeneralMessageEntity updateDepartmentGeneralMessageEntity
     (DepartmentGeneralMessageEntity entity);
-    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
-    		int pageNo, int pageCount);
+//    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptId(int departmentId,
+//    		int pageNo, int pageCount);
+    public GeneralMessageListModel getDepartmentGeneralMessageListByDeptId(int departmentId,
+			int pageNo, int pageCount);
     public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByDeptIdRefNo(int departmentId,
     		String referenceNo );
+    public List<DepartmentGeneralMessageEntity> getDepartmentGeneralMessageListByGenIdRefNo(int genMessageId,
+			String referenceNo );
     
     public List<GeneralMessageAttachmentEntity> saveGeneralMessageAttachment
     (List<GeneralMessageAttachmentEntity> entities);

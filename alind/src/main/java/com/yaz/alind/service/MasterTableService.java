@@ -2,6 +2,7 @@ package com.yaz.alind.service;
 
 import java.util.List;
 
+import com.yaz.alind.entity.DocumentTypeEntity;
 import com.yaz.alind.model.ui.DocumentCategoryModel;
 import com.yaz.alind.model.ui.DocumentTypeModel;
 import com.yaz.alind.model.ui.WorkStatusModel;
@@ -29,5 +30,9 @@ public interface MasterTableService {
 	public boolean isDrawingSeriesExists(String drawingSeries);
 	
 	public List<DocumentTypeModel> getAllDocumentType(int status);
+	public DocumentTypeModel saveDocumentType(DocumentTypeModel docType);
+	public DocumentTypeModel updateDocumentType(DocumentTypeModel docType); 
+	public DocumentTypeModel getDocumentTypeById(int documentTypeId);
+	public int deleteDocumentType(int documentTypeId);
 
 }

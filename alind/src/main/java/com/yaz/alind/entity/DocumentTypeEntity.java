@@ -25,8 +25,12 @@ public class DocumentTypeEntity {
 	@Column(name = "document_type_id", unique = true, nullable = false)
 	private int documentTypeId;
 	
-	@Column(name = "type")
+	@Column(name = "type", nullable = false)
 	private String type;
+	
+	@Column(name = "description")
+	private String desc;
+	
 	
 	@Column(name = "created_on")
 	private Date createdOn;
@@ -78,7 +82,13 @@ public class DocumentTypeEntity {
 		this.status = status;
 	}
 	
-	
-	
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
 
 }

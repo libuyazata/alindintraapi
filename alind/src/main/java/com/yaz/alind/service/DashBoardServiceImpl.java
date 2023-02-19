@@ -57,7 +57,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 			adminDashBoardModel = adminDashBoardFactory.createAdminDashBoardModel();
 			TokenEntity tokenModel = userDAO.getTokenModelByToken(token);
 			EmployeeEntity employee = userDAO.getEmployeeById(tokenModel.getUserId());
-			System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
+//			System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
 			// Admin
 			if(employee.getUserRoleId() == 1){
 				employees=userDAO.getAllEmployeesByDept(-1);
@@ -110,7 +110,7 @@ public class DashBoardServiceImpl implements DashBoardService {
 			}
 			// HOD or Department coordinator
 			if(employee.getUserRoleId() == 2 || employee.getUserRoleId() == 4){
-				System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
+//				System.out.println("DashBoardServiceImpl,getAdminDashBoardModel, role id: "+employee.getUserRoleId());
 				employees = userDAO.getAllEmployeesByDept(employee.getDepartmentId());
 				adminDashBoardModel.setNoOfEmpoyees(employees.size());
 
@@ -151,9 +151,10 @@ public class DashBoardServiceImpl implements DashBoardService {
 		try{
 
 			adminDashBoardModel = new AdminDashBoardModel();
-			List<EmployeeEntity> employees =  userDAO.getAllEmployeesByDept(deptId);
+			List<EmployeeEntity> employees =  userDAO.getEmployeeListByDept(deptId,1);
+			List<DepartmentEntity> deptList = userDAO.getAllActiveDepartments();
 			adminDashBoardModel.setNoOfEmpoyees(employees.size());
-
+            adminDashBoardModel.setNoOfDepartments(deptList.size());
 			Map<String,Integer> workDetails = getWorkDetailsByDeptId(deptId);
 
 			adminDashBoardModel.setWorkDetails(workDetails);

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -201,7 +202,7 @@ public class UtilServiceImpl implements UtilService{
 				new File(path).mkdirs();
 			}
 			destination = path+"/"+ fileName;
-			System.out.println("Util Business,saveFile,destination: "+destination);
+//			System.out.println("Util Business,saveFile,destination: "+destination);
 			File file = new File(destination);
 			mulFile.transferTo(file);
 			val = 1;
@@ -501,9 +502,7 @@ public class UtilServiceImpl implements UtilService{
 			Calendar cal = Calendar.getInstance();
 			cal.setTime(date);
 			int year = cal.get(Calendar.YEAR);
-			//			Calendar calendar = Calendar.getInstance();
-			//			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
-			System.out.println("Utill, getFirstDayOfYear,year: "+year+", date: "+date);
+//			System.out.println("Utill, getFirstDayOfYear,year: "+year+", date: "+date);
 			cal.set(Calendar.YEAR, year);
 			cal.set(Calendar.DAY_OF_YEAR, 1);    
 			start = cal.getTime();
@@ -531,6 +530,20 @@ public class UtilServiceImpl implements UtilService{
 			logger.error("getLastDayOfYear: "+e.getMessage());
 		}
 		return end;
+	}
+
+	@Override
+	public String getBase64Format(byte[] data) {
+		String base64 = null;
+		try{
+	        // Encode byte array to base64
+	      base64 = Base64.getEncoder().encodeToString(data);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getBase64Format: "+e.getMessage());
+		}
+		return base64;
 	}
 
 //	@Override

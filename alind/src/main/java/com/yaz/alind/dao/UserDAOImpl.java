@@ -108,10 +108,9 @@ public class UserDAOImpl implements UserDAO {
 		EmployeeEntity emp = null;
 		try{
 			this.sessionFactory.getCurrentSession().update(employee);
-			//			this.sessionFactory.getSessionFactory().getCurrentSession().update(employee);
-			System.out.println("DAO, updateEmployee, EmployeeId: "+employee.getEmployeeId());
+			//System.out.println("DAO, updateEmployee, EmployeeId: "+employee.getEmployeeId());
 			emp = employee;
-			System.out.println("DAO, updateEmployee, lastname: "+emp.getLastName());
+			//System.out.println("DAO, updateEmployee, lastname: "+emp.getLastName());
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("updateEmployee: "+e.getMessage());
@@ -149,7 +148,9 @@ public class UserDAOImpl implements UserDAO {
 			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(TokenEntity.class);
 			cr.add(Restrictions.eq("token", token));
 			List<TokenEntity> list = cr.list();
-			tokenModel = list.get(0);
+			if(list.size() > 0){
+				tokenModel = list.get(0);
+			}
 		}catch(Exception e){
 			e.printStackTrace();
 			logger.error("getTokenModelByToken: "+e.getMessage());
@@ -229,6 +230,27 @@ public class UserDAOImpl implements UserDAO {
 
 	@Override
 	@Transactional
+	public List<EmployeeEntity> getEmployeeListByDept(int departmentId, int isActive) {
+		List<EmployeeEntity> employees = null;
+		try{
+			Criteria cr = this.sessionFactory.getCurrentSession().createCriteria(EmployeeEntity.class);
+			if(departmentId > 0){
+				cr.add(Restrictions.eq("departmentId",departmentId));
+			}
+			if(isActive != 0){
+				cr.add(Restrictions.eq("isActive",isActive));
+			}
+			cr.addOrder(Order.asc("employeeId"));
+			employees = cr.list();
+		}catch(Exception e){
+			e.printStackTrace();
+			logger.error("getAllEmployeesByDept: "+e.getMessage());
+		}
+		return employees;
+	}
+
+	@Override
+	@Transactional
 	public List<EmployeeEntity> searchEmployee(String searchKeyWord, int departmentId){
 		List<EmployeeEntity> employees = null;
 		try{
@@ -237,6 +259,7 @@ public class UserDAOImpl implements UserDAO {
 				cr.add(Restrictions.eq("departmentId",departmentId));
 			}
 			cr.addOrder(Order.asc("employeeId"));
+			cr.add(Restrictions.eq("isActive",1));
 			Disjunction disj = Restrictions.disjunction();
 			if(searchKeyWord != null){
 				disj.add(Restrictions.ilike("emailId", searchKeyWord,MatchMode.ANYWHERE));
